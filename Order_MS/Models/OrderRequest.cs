@@ -25,6 +25,12 @@ public partial class OrderRequest
 
     public DateTime? ModifiedOn { get; set; }
 
+    public int? ReceivedBy { get; set; }
+
+    public DateTime? ReceivedOn { get; set; }
+
+    public string? OrderReqRemark { get; set; }
+
     public virtual User? ApprovedByNavigation { get; set; }
 
     public virtual User? ModifiedByNavigation { get; set; }

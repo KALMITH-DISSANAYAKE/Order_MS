@@ -48,7 +48,7 @@ builder.Services.AddDbContext<OrderMSDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(Program));
+//builder.Services.AddAutoMapper(typeof(Program));
 
 // Register Services (Dependency Injection)
 

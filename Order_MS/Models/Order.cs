@@ -23,6 +23,8 @@ public partial class Order
 
     public DateTime? ModifiedOn { get; set; }
 
+    public string? OrderRemark { get; set; }
+
     public virtual DriverVehicleLink? Connection { get; set; }
 
     public virtual User? CreatedByNavigation { get; set; }

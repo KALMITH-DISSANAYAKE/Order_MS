@@ -1,0 +1,289 @@
+-- ============================================================
+-- Cargills Food City Order Management System
+-- Database Script based on ER Diagram
+-- ============================================================
+
+CREATE DATABASE OrderMS_DB;
+GO
+
+USE OrderMS_DB;
+GO
+
+-- ============================================================
+-- 1. ROLE TABLE
+-- ============================================================
+CREATE TABLE [role] (
+    role_id INT PRIMARY KEY IDENTITY(1,1),
+    role_name VARCHAR(50) NOT NULL UNIQUE,
+    [description] VARCHAR(255),
+    created_on DATETIME DEFAULT GETDATE(),
+    modified_on DATETIME
+);
+
+-- ============================================================
+-- 2. BRANCH TABLE
+-- ============================================================
+CREATE TABLE branch (
+    branch_id INT PRIMARY KEY IDENTITY(1,1),
+    branch_code VARCHAR(20) NOT NULL UNIQUE,
+    [location] VARCHAR(255) NOT NULL,
+    created_by INT,
+    created_on DATETIME DEFAULT GETDATE(),
+    modified_by INT,
+    modified_on DATETIME
+);
+
+-- ============================================================
+-- 3. USER TABLE
+-- ============================================================
+CREATE TABLE [user] (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    user_name VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role_id INT NOT NULL,
+    branch_id INT,
+    created_by INT,
+    created_on DATETIME DEFAULT GETDATE(),
+    modified_by INT,
+    modified_on DATETIME,
+    
+    CONSTRAINT FK_user_role FOREIGN KEY (role_id) REFERENCES [role](role_id),
+    CONSTRAINT FK_user_branch FOREIGN KEY (branch_id) REFERENCES branch(branch_id),
+    CONSTRAINT FK_user_created_by FOREIGN KEY (created_by) REFERENCES [user](id),
+    CONSTRAINT FK_user_modified_by FOREIGN KEY (modified_by) REFERENCES [user](id)
+);
+
+-- Add self-referencing FK for branch
+ALTER TABLE branch ADD CONSTRAINT FK_branch_created_by 
+    FOREIGN KEY (created_by) REFERENCES [user](id);
+ALTER TABLE branch ADD CONSTRAINT FK_branch_modified_by 
+    FOREIGN KEY (modified_by) REFERENCES [user](id);
+
+-- ============================================================
+-- 4. SUPPLIER TABLE
+-- ============================================================
+CREATE TABLE supplier (
+    supplier_id INT PRIMARY KEY IDENTITY(1,1),
+    supplier_name VARCHAR(100) NOT NULL,
+    availability VARCHAR(50),
+    created_on DATETIME DEFAULT GETDATE(),
+    modified_on DATETIME
+);
+
+-- ============================================================
+-- 5. ITEM (PRODUCT) TABLE
+-- ============================================================
+CREATE TABLE item (
+    item_id INT PRIMARY KEY IDENTITY(1,1),
+    item_name VARCHAR(100) NOT NULL,
+    unit_price DECIMAL(18,2) NOT NULL,
+    reorder_level INT DEFAULT 0,
+    supplier_id INT,
+    created_by INT,
+    created_on DATETIME DEFAULT GETDATE(),
+    modified_by INT,
+    modified_on DATETIME,
+    
+    CONSTRAINT FK_item_supplier FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id),
+    CONSTRAINT FK_item_created_by FOREIGN KEY (created_by) REFERENCES [user](id),
+    CONSTRAINT FK_item_modified_by FOREIGN KEY (modified_by) REFERENCES [user](id)
+);
+
+-- ============================================================
+-- 6. INVENTORY TABLE (Branch Stock)
+-- ============================================================
+CREATE TABLE inventory (
+    inventory_id INT PRIMARY KEY IDENTITY(1,1),
+    branch_id INT NOT NULL,
+    item_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 0,
+    reorder_level INT DEFAULT 0,
+    modified_on DATETIME,
+    
+    CONSTRAINT FK_inventory_branch FOREIGN KEY (branch_id) REFERENCES branch(branch_id),
+    CONSTRAINT FK_inventory_item FOREIGN KEY (item_id) REFERENCES item(item_id),
+    CONSTRAINT UQ_inventory_branch_item UNIQUE (branch_id, item_id)
+);
+
+-- ============================================================
+-- 7. DRIVER TABLE
+-- ============================================================
+CREATE TABLE driver (
+    driver_id INT PRIMARY KEY IDENTITY(1,1),
+    drivers_name VARCHAR(100) NOT NULL,
+    license_number VARCHAR(50) NOT NULL UNIQUE,
+    [Available] VARCHAR(20) DEFAULT 'Available',
+    created_on DATETIME DEFAULT GETDATE(),
+    modified_on DATETIME
+);
+
+-- ============================================================
+-- 8. VEHICLE TABLE (Fixed typo: vehical -> vehicle)
+-- ============================================================
+CREATE TABLE vehicle (
+    vehical_id INT PRIMARY KEY IDENTITY(1,1),
+    vehical_number VARCHAR(20) NOT NULL UNIQUE,
+    [Available] VARCHAR(20) DEFAULT 'Available',
+    created_on DATETIME DEFAULT GETDATE(),
+    modified_on DATETIME
+);
+
+-- ============================================================
+-- 9. CONNECTION TABLE (Renamed to avoid reserved keyword)
+-- ============================================================
+CREATE TABLE driver_vehicle_link (
+    connection_id INT PRIMARY KEY IDENTITY(1,1),
+    driver_id INT NOT NULL,
+    vehical_id INT NOT NULL,
+    created_on DATETIME DEFAULT GETDATE(),
+    
+    CONSTRAINT FK_dvl_driver FOREIGN KEY (driver_id) REFERENCES driver(driver_id),
+    CONSTRAINT FK_dvl_vehicle FOREIGN KEY (vehical_id) REFERENCES vehicle(vehical_id),
+    CONSTRAINT UQ_dvl_driver_vehicle UNIQUE (driver_id, vehical_id)
+);
+
+-- ============================================================
+-- 10. ORDER_REQUEST TABLE
+-- ============================================================
+CREATE TABLE order_request (
+    order_req_id INT PRIMARY KEY IDENTITY(1,1),
+    req_status VARCHAR(50) DEFAULT 'SubmittedForReview',
+    total_quantity INT,
+    total_price DECIMAL(18,2),
+    requested_by INT NOT NULL,
+    requested_on DATETIME DEFAULT GETDATE(),
+    approved_by INT,
+    approved_on DATETIME,
+    modified_by INT,
+    modified_on DATETIME,
+    received_by INT,
+    received_on DATETIME,
+    order_req_remark NVARCHAR,
+
+    
+    CONSTRAINT FK_order_request_requested_by FOREIGN KEY (requested_by) REFERENCES [user](id),
+    CONSTRAINT FK_order_request_approved_by FOREIGN KEY (approved_by) REFERENCES [user](id),
+    CONSTRAINT FK_order_request_modified_by FOREIGN KEY (modified_by) REFERENCES [user](id)
+);
+
+-- ============================================================
+-- 11. ORDER_REQUEST_LINE TABLE
+-- ============================================================
+CREATE TABLE order_request_line (
+    order_req_line_id INT PRIMARY KEY IDENTITY(1,1),
+    order_req_id INT NOT NULL,
+    item_id INT NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(18,2),
+    
+    CONSTRAINT FK_orl_order_request FOREIGN KEY (order_req_id) REFERENCES order_request(order_req_id) ON DELETE CASCADE,
+    CONSTRAINT FK_orl_item FOREIGN KEY (item_id) REFERENCES item(item_id)
+);
+
+-- ============================================================
+-- 12. ORDERS TABLE
+-- ============================================================
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY IDENTITY(1,1),
+    order_req_id INT,
+    connection_id INT,
+    price DECIMAL(18,2),
+    order_status VARCHAR(50) DEFAULT 'Pending',
+    created_by INT,
+    created_on DATETIME DEFAULT GETDATE(),
+    modified_by INT,
+    modified_on DATETIME,
+    order_remark NVARCHAR,
+    
+    CONSTRAINT FK_orders_order_request FOREIGN KEY (order_req_id) REFERENCES order_request(order_req_id),
+    CONSTRAINT FK_orders_connection FOREIGN KEY (connection_id) REFERENCES driver_vehicle_link(connection_id),
+    CONSTRAINT FK_orders_created_by FOREIGN KEY (created_by) REFERENCES [user](id),
+    CONSTRAINT FK_orders_modified_by FOREIGN KEY (modified_by) REFERENCES [user](id)
+);
+
+-- ============================================================
+-- 13. ORDER_LINE TABLE
+-- ============================================================
+CREATE TABLE order_line (
+    orderline_id INT PRIMARY KEY IDENTITY(1,1),
+    order_id INT NOT NULL,
+    item_id INT NOT NULL,
+    supplier_id INT,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(18,2),
+    total_price DECIMAL(18,2),
+    
+    CONSTRAINT FK_ol_orders FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    CONSTRAINT FK_ol_item FOREIGN KEY (item_id) REFERENCES item(item_id),
+    CONSTRAINT FK_ol_supplier FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
+);
+
+-- ============================================================
+-- SEED DATA
+-- ============================================================
+
+-- Roles
+INSERT INTO [role] (role_name, [description]) VALUES
+('BranchManager', 'Monitors inventory, creates order requests, verifies delivery'),
+('InventoryManager', 'Reviews and approves order requests, processes payments'),
+('TransportDepartment', 'Assigns vehicles and drivers for delivery');
+
+-- Branches
+INSERT INTO branch (branch_code, [location]) VALUES
+('CMB-001', 'Colombo - Bambalapitiya'),
+('CMB-002', 'Colombo - Nugegoda'),
+('KDY-001', 'Kandy - City Center');
+
+-- Suppliers
+INSERT INTO supplier (supplier_name, availability) VALUES
+('Ceylon Fresh Foods', 'Available'),
+('Lanka Dairy Products', 'Available'),
+('Global Spices Lanka', 'Available');
+
+-- Items (Products)
+INSERT INTO item (item_name, unit_price, reorder_level, supplier_id) VALUES
+('Samba Rice 5kg', 185.00, 50, 1),
+('Red Dhal 1kg', 95.00, 100, 1),
+('Fresh Milk 1L', 45.00, 80, 2),
+('Cheddar Cheese 200g', 320.00, 30, 2),
+('Curry Powder 100g', 150.00, 40, 3),
+('Chili Powder 100g', 120.00, 40, 3),
+('Coconut Oil 1L', 280.00, 25, 1),
+('Butter 200g', 350.00, 20, 2);
+
+-- Users (Password: Password123! - BCrypt hashed)
+INSERT INTO [user] (first_name, last_name, user_name, password_hash, role_id, branch_id) VALUES
+('Kamal', 'Perera', 'bm_colombo', '$2b$11$MP2UZD93UPWGIR3j3OhNpuuardvcyc/9llYIKNjGvRaQ1AaA.2oWG', 1, 1),
+('Nimal', 'Fernando', 'bm_kandy', '$2b$11$MP2UZD93UPWGIR3j3OhNpuuardvcyc/9llYIKNjGvRaQ1AaA.2oWG', 1, 3),
+('Sunil', 'Silva', 'inv_manager', '$2b$11$MP2UZD93UPWGIR3j3OhNpuuardvcyc/9llYIKNjGvRaQ1AaA.2oWG', 2, NULL),
+('Ajith', 'Bandara', 'transport_user', '$2b$11$MP2UZD93UPWGIR3j3OhNpuuardvcyc/9llYIKNjGvRaQ1AaA.2oWG', 3, NULL);
+
+-- Inventory (Branch Stock)
+INSERT INTO inventory (branch_id, item_id, quantity, reorder_level) VALUES
+(1, 1, 45, 50),
+(1, 2, 120, 100),
+(1, 3, 30, 80),
+(1, 4, 25, 30),
+(2, 1, 80, 50),
+(2, 5, 35, 40),
+(3, 1, 60, 50),
+(3, 6, 20, 40);
+
+-- Drivers
+INSERT INTO driver (drivers_name, license_number, [Available]) VALUES
+('Ranjit Kumara', 'L-123456789', 'Available'),
+('Samantha Perera', 'L-987654321', 'Available'),
+('Dinesh Fernando', 'L-456789123', 'Available'),
+('Mahesh Silva', 'L-789123456', 'Available');
+
+-- Vehicles
+INSERT INTO vehicle (vehical_number, [Available]) VALUES
+('WP-CAB-1234', 'Available'),
+('WP-L-5678', 'Available'),
+('WP-KA-9012', 'Available'),
+('WP-G-3456', 'Available');
+
+PRINT 'Database OrderMS_DB created successfully!';
+GO

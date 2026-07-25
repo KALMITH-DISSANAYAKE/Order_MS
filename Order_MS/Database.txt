@@ -221,6 +221,25 @@ CREATE TABLE order_line (
 );
 
 -- ============================================================
+-- 14. TRANSPORTER_ASSIGNMENT TABLE
+-- ============================================================
+
+CREATE TABLE TransportAssignment (
+    assignment_id INT IDENTITY(1,1) PRIMARY KEY,
+    order_id INT NOT NULL,
+    vehicle_id INT NOT NULL,
+    driver_id INT NOT NULL,
+    assigned_on DATETIME2 NOT NULL,
+    status NVARCHAR(50) NULL,
+
+    -- Foreign Key Constraints
+    CONSTRAINT FK_TransportAssignment_Order FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE,
+    CONSTRAINT FK_TransportAssignment_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehical_id),
+    CONSTRAINT FK_TransportAssignment_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id )
+);
+
+
+-- ============================================================
 -- SEED DATA
 -- ============================================================
 

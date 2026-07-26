@@ -1,0 +1,102 @@
+using Microsoft.EntityFrameworkCore;
+using Order_MS.Data;
+using Order_MS.DTOs;
+using Order_MS.Interfaces;
+using Order_MS.Models;
+
+namespace Order_MS.Services;
+
+public class OrderRequestService : IOrderRequestService
+{
+    private readonly OrderMSDbContext _context;
+
+
+    public OrderRequestService(OrderMSDbContext context)
+    {
+        _context = context;
+    }
+
+
+    public async Task<OrderRequestResponseDTO> CreateOrderRequest(CreateOrderRequestDTO dto)
+    {
+        var orderRequest = new OrderRequest
+        {
+            RequestedBy = dto.RequestedBy,
+            ReqStatus = "SubmittedForReview",
+            RequestedOn = DateTime.Now
+        };
+
+        _context.OrderRequests.Add(orderRequest);
+
+        await _context.SaveChangesAsync();
+
+        int totalQuantity = 0;
+        decimal totalPrice = 0;
+
+        foreach (var item in dto.Items)
+        {
+
+            var dbItem = await _context.Items
+                .FirstOrDefaultAsync(x => x.ItemId == item.ItemId);
+
+            if (dbItem == null)
+            {
+                throw new Exception($"Item with ID {item.ItemId} not found");
+            }
+
+            var orderRequestLine = new OrderRequestLine
+            {
+                OrderReqId = orderRequest.OrderReqId,
+                ItemId = item.ItemId,
+                Quantity = item.Quantity,
+                Price = dbItem.UnitPrice
+            };
+
+
+            _context.OrderRequestLines.Add(orderRequestLine);
+
+            totalQuantity += item.Quantity;
+
+            totalPrice += item.Quantity * dbItem.UnitPrice;
+
+
+        }
+
+        orderRequest.TotalQuantity = totalQuantity;
+
+        orderRequest.TotalPrice = totalPrice;
+
+        _context.OrderRequests.Update(orderRequest);
+
+        await _context.SaveChangesAsync();
+
+        return new OrderRequestResponseDTO
+        {
+            OrderReqId = orderRequest.OrderReqId,
+            Status = orderRequest.ReqStatus,
+            TotalQuantity = orderRequest.TotalQuantity ?? 0,
+            TotalPrice = orderRequest.TotalPrice ?? 0,
+            RequestedOn = orderRequest.RequestedOn ?? DateTime.Now
+        };
+    }
+
+    public async Task<List<OrderRequestListDTO>> GetAllOrderRequests()
+    {
+        var requests = await _context.OrderRequests
+         .Include(x => x.RequestedByNavigation)
+            .Select(x => new OrderRequestListDTO
+             {
+                OrderReqId = x.OrderReqId,
+                Status = x.ReqStatus,
+                TotalQuantity = x.TotalQuantity ?? 0,
+                TotalPrice = x.TotalPrice ?? 0,
+                RequestedOn = x.RequestedOn ?? DateTime.MinValue,
+                RequestedBy = x.RequestedByNavigation.UserName
+            })
+            .ToListAsync();
+            return requests;
+
+
+    }
+}
+

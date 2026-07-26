@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-//using Order_MS.Data;
+using Order_MS.Data;
 using Order_MS.Repositories;
 using Order_MS.Services;
 using System.Text;
@@ -11,9 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add controllers
 builder.Services.AddControllers();
-
-// Swagger with JWT Auth
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Order Management System API", Version = "v1" });
@@ -44,9 +43,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Database Context
-//builder.Services.AddDbContext<OrderMSDbContext>(options =>
-    //options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+Database Context
+builder.Services.AddDbContext<OrderMSDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // AutoMapper
 //builder.Services.AddAutoMapper(typeof(Program));
@@ -58,15 +57,15 @@ builder.Services.AddSwaggerGen(c =>
 //builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 //builder.Services.AddScoped<IOrderService, OrderService>();
 //builder.Services.AddScoped<IInventoryService, InventoryService>();
-//builder.Services.AddScoped<ITransportService, TransportService>();
-//builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+builder.Services.AddScoped<ITransportService, TransportService>();
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 
 // Generic repo 
-//builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// Specific repos (transport management)
-//builder.Services.AddScoped<ITransportAssignmentRepository, TransportAssignmentRepository>();
-//builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+// Specific repo (transport management)
+builder.Services.AddScoped<ITransportAssignmentRepository, TransportAssignmentRepository>();
+
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

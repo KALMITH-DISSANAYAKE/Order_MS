@@ -2,6 +2,7 @@
 {
     public class OrderResponseDtos
     {
+        public int OrderId { get; set; }
         public int? OrderReqId { get; set; }
         public int? ConnectionId { get; set; }
         public decimal? Price { get; set; }

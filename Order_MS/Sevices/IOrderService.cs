@@ -8,9 +8,11 @@ namespace Order_MS.Sevices
 
         Task<OrderResponseDtos?> GetOrderById(int id);
 
-        Task CreateOrder(OrderCreateDtos OrderDto, OrderLiCreateDtos);
+        Task<OrderResponseDtos> CreateOrderFromOrderRequest(int orderReqId);
 
-        Task UpdateOrder(int id, StudentUpdateDto dto);
+        Task CreateOrder(OrderCreateDtos OrderDto);
+
+        Task UpdateOrder(int id, OrderUpdateDtos dto, int modifiedBy);
 
         Task DeleteOrder(int id);
     }

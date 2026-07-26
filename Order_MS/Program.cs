@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 using System.Text;
 //using Order_MS.Services;
+=======
+using Order_MS.Data;
+using Order_MS.Services;
+>>>>>>> 52c19a13ea4561a3295abf023cdcc3aa8e195d7e
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -54,12 +59,13 @@ builder.Services.AddDbContext<OrderMSDbContext>(options =>
 
 // Register Services (Dependency Injection)
 
-/* builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IInventoryService, InventoryService>();
-builder.Services.AddScoped<ITransportService, TransportService>();
-builder.Services.AddScoped<IDeliveryService, DeliveryService>(); */
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBranchService, BranchService>();
+//builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
+//builder.Services.AddScoped<IOrderService, OrderService>();
+//builder.Services.AddScoped<IInventoryService, InventoryService>();
+//builder.Services.AddScoped<ITransportService, TransportService>();
+//builder.Services.AddScoped<IDeliveryService, DeliveryService>(); 
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

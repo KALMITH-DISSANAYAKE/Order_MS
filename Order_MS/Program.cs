@@ -11,9 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add controllers
 builder.Services.AddControllers();
-
-// Swagger with JWT Auth
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Order Management System API", Version = "v1" });
@@ -44,7 +43,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Database Context
+//Database Context
 builder.Services.AddDbContext<OrderMSDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -53,14 +52,20 @@ builder.Services.AddDbContext<OrderMSDbContext>(options =>
 
 // Register Services (Dependency Injection)
 
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IBranchService, BranchService>();
+//builder.Services.AddScoped<IAuthService, AuthService>();
+//builder.Services.AddScoped<IBranchService, BranchService>();
 //builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 //builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IInventoryService, InventoryService>();
-//builder.Services.AddScoped<ITransportService, TransportService>();
-//builder.Services.AddScoped<IDeliveryService, DeliveryService>(); 
+//builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<ITransportService, TransportService>();
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+
+// Generic repo 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// Specific repo (transport management)
+builder.Services.AddScoped<ITransportAssignmentRepository, TransportAssignmentRepository>();
+
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -25,5 +25,7 @@ public partial class Branch
 
     public virtual User? ModifiedByNavigation { get; set; }
 
+    public virtual ICollection<OrderRequest> OrderRequests { get; set; } = new List<OrderRequest>();
+
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

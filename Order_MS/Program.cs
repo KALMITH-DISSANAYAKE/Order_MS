@@ -1,11 +1,19 @@
+<<<<<<< HEAD
+using System.Text;
+//using Order_MS.Services;
+=======
 using Order_MS.Data;
 using Order_MS.Services;
+>>>>>>> 52c19a13ea4561a3295abf023cdcc3aa8e195d7e
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Order_MS.Repositories;
+using Order_MS.Data;
+using Order_MS.Interfaces;
+using Order_MS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,6 +94,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("InventoryManager", policy => policy.RequireRole("InventoryManager"));
     options.AddPolicy("TransportDepartment", policy => policy.RequireRole("TransportDepartment"));
 });
+
+builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 
 var app = builder.Build();
 

@@ -114,29 +114,91 @@ public class OrderRequestService : IOrderRequestService
         return new OrderRequestResponseDTO
         {
             OrderReqId = request.OrderReqId,
-
             Status = request.ReqStatus,
-
             TotalQuantity = request.TotalQuantity ?? 0,
-
             TotalPrice = request.TotalPrice ?? 0,
-
             RequestedOn = request.RequestedOn ?? DateTime.Now,
 
             Items = request.OrderRequestLines
-               .Select(line => new OrderRequestLineDTO
+               .Select(line => new OrderRequestLineResponseDTO
                 {
                     ItemId = line.ItemId,
-
                     ItemName = line.Item.ItemName,
-
                     Quantity = line.Quantity,
-
                     UnitPrice = line.Price ?? 0,
-
                     LineTotal = line.Quantity * line.Price ?? 0
                 })
                 .ToList()
+        };
+    }
+
+    public async Task<OrderRequestResponseDTO?> ApproveOrderRequest(int id, int approvedBy)
+    {
+        var request = await _context.OrderRequests
+            .FirstOrDefaultAsync(x => x.OrderReqId == id);
+
+        if(request == null)
+        {
+            return null;
+        }
+
+        if (request.ReqStatus != "SubmittedForReview")
+        {
+            return null;
+        }
+
+        request.ReqStatus = "Approved";
+        request.ApprovedBy = approvedBy;
+        request.ApprovedOn = DateTime.Now;
+
+        var transportAssignment = new TransportAssignment
+        {
+            OrderReqId = request.OrderReqId,
+            Status = "Pending",
+            AssignedOn = DateTime.Now
+        };
+
+        _context.TransportAssignments.Add(transportAssignment);
+
+        await _context.SaveChangesAsync();
+
+        return new OrderRequestResponseDTO
+        {
+            OrderReqId = request.OrderReqId,
+            Status = request.ReqStatus,
+            TotalQuantity = request.TotalQuantity ?? 0,
+            TotalPrice = request.TotalPrice ?? 0,
+            RequestedOn = request.RequestedOn ?? DateTime.Now
+        };
+
+    }
+
+    public async Task<OrderRequestResponseDTO?> RejectOrderRequest(int id)
+    {
+        var request = await _context.OrderRequests
+            .FirstOrDefaultAsync(x => x.OrderReqId == id);
+
+        if (request == null)
+        {
+            return null;
+        }
+
+        if (request.ReqStatus != "SubmittedForReview")
+        {
+            return null;
+        }
+
+        request.ReqStatus = "Rejected";
+
+        await _context.SaveChangesAsync();
+
+        return new OrderRequestResponseDTO
+        {
+            OrderReqId = request.OrderReqId,
+            Status = request.ReqStatus,
+            TotalQuantity = request.TotalQuantity ?? 0,
+            TotalPrice = request.TotalPrice ?? 0,
+            RequestedOn = request.RequestedOn ?? DateTime.Now
         };
     }
 }

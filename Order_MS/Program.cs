@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-using System.Text;
-//using Order_MS.Services;
-=======
 using Order_MS.Data;
 using Order_MS.Services;
->>>>>>> 52c19a13ea4561a3295abf023cdcc3aa8e195d7e
+using Order_MS.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,16 +8,16 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Order_MS.Repositories;
 using Order_MS.Data;
-using Order_MS.Interfaces;
+using Order_MS.Repositories;
 using Order_MS.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add controllers
 builder.Services.AddControllers();
-
-// Swagger with JWT Auth
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Order Management System API", Version = "v1" });
@@ -52,7 +48,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Database Context
+//Database Context
 builder.Services.AddDbContext<OrderMSDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -63,12 +59,30 @@ builder.Services.AddDbContext<OrderMSDbContext>(options =>
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBranchService, BranchService>();
+// Generic Repository — works for ANY entity
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// Your services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<IUserService, UserService>();
 //builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 //builder.Services.AddScoped<IOrderService, OrderService>();
 //builder.Services.AddScoped<IInventoryService, InventoryService>();
+
 //builder.Services.AddScoped<ITransportService, TransportService>();
 //builder.Services.AddScoped<IDeliveryService, DeliveryService>(); 
 builder.Services.AddScoped(typeof(IOrderRepository<>), typeof(OrderRepository<>));
+
+builder.Services.AddScoped<ITransportService, TransportService>();
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+
+// Generic repo 
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// Specific repo (transport management)
+builder.Services.AddScoped<ITransportAssignmentRepository, TransportAssignmentRepository>();
+
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -94,8 +108,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("InventoryManager", policy => policy.RequireRole("InventoryManager"));
     options.AddPolicy("TransportDepartment", policy => policy.RequireRole("TransportDepartment"));
 });
-
-builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 
 var app = builder.Build();
 

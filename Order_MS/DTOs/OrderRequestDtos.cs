@@ -7,8 +7,14 @@ public class CreateOrderRequestDTO
     public List<OrderRequestLineDTO> Items { get; set; }
 }
 
-
 public class OrderRequestLineDTO
+{
+    public int ItemId { get; set; }
+    public int Quantity { get; set; }
+}
+
+
+public class OrderRequestLineResponseDTO
 {
     public int ItemId { get; set; }
 
@@ -35,7 +41,7 @@ public class OrderRequestResponseDTO
 
     public DateTime RequestedOn { get; set; }
 
-    public List<OrderRequestLineDTO> Items { get; set; }
+    public List<OrderRequestLineResponseDTO> Items { get; set; }
 }
 
 public class OrderRequestListDTO
@@ -51,4 +57,9 @@ public class OrderRequestListDTO
     public DateTime RequestedOn { get; set; }
 
     public string RequestedBy { get; set; }
+}
+
+public class ApproveOrderRequestDTO
+{
+    public int ApprovedBy { get; set; }
 }

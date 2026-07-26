@@ -24,4 +24,20 @@ namespace Order_MS.DTOs
         public string SupplierName { get; set; } = string.Empty;
         public string Availability { get; set; } = string.Empty;
     }
+
+    public class CreateItemDto
+    {
+        public string ItemName { get; set; } = string.Empty;
+        public decimal UnitPrice { get; set; }
+        public int ReorderLevel { get; set; }
+        public int SupplierId { get; set; }
+    }
+
+    public class UpdateItemDto
+    {
+        public string ItemName { get; set; } = string.Empty;
+        public decimal UnitPrice { get; set; }
+        public int ReorderLevel { get; set; }
+        public int SupplierId { get; set; }
+    }
 }

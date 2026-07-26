@@ -8,7 +8,7 @@ namespace Order_MS.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-   [Authorize]
+   //[Authorize]
     public class InventoryController : ControllerBase
     {
         private readonly IInventoryService _inventoryService;
@@ -24,6 +24,45 @@ namespace Order_MS.Controllers
         {
             var items = await _inventoryService.GetAllItemsAsync();
             return Ok(items);
+        }
+
+        // POST: api/inventory/items
+        [HttpPost("items")]
+        //[Authorize(Roles = "InventoryManager")]
+        public async Task<IActionResult> CreateItem([FromBody] CreateItemDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int createdBy = int.TryParse(userIdClaim, out int uid) ? uid : 0;
+
+            var createdItem = await _inventoryService.CreateItemAsync(dto, createdBy);
+            return CreatedAtAction(nameof(GetItemById), new { id = createdItem.ItemId }, createdItem);
+        }
+
+        // PUT: api/inventory/items/1
+        [HttpPut("items/{id}")]
+        [Authorize(Roles = "InventoryManager")]
+        public async Task<IActionResult> UpdateItem(int id, [FromBody] UpdateItemDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int modifiedBy = int.TryParse(userIdClaim, out int uid) ? uid : 0;
+
+            var updatedItem = await _inventoryService.UpdateItemAsync(id, dto, modifiedBy);
+            if (updatedItem == null)
+                return NotFound(new { message = "Item not found" });
+
+            return Ok(updatedItem);
+        }
+
+        // DELETE: api/inventory/items/1
+        [HttpDelete("items/{id}")]
+        //[Authorize(Roles = "InventoryManager")]
+        public async Task<IActionResult> DeleteItem(int id)
+        {
+            var success = await _inventoryService.DeleteItemAsync(id);
+            if (!success)
+                return NotFound(new { message = "Item not found" });
+
+            return NoContent(); // 204 = standard for successful delete
         }
 
         // GET: api/inventory/items/1

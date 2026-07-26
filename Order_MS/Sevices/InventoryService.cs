@@ -138,5 +138,53 @@ namespace Order_MS.Services
                     : "Stock updated successfully."
             };
         }
+
+        public async Task<ItemDetailDto> CreateItemAsync(CreateItemDto dto, int createdBy)
+        {
+            var item = new Item
+            {
+                ItemName = dto.ItemName,
+                UnitPrice = dto.UnitPrice,
+                ReorderLevel = dto.ReorderLevel,
+                SupplierId = dto.SupplierId,
+                CreatedBy = createdBy,
+                CreatedOn = DateTime.Now
+            };
+
+            await _itemRepo.AddAsync(item);
+            await _itemRepo.SaveAsync();
+
+            // Reload with supplier info
+            return await GetItemByIdAsync(item.ItemId)
+                ?? throw new InvalidOperationException("Failed to retrieve created item.");
+        }
+
+        public async Task<ItemDetailDto?> UpdateItemAsync(int id, UpdateItemDto dto, int modifiedBy)
+        {
+            var item = await _itemRepo.GetByIdAsync(id) as Item;
+            if (item == null) return null;
+
+            item.ItemName = dto.ItemName;
+            item.UnitPrice = dto.UnitPrice;
+            item.ReorderLevel = dto.ReorderLevel;
+            item.SupplierId = dto.SupplierId;
+            item.ModifiedBy = modifiedBy;
+            item.ModifiedOn = DateTime.Now;
+
+            _itemRepo.Update(item);
+            await _itemRepo.SaveAsync();
+
+            return await GetItemByIdAsync(id);
+        }
+
+        public async Task<bool> DeleteItemAsync(int id)
+        {
+            var item = await _itemRepo.GetByIdAsync(id) as Item;
+            if (item == null) return false;
+
+            _itemRepo.Delete(item);
+            await _itemRepo.SaveAsync();
+            return true;
+        }
     }
 }

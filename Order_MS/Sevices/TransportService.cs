@@ -6,14 +6,14 @@ namespace Order_MS.Services
 {
     public class TransportService : ITransportService
     {
-        private readonly IGenericRepository<Order> _orderRepo;
+        private readonly IOrderRepository _orderRepo;
         private readonly IGenericRepository<Vehicle> _vehicleRepo;
         private readonly IGenericRepository<Driver> _driverRepo;
         private readonly IGenericRepository<DriverVehicleLink> _linkRepo;
         private readonly ITransportAssignmentRepository _assignmentRepo;
 
         public TransportService(
-            IGenericRepository<Order> orderRepo,
+            IOrderRepository orderRepo,
             IGenericRepository<Vehicle> vehicleRepo,
             IGenericRepository<Driver> driverRepo,
             IGenericRepository<DriverVehicleLink> linkRepo,
@@ -30,37 +30,88 @@ namespace Order_MS.Services
         {
             var order = await _orderRepo.GetByIdAsync((object)dto.OrderId);
             if (order == null) throw new Exception("Order not found");
-            if (order.order_status != "Paid") throw new Exception("Payment not completed");
 
+            // Allow assignment on Pending/Approved/TransportAssigned orders
+            if (order.order_status != "Pending" && order.order_status != "Approved" && order.order_status != "TransportAssigned")
+                throw new Exception("Order not available for transport assignment");
+
+            // 1. Order quantity check
+            var orderTotalQty = await _orderRepo.GetOrderTotalQuantityAsync(dto.OrderId);
+            var orderAssignments = await _assignmentRepo.GetAllByOrderIdAsync(dto.OrderId);
+            var alreadyAssignedQty = orderAssignments.Sum(a => a.quantity ?? 0);
+            var remainingOrderQty = orderTotalQty - alreadyAssignedQty;
+
+            if (remainingOrderQty <= 0)
+                throw new Exception("Order fully assigned already");
+
+            if (dto.Quantity <= 0)
+                throw new Exception("Quantity must be greater than zero");
+
+            if (dto.Quantity > remainingOrderQty)
+                throw new Exception($"Only {remainingOrderQty} quantity remaining to assign for this order");
+
+            // 2. Vehicle capacity check
             var vehicle = await _vehicleRepo.GetByIdAsync((object)dto.VehicleId);
-            if (vehicle == null || vehicle.Available != "Available") throw new Exception("Vehicle not available");
+            if (vehicle == null) throw new Exception("Vehicle not found");
 
+            var vehicleCapacity = vehicle.capacity ?? 0;
+            var vehicleActiveAssignments = await _assignmentRepo.GetActiveByVehicleIdAsync(dto.VehicleId);
+            var vehicleUsedCapacity = vehicleActiveAssignments.Sum(a => a.quantity ?? 0);
+            var vehicleRemaining = vehicleCapacity - vehicleUsedCapacity;
+
+            if (dto.Quantity > vehicleRemaining)
+                throw new Exception($"Vehicle only has {vehicleRemaining} remaining capacity");
+
+            // 3. Driver check
             var driver = await _driverRepo.GetByIdAsync((object)dto.DriverId);
-            if (driver == null || driver.Available != "Available") throw new Exception("Driver not available");
+            if (driver == null) throw new Exception("Driver not found");
 
+            // Driver can be used if Available OR already assigned to this same vehicle
+            var driverActiveAssignments = await _assignmentRepo.GetActiveByDriverIdAsync(dto.DriverId);
+            bool driverOnThisVehicle = driverActiveAssignments.Any(a => a.vehicle_id == dto.VehicleId);
+
+            if (driver.Available != "Available" && !driverOnThisVehicle)
+                throw new Exception("Driver already assigned to another vehicle");
+
+            // 4. Driver-Vehicle link check
             var allLinks = await _linkRepo.GetAllAsync();
             var link = allLinks.FirstOrDefault(l => l.driver_id == dto.DriverId && l.vehical_id == dto.VehicleId);
             if (link == null) throw new Exception("Driver not linked to this vehicle");
 
+            // 5. Create assignment
             var assignment = new TransportAssignment
             {
                 order_id = dto.OrderId,
                 vehicle_id = dto.VehicleId,
                 driver_id = dto.DriverId,
+                quantity = dto.Quantity,
                 assigned_on = DateTime.UtcNow,
                 status = "Assigned"
             };
 
-            order.order_status = "ReadyForDelivery";
-            order.modified_on = DateTime.UtcNow;
-            vehicle.Available = "Not Available";
-            driver.Available = "Not Available";
+            // Update order status on first assignment
+            if (!orderAssignments.Any())
+            {
+                order.order_status = "TransportAssigned";
+                order.modified_on = DateTime.UtcNow;
+                _orderRepo.Update(order);
+            }
+
+            // Mark vehicle unavailable if fully loaded
+            if (dto.Quantity >= vehicleRemaining)
+            {
+                vehicle.Available = "Not Available";
+                _vehicleRepo.Update(vehicle);
+            }
+
+            // Mark driver unavailable if newly assigned
+            if (driver.Available == "Available")
+            {
+                driver.Available = "Not Available";
+                _driverRepo.Update(driver);
+            }
 
             await _assignmentRepo.AddAsync(assignment);
-            _orderRepo.Update(order);
-            _vehicleRepo.Update(vehicle);
-            _driverRepo.Update(driver);
-
             await _orderRepo.SaveAsync();
 
             return new TransportResponseDto
@@ -72,6 +123,7 @@ namespace Order_MS.Services
                 VehicleNumber = vehicle.vehical_number,
                 DriverId = driver.driver_id,
                 DriverLicense = driver.license_number,
+                Quantity = assignment.quantity ?? 0,
                 AssignedOn = assignment.assigned_on,
                 Status = assignment.status
             };
@@ -79,14 +131,31 @@ namespace Order_MS.Services
 
         public async Task<List<VehicleDto>> GetAvailableVehiclesAsync()
         {
-            var all = await _vehicleRepo.GetAllAsync();
-            return all.Where(v => v.Available == "Available")
-                .Select(v => new VehicleDto
+            var allVehicles = await _vehicleRepo.GetAllAsync();
+            var allAssignments = await _assignmentRepo.GetAllAsync();
+
+            var result = new List<VehicleDto>();
+            foreach (var v in allVehicles)
+            {
+                var used = allAssignments
+                    .Where(a => a.vehicle_id == v.vehical_id && a.status != "Delivered" && a.status != "Completed" && a.status != "Cancelled")
+                    .Sum(a => a.quantity ?? 0);
+
+                var remaining = (v.capacity ?? 0) - used;
+
+                if (remaining > 0)
                 {
-                    VehicleId = v.vehical_id,
-                    VehicleNumber = v.vehical_number,
-                    Available = v.Available
-                }).ToList();
+                    result.Add(new VehicleDto
+                    {
+                        VehicleId = v.vehical_id,
+                        VehicleNumber = v.vehical_number,
+                        Available = v.Available,
+                        Capacity = v.capacity ?? 0,
+                        RemainingCapacity = remaining
+                    });
+                }
+            }
+            return result;
         }
 
         public async Task<List<DriverDto>> GetAvailableDriversAsync()
@@ -113,17 +182,16 @@ namespace Order_MS.Services
                 VehicleNumber = t.Vehicle.vehical_number,
                 DriverId = t.driver_id,
                 DriverLicense = t.Driver.license_number,
+                Quantity = t.quantity ?? 0,
                 AssignedOn = t.assigned_on,
                 Status = t.status
             }).ToList();
         }
 
-        public async Task<TransportResponseDto> GetAssignmentByOrderIdAsync(int orderId)
+        public async Task<List<TransportResponseDto>> GetAssignmentsByOrderIdAsync(int orderId)
         {
-            var t = await _assignmentRepo.GetByOrderIdWithDetailsAsync(orderId);
-            if (t == null) throw new Exception("Assignment not found");
-
-            return new TransportResponseDto
+            var assignments = await _assignmentRepo.GetAllByOrderIdWithDetailsAsync(orderId);
+            return assignments.Select(t => new TransportResponseDto
             {
                 AssignmentId = t.assignment_id,
                 OrderId = t.order_id,
@@ -132,9 +200,10 @@ namespace Order_MS.Services
                 VehicleNumber = t.Vehicle.vehical_number,
                 DriverId = t.driver_id,
                 DriverLicense = t.Driver.license_number,
+                Quantity = t.quantity ?? 0,
                 AssignedOn = t.assigned_on,
                 Status = t.status
-            };
+            }).ToList();
         }
     }
 }

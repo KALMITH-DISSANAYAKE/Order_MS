@@ -5,6 +5,7 @@ namespace Order_MS.DTOs
         public int OrderId { get; set; }
         public int VehicleId { get; set; }
         public int DriverId { get; set; }
+        public int Quantity { get; set; }
     }
 
     public class TransportResponseDto
@@ -16,6 +17,7 @@ namespace Order_MS.DTOs
         public string VehicleNumber { get; set; }
         public int DriverId { get; set; }
         public string DriverLicense { get; set; }
+        public int Quantity { get; set; }
         public DateTime AssignedOn { get; set; }
         public string Status { get; set; }
     }
@@ -25,6 +27,8 @@ namespace Order_MS.DTOs
         public int VehicleId { get; set; }
         public string VehicleNumber { get; set; }
         public bool Available { get; set; }
+        public int Capacity { get; set; }
+        public int RemainingCapacity { get; set; }
     }
 
     public class DriverDto

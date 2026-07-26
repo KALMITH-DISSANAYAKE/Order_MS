@@ -28,17 +28,19 @@ namespace Order_MS.Services
             var order = await _orderRepo.GetByOrderNumberAsync(dto.OrderNumber);
             if (order == null) throw new Exception("Order not found");
 
-            var assignment = await _assignmentRepo.GetByOrderIdWithDetailsAsync(order.order_id);
-            if (assignment == null) throw new Exception("No transport assignment found");
-            if (assignment.Vehicle.vehical_number != dto.VehicleNumber)
-                throw new Exception("Vehicle number does not match assignment");
+            var assignments = await _assignmentRepo.GetAllByOrderIdWithDetailsAsync(order.order_id);
+            if (!assignments.Any()) throw new Exception("No transport assignment found");
+
+            var matchingAssignment = assignments.FirstOrDefault(a => a.Vehicle.vehical_number == dto.VehicleNumber);
+            if (matchingAssignment == null)
+                throw new Exception("Vehicle number does not match any assignment for this order");
 
             return new DeliveryResponseDto
             {
                 OrderId = order.order_id,
                 OrderStatus = order.order_status,
-                VehicleNumber = assignment.Vehicle.vehical_number,
-                DriverLicense = assignment.Driver.license_number
+                VehicleNumber = matchingAssignment.Vehicle.vehical_number,
+                DriverLicense = matchingAssignment.Driver.license_number
             };
         }
 
@@ -47,26 +49,53 @@ namespace Order_MS.Services
             var order = await _orderRepo.GetByIdAsync((object)dto.OrderId);
             if (order == null) throw new Exception("Order not found");
 
-            var assignment = await _assignmentRepo.GetByOrderIdWithDetailsAsync(dto.OrderId);
+            // For delivery updates, order should be Paid or InTransit
+            if (order.order_status != "Paid" && order.order_status != "InTransit" && order.order_status != "TransportAssigned")
+                throw new Exception("Order not ready for delivery");
+
+            var assignments = await _assignmentRepo.GetAllByOrderIdAsync(dto.OrderId);
+            var assignment = assignments.FirstOrDefault();
+            if (assignment == null) throw new Exception("No assignment found");
 
             order.order_status = dto.Status;
             order.modified_on = DateTime.UtcNow;
             _orderRepo.Update(order);
 
-            if (dto.Status == "Delivered" && assignment != null)
+            foreach (var a in assignments)
             {
-                assignment.status = "Delivered";
-                _assignmentRepo.Update(assignment);
-
-                if (assignment.Vehicle != null)
+                if (dto.Status == "InTransit" && a.status == "Assigned")
                 {
-                    assignment.Vehicle.Available = "Available";
-                    _vehicleRepo.Update(assignment.Vehicle);
+                    a.status = "InTransit";
+                    _assignmentRepo.Update(a);
                 }
-                if (assignment.Driver != null)
+                else if (dto.Status == "Delivered" && (a.status == "Assigned" || a.status == "InTransit"))
                 {
-                    assignment.Driver.Available = "Available";
-                    _driverRepo.Update(assignment.Driver);
+                    a.status = "Delivered";
+                    _assignmentRepo.Update(a);
+
+                    // Free vehicle if no other active assignments
+                    var vehicleActive = await _assignmentRepo.GetActiveByVehicleIdAsync(a.vehicle_id);
+                    if (!vehicleActive.Any())
+                    {
+                        var vehicle = await _vehicleRepo.GetByIdAsync((object)a.vehicle_id);
+                        if (vehicle != null)
+                        {
+                            vehicle.Available = "Available";
+                            _vehicleRepo.Update(vehicle);
+                        }
+                    }
+
+                    // Free driver if no other active assignments
+                    var driverActive = await _assignmentRepo.GetActiveByDriverIdAsync(a.driver_id);
+                    if (!driverActive.Any())
+                    {
+                        var driver = await _driverRepo.GetByIdAsync((object)a.driver_id);
+                        if (driver != null)
+                        {
+                            driver.Available = "Available";
+                            _driverRepo.Update(driver);
+                        }
+                    }
                 }
             }
 
@@ -76,8 +105,6 @@ namespace Order_MS.Services
             {
                 OrderId = order.order_id,
                 OrderStatus = order.order_status,
-                VehicleNumber = assignment?.Vehicle?.vehical_number,
-                DriverLicense = assignment?.Driver?.license_number,
                 DeliveredOn = dto.Status == "Delivered" ? DateTime.UtcNow : null
             };
         }
@@ -99,17 +126,19 @@ namespace Order_MS.Services
         {
             var order = await _orderRepo.GetByIdAsync((object)orderId);
             if (order == null) throw new Exception("Order not found");
-            if (order.order_status != "Delivered") throw new Exception("Order not delivered yet");
+
+            var assignments = await _assignmentRepo.GetAllByOrderIdAsync(orderId);
+            if (assignments.Any(a => a.status != "Delivered"))
+                throw new Exception("Not all deliveries completed yet");
 
             order.order_status = "Completed";
             order.modified_on = DateTime.UtcNow;
             _orderRepo.Update(order);
 
-            var assignment = await _assignmentRepo.GetByOrderIdAsync(orderId);
-            if (assignment != null)
+            foreach (var a in assignments)
             {
-                assignment.status = "Completed";
-                _assignmentRepo.Update(assignment);
+                a.status = "Completed";
+                _assignmentRepo.Update(a);
             }
 
             await _orderRepo.SaveAsync();

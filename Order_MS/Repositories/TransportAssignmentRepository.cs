@@ -13,19 +13,21 @@ namespace Order_MS.Repositories
             _context = context;
         }
 
-        public async Task<TransportAssignment?> GetByOrderIdAsync(int orderId)
+        public async Task<List<TransportAssignment>> GetAllByOrderIdAsync(int orderId)
         {
             return await _context.TransportAssignments
-                .FirstOrDefaultAsync(t => t.order_id == orderId);
+                .Where(t => t.order_id == orderId)
+                .ToListAsync();
         }
 
-        public async Task<TransportAssignment?> GetByOrderIdWithDetailsAsync(int orderId)
+        public async Task<List<TransportAssignment>> GetAllByOrderIdWithDetailsAsync(int orderId)
         {
             return await _context.TransportAssignments
                 .Include(t => t.Order)
                 .Include(t => t.Vehicle)
                 .Include(t => t.Driver)
-                .FirstOrDefaultAsync(t => t.order_id == orderId);
+                .Where(t => t.order_id == orderId)
+                .ToListAsync();
         }
 
         public async Task<List<TransportAssignment>> GetAllWithDetailsAsync()
@@ -44,6 +46,20 @@ namespace Order_MS.Repositories
                 .Include(t => t.Vehicle)
                 .Include(t => t.Driver)
                 .Where(t => t.status == "Delivered" || t.status == "Completed" || t.Order.order_status == "InTransit")
+                .ToListAsync();
+        }
+
+        public async Task<List<TransportAssignment>> GetActiveByVehicleIdAsync(int vehicleId)
+        {
+            return await _context.TransportAssignments
+                .Where(t => t.vehicle_id == vehicleId && t.status != "Delivered" && t.status != "Completed" && t.status != "Cancelled")
+                .ToListAsync();
+        }
+
+        public async Task<List<TransportAssignment>> GetActiveByDriverIdAsync(int driverId)
+        {
+            return await _context.TransportAssignments
+                .Where(t => t.driver_id == driverId && t.status != "Delivered" && t.status != "Completed" && t.status != "Cancelled")
                 .ToListAsync();
         }
     }

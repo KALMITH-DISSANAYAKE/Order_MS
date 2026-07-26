@@ -8,6 +8,6 @@ namespace Order_MS.Services
         Task<List<VehicleDto>> GetAvailableVehiclesAsync();
         Task<List<DriverDto>> GetAvailableDriversAsync();
         Task<List<TransportResponseDto>> GetAssignmentsAsync();
-        Task<TransportResponseDto> GetAssignmentByOrderIdAsync(int orderId);
+        Task<List<TransportResponseDto>> GetAssignmentsByOrderIdAsync(int orderId);
     }
 }

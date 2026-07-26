@@ -5,5 +5,6 @@ namespace Order_MS.Repositories
     public interface IOrderRepository : IGenericRepository<Order>
     {
         Task<Order?> GetByOrderNumberAsync(string orderNumber);
+        Task<int> GetOrderTotalQuantityAsync(int orderId);
     }
 }

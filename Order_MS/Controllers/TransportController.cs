@@ -51,17 +51,10 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("assignments/{orderId}")]
-        public async Task<IActionResult> GetAssignmentByOrderId(int orderId)
+        public async Task<IActionResult> GetAssignmentsByOrderId(int orderId)
         {
-            try
-            {
-                var assignment = await _transportService.GetAssignmentByOrderIdAsync(orderId);
-                return Ok(assignment);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+            var assignments = await _transportService.GetAssignmentsByOrderIdAsync(orderId);
+            return Ok(assignments);
         }
     }
 }

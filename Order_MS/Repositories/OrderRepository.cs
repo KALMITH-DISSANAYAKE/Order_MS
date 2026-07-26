@@ -22,5 +22,11 @@ namespace Order_MS.Repositories
             }
             return null;
         }
+        public async Task<int> GetOrderTotalQuantityAsync(int orderId)
+        {
+            return await _context.OrderLines
+                .Where(ol => ol.order_id == orderId)
+                .SumAsync(ol => (int?)ol.quantity) ?? 0;
+        }
     }
 }

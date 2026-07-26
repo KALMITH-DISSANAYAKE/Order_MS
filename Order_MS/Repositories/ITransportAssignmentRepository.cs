@@ -8,5 +8,7 @@ namespace Order_MS.Repositories
         Task<TransportAssignment?> GetByOrderIdWithDetailsAsync(int orderId);
         Task<List<TransportAssignment>> GetAllWithDetailsAsync();
         Task<List<TransportAssignment>> GetDeliveredOrInTransitAsync();
+        Task<List<TransportAssignment>> GetActiveByVehicleIdAsync(int vehicleId);
+        Task<List<TransportAssignment>> GetActiveByDriverIdAsync(int driverId);
     }
 }

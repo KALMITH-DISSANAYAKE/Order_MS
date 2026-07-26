@@ -44,9 +44,9 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("history")]
-        public async Task<IActionResult> GetHistory([FromQuery] int? branchId)
+        public async Task<IActionResult> GetHistory()
         {
-            var history = await _deliveryService.GetDeliveryHistoryAsync(branchId);
+            var history = await _deliveryService.GetDeliveryHistoryAsync();
             return Ok(history);
         }
 

@@ -98,5 +98,46 @@ public class OrderRequestService : IOrderRequestService
 
 
     }
+
+    public async Task<OrderRequestResponseDTO?> GetOrderRequestById(int id)
+    {
+        var request = await _context.OrderRequests
+            .Include(x => x.OrderRequestLines)
+            .ThenInclude(x => x.Item)
+            .FirstOrDefaultAsync(x => x.OrderReqId == id);
+
+        if (request == null)
+        {
+            return null;
+        }
+
+        return new OrderRequestResponseDTO
+        {
+            OrderReqId = request.OrderReqId,
+
+            Status = request.ReqStatus,
+
+            TotalQuantity = request.TotalQuantity ?? 0,
+
+            TotalPrice = request.TotalPrice ?? 0,
+
+            RequestedOn = request.RequestedOn ?? DateTime.Now,
+
+            Items = request.OrderRequestLines
+               .Select(line => new OrderRequestLineDTO
+                {
+                    ItemId = line.ItemId,
+
+                    ItemName = line.Item.ItemName,
+
+                    Quantity = line.Quantity,
+
+                    UnitPrice = line.Price ?? 0,
+
+                    LineTotal = line.Quantity * line.Price ?? 0
+                })
+                .ToList()
+        };
+    }
 }
 

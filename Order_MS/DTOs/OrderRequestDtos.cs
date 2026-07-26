@@ -12,7 +12,14 @@ public class OrderRequestLineDTO
 {
     public int ItemId { get; set; }
 
+    public string ItemName { get; set; }
+
     public int Quantity { get; set; }
+
+    public decimal UnitPrice { get; set; }
+
+    public decimal LineTotal { get; set; }
+
 }
 
 
@@ -27,6 +34,8 @@ public class OrderRequestResponseDTO
     public decimal TotalPrice { get; set; }
 
     public DateTime RequestedOn { get; set; }
+
+    public List<OrderRequestLineDTO> Items { get; set; }
 }
 
 public class OrderRequestListDTO

@@ -40,4 +40,17 @@ public class OrderRequestController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetOrderRequestById(int id)
+    {
+        var request = await _orderRequestService.GetOrderRequestById(id);
+
+        if (request == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(request);
+    }
+
 }

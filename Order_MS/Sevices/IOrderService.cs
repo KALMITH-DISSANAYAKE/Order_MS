@@ -6,12 +6,12 @@ namespace Order_MS.Sevices
     {
         Task<IEnumerable<OrderResponseDtos>> GetAllOrders();
 
-        Task<OrderResponseDtos?> GetOrder(int id);
+        Task<OrderResponseDtos?> GetOrderById(int id);
 
         Task CreateOrder(OrderCreateDtos OrderDto, OrderLiCreateDtos);
 
-        Task UpdateStudent(int id, StudentUpdateDto dto);
+        Task UpdateOrder(int id, StudentUpdateDto dto);
 
-        Task DeleteStudent(int id);
+        Task DeleteOrder(int id);
     }
 }

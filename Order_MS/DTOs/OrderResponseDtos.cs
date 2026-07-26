@@ -7,8 +7,10 @@
         public decimal? Price { get; set; }
         public string? OrderStatus { get; set; }
         public int? CreatedBy { get; set; }
+        public decimal? Total { get; set; }
         public DateTime? CreatedOn { get; set; }
         public string? OrderRemark { get; set; }
-        public List<OrderLineResponse> OrderLines { get; set; } = new List<OrderLineResponse>();
+        public IEnumerable<OrderLineToOrderDtos> OrderLines { get; set; }
+        public TransportToOrderDtos? ConnectionLine { get; set; }
     }
 }

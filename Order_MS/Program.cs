@@ -68,7 +68,7 @@ builder.Services.AddScoped<IBranchService, BranchService>();
 //builder.Services.AddScoped<IInventoryService, InventoryService>();
 //builder.Services.AddScoped<ITransportService, TransportService>();
 //builder.Services.AddScoped<IDeliveryService, DeliveryService>(); 
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped(typeof(IOrderRepository<>), typeof(OrderRepository<>));
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

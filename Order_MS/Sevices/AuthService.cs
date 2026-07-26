@@ -1,4 +1,4 @@
-using Order_MS.Data;
+/*using Order_MS.Data;
 using Order_MS.DTOs;
 using Order_MS.Models;
 using Microsoft.EntityFrameworkCore;
@@ -67,4 +67,4 @@ public class AuthService : IAuthService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-}
+}*/

@@ -7,11 +7,9 @@ public partial class TransportAssignment
 {
     public int AssignmentId { get; set; }
 
-    public int OrderId { get; set; }
+    public int OrderReqId { get; set; }
 
-    public int VehicleId { get; set; }
-
-    public int DriverId { get; set; }
+    public int? ConnectionId { get; set; }
 
     public DateTime AssignedOn { get; set; }
 
@@ -19,9 +17,7 @@ public partial class TransportAssignment
 
     public int? Quantity { get; set; }
 
-    public virtual Driver Driver { get; set; } = null!;
+    public virtual DriverVehicleLink? Connection { get; set; }
 
-    public virtual Order Order { get; set; } = null!;
-
-    public virtual Vehicle Vehicle { get; set; } = null!;
+    public virtual OrderRequest OrderReq { get; set; } = null!;
 }

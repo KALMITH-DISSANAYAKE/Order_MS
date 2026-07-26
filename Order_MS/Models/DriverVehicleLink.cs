@@ -9,7 +9,7 @@ public partial class DriverVehicleLink
 
     public int DriverId { get; set; }
 
-    public int VehicalId { get; set; }
+    public int VehicleId { get; set; }
 
     public DateTime? CreatedOn { get; set; }
 
@@ -17,5 +17,7 @@ public partial class DriverVehicleLink
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
-    public virtual Vehicle Vehical { get; set; } = null!;
+    public virtual ICollection<TransportAssignment> TransportAssignments { get; set; } = new List<TransportAssignment>();
+
+    public virtual Vehicle Vehicle { get; set; } = null!;
 }

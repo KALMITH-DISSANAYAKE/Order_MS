@@ -17,6 +17,8 @@ public partial class OrderRequest
 
     public DateTime? RequestedOn { get; set; }
 
+    public int BranchId { get; set; }
+
     public int? ApprovedBy { get; set; }
 
     public DateTime? ApprovedOn { get; set; }
@@ -33,6 +35,8 @@ public partial class OrderRequest
 
     public virtual User? ApprovedByNavigation { get; set; }
 
+    public virtual Branch Branch { get; set; } = null!;
+
     public virtual User? ModifiedByNavigation { get; set; }
 
     public virtual ICollection<OrderRequestLine> OrderRequestLines { get; set; } = new List<OrderRequestLine>();
@@ -40,4 +44,6 @@ public partial class OrderRequest
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
     public virtual User RequestedByNavigation { get; set; } = null!;
+
+    public virtual ICollection<TransportAssignment> TransportAssignments { get; set; } = new List<TransportAssignment>();
 }

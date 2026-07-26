@@ -40,4 +40,6 @@ public partial class OrderRequest
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
     public virtual User RequestedByNavigation { get; set; } = null!;
+
+    public virtual ICollection<TransportAssignment> TransportAssignments { get; set; } = new List<TransportAssignment>();
 }

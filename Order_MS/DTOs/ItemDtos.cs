@@ -1,6 +1,6 @@
 namespace Order_MS.DTOs
 {
-    public class ProductDto
+    public class ItemDto
     {
         public int ItemId { get; set; }
         public string ItemName { get; set; } = string.Empty;
@@ -9,7 +9,7 @@ namespace Order_MS.DTOs
         public string SupplierName { get; set; } = string.Empty;
     }
 
-    public class ProductDetailDto
+    public class ItemDetailDto
     {
         public int ItemId { get; set; }
         public string ItemName { get; set; } = string.Empty;

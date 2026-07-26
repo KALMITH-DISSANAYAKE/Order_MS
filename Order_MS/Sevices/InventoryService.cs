@@ -2,23 +2,31 @@ using Microsoft.EntityFrameworkCore;
 using Order_MS.Data;
 using Order_MS.DTOs;
 using Order_MS.Models;
+using Order_MS.Repositories;
 
 namespace Order_MS.Services
 {
     public class InventoryService : IInventoryService
     {
         private readonly OrderMSDbContext _context;
+        private readonly IGenericRepository<Item> _itemRepo;
+        private readonly IGenericRepository<Inventory> _inventoryRepo;
 
-        public InventoryService(OrderMSDbContext context)
+        public InventoryService(
+            OrderMSDbContext context,
+            IGenericRepository<Item> itemRepo,
+            IGenericRepository<Inventory> inventoryRepo)
         {
             _context = context;
+            _itemRepo = itemRepo;
+            _inventoryRepo = inventoryRepo;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
+        public async Task<IEnumerable<ItemDto>> GetAllItemsAsync()
         {
             return await _context.Items
                 .Include(i => i.Supplier)
-                .Select(i => new ProductDto
+                .Select(i => new ItemDto
                 {
                     ItemId = i.ItemId,
                     ItemName = i.ItemName,
@@ -29,7 +37,7 @@ namespace Order_MS.Services
                 .ToListAsync();
         }
 
-        public async Task<ProductDetailDto?> GetProductByIdAsync(int id)
+        public async Task<ItemDetailDto?> GetItemByIdAsync(int id)
         {
             var item = await _context.Items
                 .Include(i => i.Supplier)
@@ -37,7 +45,7 @@ namespace Order_MS.Services
 
             if (item == null) return null;
 
-            return new ProductDetailDto
+            return new ItemDetailDto
             {
                 ItemId = item.ItemId,
                 ItemName = item.ItemName,
@@ -70,7 +78,7 @@ namespace Order_MS.Services
                     ItemId = i.ItemId,
                     ItemName = i.Item != null ? i.Item.ItemName : "",
                     Quantity = i.Quantity,
-                    ReorderLevel = (int)i.ReorderLevel,
+                    ReorderLevel = i.ReorderLevel,
                     IsBelowReorderLevel = i.Quantity < i.ReorderLevel
                 })
                 .ToListAsync();
@@ -103,26 +111,24 @@ namespace Order_MS.Services
 
         public async Task<UpdateStockResponseDto?> UpdateStockAsync(UpdateStockDto dto, int modifiedBy)
         {
-            var inventory = await _context.Inventories
-                .Include(i => i.Item)
-                .FirstOrDefaultAsync(i => i.InventoryId == dto.InventoryId);
-
+            var inventory = await _inventoryRepo.GetByIdAsync(dto.InventoryId) as Inventory;
             if (inventory == null) return null;
+
+            var item = await _itemRepo.GetByIdAsync(inventory.ItemId) as Item;
 
             int oldQuantity = inventory.Quantity;
             inventory.Quantity = dto.NewQuantity;
             inventory.ModifiedOn = DateTime.Now;
-            // Note: modified_by field doesn't exist on inventory table per schema, 
-            // but you can extend schema if needed
 
-            await _context.SaveChangesAsync();
+            _inventoryRepo.Update(inventory);
+            await _inventoryRepo.SaveAsync();
 
             bool isLow = inventory.Quantity < inventory.ReorderLevel;
 
             return new UpdateStockResponseDto
             {
                 InventoryId = inventory.InventoryId,
-                ItemName = inventory.Item?.ItemName ?? "",
+                ItemName = item?.ItemName ?? "",
                 OldQuantity = oldQuantity,
                 NewQuantity = inventory.Quantity,
                 IsBelowReorderLevel = isLow,

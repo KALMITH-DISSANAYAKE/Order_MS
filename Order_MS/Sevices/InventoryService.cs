@@ -31,7 +31,7 @@ namespace Order_MS.Services
                     ItemId = i.ItemId,
                     ItemName = i.ItemName,
                     UnitPrice = i.UnitPrice,
-                    ReorderLevel = i.ReorderLevel,
+                    ReorderLevel = i.ReorderLevel ?? 0,  
                     SupplierName = i.Supplier != null ? i.Supplier.SupplierName : "N/A"
                 })
                 .ToListAsync();
@@ -50,7 +50,7 @@ namespace Order_MS.Services
                 ItemId = item.ItemId,
                 ItemName = item.ItemName,
                 UnitPrice = item.UnitPrice,
-                ReorderLevel = item.ReorderLevel,
+                ReorderLevel = item.ReorderLevel ?? 0,  
                 Supplier = item.Supplier == null ? null! : new SupplierDto
                 {
                     SupplierId = item.Supplier.SupplierId,
@@ -78,8 +78,8 @@ namespace Order_MS.Services
                     ItemId = i.ItemId,
                     ItemName = i.Item != null ? i.Item.ItemName : "",
                     Quantity = i.Quantity,
-                    ReorderLevel = i.ReorderLevel,
-                    IsBelowReorderLevel = i.Quantity < i.ReorderLevel
+                    ReorderLevel = i.ReorderLevel ?? 0,  
+                    IsBelowReorderLevel = (i.Quantity < (i.ReorderLevel ?? 0))  
                 })
                 .ToListAsync();
         }
@@ -89,7 +89,7 @@ namespace Order_MS.Services
             var query = _context.Inventories
                 .Include(i => i.Item)
                 .Include(i => i.Branch)
-                .Where(i => i.Quantity < i.ReorderLevel)
+                .Where(i => i.Quantity < (i.ReorderLevel ?? 0))  
                 .AsQueryable();
 
             if (branchId.HasValue)
@@ -104,7 +104,7 @@ namespace Order_MS.Services
                     ItemId = i.ItemId,
                     ItemName = i.Item != null ? i.Item.ItemName : "",
                     CurrentQuantity = i.Quantity,
-                    ReorderLevel = i.ReorderLevel
+                    ReorderLevel = i.ReorderLevel ?? 0  
                 })
                 .ToListAsync();
         }
@@ -123,7 +123,8 @@ namespace Order_MS.Services
             _inventoryRepo.Update(inventory);
             await _inventoryRepo.SaveAsync();
 
-            bool isLow = inventory.Quantity < inventory.ReorderLevel;
+            int reorderLevel = inventory.ReorderLevel ?? 0;  
+            bool isLow = inventory.Quantity < reorderLevel;
 
             return new UpdateStockResponseDto
             {
@@ -133,7 +134,7 @@ namespace Order_MS.Services
                 NewQuantity = inventory.Quantity,
                 IsBelowReorderLevel = isLow,
                 Message = isLow
-                    ? $"Warning: Stock is below reorder level ({inventory.ReorderLevel})!"
+                    ? $"Warning: Stock is below reorder level ({reorderLevel})!"
                     : "Stock updated successfully."
             };
         }

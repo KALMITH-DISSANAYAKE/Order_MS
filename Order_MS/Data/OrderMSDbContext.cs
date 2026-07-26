@@ -38,23 +38,25 @@ public partial class OrderMSDbContext : DbContext
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
 
+    public virtual DbSet<TransportAssignment> TransportAssignments { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=.;Database=OrderMS_DB;Trusted_Connection=True;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=OrderMS_DB;Trusted_Connection=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Branch>(entity =>
         {
-            entity.HasKey(e => e.BranchId).HasName("PK__branch__E55E37DE11696AA7");
+            entity.HasKey(e => e.BranchId).HasName("PK__branch__E55E37DEE58B1920");
 
             entity.ToTable("branch");
 
-            entity.HasIndex(e => e.BranchCode, "UQ__branch__A9F83E3BED927262").IsUnique();
+            entity.HasIndex(e => e.BranchCode, "UQ__branch__A9F83E3B887FF538").IsUnique();
 
             entity.Property(e => e.BranchId).HasColumnName("branch_id");
             entity.Property(e => e.BranchCode)
@@ -86,11 +88,11 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Driver>(entity =>
         {
-            entity.HasKey(e => e.DriverId).HasName("PK__driver__A411C5BD1DB4F3C2");
+            entity.HasKey(e => e.DriverId).HasName("PK__driver__A411C5BD0E884853");
 
             entity.ToTable("driver");
 
-            entity.HasIndex(e => e.LicenseNumber, "UQ__driver__D482A003CEDA72A8").IsUnique();
+            entity.HasIndex(e => e.LicenseNumber, "UQ__driver__D482A0031A755ACD").IsUnique();
 
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.Available)
@@ -116,7 +118,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<DriverVehicleLink>(entity =>
         {
-            entity.HasKey(e => e.ConnectionId).HasName("PK__driver_v__E4AA4DD08ED1760D");
+            entity.HasKey(e => e.ConnectionId).HasName("PK__driver_v__E4AA4DD0EC5B54C9");
 
             entity.ToTable("driver_vehicle_link");
 
@@ -143,7 +145,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Inventory>(entity =>
         {
-            entity.HasKey(e => e.InventoryId).HasName("PK__inventor__B59ACC491B59A81B");
+            entity.HasKey(e => e.InventoryId).HasName("PK__inventor__B59ACC494D415CF8");
 
             entity.ToTable("inventory");
 
@@ -173,7 +175,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Item>(entity =>
         {
-            entity.HasKey(e => e.ItemId).HasName("PK__item__52020FDD670EA66C");
+            entity.HasKey(e => e.ItemId).HasName("PK__item__52020FDD195E79F4");
 
             entity.ToTable("item");
 
@@ -214,7 +216,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__orders__46596229397BFDF3");
+            entity.HasKey(e => e.OrderId).HasName("PK__orders__46596229E9E52FE4");
 
             entity.ToTable("orders");
 
@@ -261,7 +263,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<OrderLine>(entity =>
         {
-            entity.HasKey(e => e.OrderlineId).HasName("PK__order_li__053FF2124A20BF22");
+            entity.HasKey(e => e.OrderlineId).HasName("PK__order_li__053FF212667148A6");
 
             entity.ToTable("order_line");
 
@@ -293,7 +295,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<OrderRequest>(entity =>
         {
-            entity.HasKey(e => e.OrderReqId).HasName("PK__order_re__0CF367CBDC9B97AA");
+            entity.HasKey(e => e.OrderReqId).HasName("PK__order_re__0CF367CB8EFE6752");
 
             entity.ToTable("order_request");
 
@@ -344,7 +346,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<OrderRequestLine>(entity =>
         {
-            entity.HasKey(e => e.OrderReqLineId).HasName("PK__order_re__7C549BF1C051A841");
+            entity.HasKey(e => e.OrderReqLineId).HasName("PK__order_re__7C549BF15DC4ECEE");
 
             entity.ToTable("order_request_line");
 
@@ -368,11 +370,11 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__role__760965CC13FBEE2C");
+            entity.HasKey(e => e.RoleId).HasName("PK__role__760965CCC9AAEE89");
 
             entity.ToTable("role");
 
-            entity.HasIndex(e => e.RoleName, "UQ__role__783254B11A92B8A0").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__role__783254B1E28BAFA4").IsUnique();
 
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.CreatedOn)
@@ -394,7 +396,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Supplier>(entity =>
         {
-            entity.HasKey(e => e.SupplierId).HasName("PK__supplier__6EE594E87CD06FE8");
+            entity.HasKey(e => e.SupplierId).HasName("PK__supplier__6EE594E80DA2B76A");
 
             entity.ToTable("supplier");
 
@@ -416,13 +418,44 @@ public partial class OrderMSDbContext : DbContext
                 .HasColumnName("supplier_name");
         });
 
+        modelBuilder.Entity<TransportAssignment>(entity =>
+        {
+            entity.HasKey(e => e.AssignmentId).HasName("PK__Transpor__DA891814D1AE91D7");
+
+            entity.ToTable("TransportAssignment");
+
+            entity.Property(e => e.AssignmentId).HasColumnName("assignment_id");
+            entity.Property(e => e.AssignedOn).HasColumnName("assigned_on");
+            entity.Property(e => e.DriverId).HasColumnName("driver_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasColumnName("status");
+            entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
+
+            entity.HasOne(d => d.Driver).WithMany(p => p.TransportAssignments)
+                .HasForeignKey(d => d.DriverId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TransportAssignment_Driver");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.TransportAssignments)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TransportAssignment_Order");
+
+            entity.HasOne(d => d.Vehicle).WithMany(p => p.TransportAssignments)
+                .HasForeignKey(d => d.VehicleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TransportAssignment_Vehicle");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__user__3213E83F2363348A");
+            entity.HasKey(e => e.Id).HasName("PK__user__3213E83F62691C85");
 
             entity.ToTable("user");
 
-            entity.HasIndex(e => e.UserName, "UQ__user__7C9273C448FDA473").IsUnique();
+            entity.HasIndex(e => e.UserName, "UQ__user__7C9273C4C7A52D56").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BranchId).HasColumnName("branch_id");
@@ -473,11 +506,11 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Vehicle>(entity =>
         {
-            entity.HasKey(e => e.VehicalId).HasName("PK__vehicle__6E8871A092CE438C");
+            entity.HasKey(e => e.VehicalId).HasName("PK__vehicle__6E8871A0F329764C");
 
             entity.ToTable("vehicle");
 
-            entity.HasIndex(e => e.VehicalNumber, "UQ__vehicle__2294CA0ACE4D94EA").IsUnique();
+            entity.HasIndex(e => e.VehicalNumber, "UQ__vehicle__2294CA0AB369B4F9").IsUnique();
 
             entity.Property(e => e.VehicalId).HasColumnName("vehical_id");
             entity.Property(e => e.Available)

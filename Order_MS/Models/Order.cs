@@ -34,4 +34,6 @@ public partial class Order
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
 
     public virtual OrderRequest? OrderReq { get; set; }
+
+    public virtual ICollection<TransportAssignment> TransportAssignments { get; set; } = new List<TransportAssignment>();
 }

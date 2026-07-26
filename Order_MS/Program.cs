@@ -1,9 +1,10 @@
-using Order_MS.Data;
-using Order_MS.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Order_MS.Data;
+using Order_MS.Repositories;
+using Order_MS.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,8 +58,15 @@ builder.Services.AddScoped<IBranchService, BranchService>();
 //builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 //builder.Services.AddScoped<IOrderService, OrderService>();
 //builder.Services.AddScoped<IInventoryService, InventoryService>();
-//builder.Services.AddScoped<ITransportService, TransportService>();
-//builder.Services.AddScoped<IDeliveryService, DeliveryService>(); 
+builder.Services.AddScoped<ITransportService, TransportService>();
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+
+// Generic repo 
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// Specific repos (transport management)
+builder.Services.AddScoped<ITransportAssignmentRepository, TransportAssignmentRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

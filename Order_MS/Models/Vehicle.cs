@@ -15,6 +15,8 @@ public partial class Vehicle
 
     public DateTime? ModifiedOn { get; set; }
 
+    public int? Capacity { get; set; }
+
     public virtual ICollection<DriverVehicleLink> DriverVehicleLinks { get; set; } = new List<DriverVehicleLink>();
 
     public virtual ICollection<TransportAssignment> TransportAssignments { get; set; } = new List<TransportAssignment>();

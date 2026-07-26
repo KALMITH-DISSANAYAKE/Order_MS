@@ -428,6 +428,7 @@ public partial class OrderMSDbContext : DbContext
             entity.Property(e => e.AssignedOn).HasColumnName("assigned_on");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasColumnName("status");
@@ -517,6 +518,7 @@ public partial class OrderMSDbContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasDefaultValue("Available");
+            entity.Property(e => e.Capacity).HasColumnName("capacity");
             entity.Property(e => e.CreatedOn)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")

@@ -17,6 +17,8 @@ public partial class TransportAssignment
 
     public string? Status { get; set; }
 
+    public int? Quantity { get; set; }
+
     public virtual Driver Driver { get; set; } = null!;
 
     public virtual Order Order { get; set; } = null!;

@@ -17,7 +17,6 @@ public class BranchService : IBranchService
         _branchRepo = branchRepo;
     }
 
-    // ========== READ (existing, now using repo) ==========
     public async Task<List<BranchDto>> GetAllAsync()
     {
         var branches = await _branchRepo.GetAllAsync();
@@ -42,7 +41,6 @@ public class BranchService : IBranchService
         };
     }
 
-    // ========== CREATE ==========
     public async Task<BranchDto> CreateAsync(CreateBranchDto dto)
     {
         var branch = new Branch
@@ -52,17 +50,17 @@ public class BranchService : IBranchService
             CreatedOn = DateTime.UtcNow
         };
 
-        var created = await _branchRepo.AddAsync(branch);
+        await _branchRepo.AddAsync(branch);
+        await _branchRepo.SaveAsync();  // ← NEW: Must call SaveAsync!
 
         return new BranchDto
         {
-            BranchId = created.BranchId,
-            BranchCode = created.BranchCode,
-            Location = created.Location
+            BranchId = branch.BranchId,  // EF populates ID after AddAsync
+            BranchCode = branch.BranchCode,
+            Location = branch.Location
         };
     }
 
-    // ========== UPDATE ==========
     public async Task<BranchDto?> UpdateAsync(int id, UpdateBranchDto dto)
     {
         var branch = await _branchRepo.GetByIdAsync(id);
@@ -72,7 +70,8 @@ public class BranchService : IBranchService
         branch.Location = dto.Location;
         branch.ModifiedOn = DateTime.UtcNow;
 
-        await _branchRepo.UpdateAsync(branch);
+        _branchRepo.Update(branch);      // ← void, just marks as modified
+        await _branchRepo.SaveAsync();     // ← NEW: Must call SaveAsync!
 
         return new BranchDto
         {
@@ -82,13 +81,14 @@ public class BranchService : IBranchService
         };
     }
 
-    // ========== DELETE ==========
     public async Task<bool> DeleteAsync(int id)
     {
-        if (!await _branchRepo.ExistsAsync(id))
-            return false;
+        var branch = await _branchRepo.GetByIdAsync(id);
+        if (branch == null) return false;
 
-        await _branchRepo.DeleteAsync(id);
+        _branchRepo.Delete(branch);        // ← void, pass entity not int
+        await _branchRepo.SaveAsync();     // ← NEW: Must call SaveAsync!
+
         return true;
     }
 }

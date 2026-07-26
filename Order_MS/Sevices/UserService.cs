@@ -17,10 +17,8 @@ public class UserService : IUserService
         _userRepo = userRepo;
     }
 
-    // ========== CREATE ==========
     public async Task<UserDto> CreateAsync(CreateUserDto dto)
     {
-        // Hash password with BCrypt (automatically handles salt)
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
         var user = new User
@@ -34,17 +32,17 @@ public class UserService : IUserService
             CreatedOn = DateTime.UtcNow
         };
 
-        var created = await _userRepo.AddAsync(user);
+        await _userRepo.AddAsync(user);
+        await _userRepo.SaveAsync();  // ← Must save
 
-        // Load navigation properties for response
-        await _context.Entry(created).Reference(u => u.Role).LoadAsync();
-        if (created.BranchId.HasValue)
-            await _context.Entry(created).Reference(u => u.Branch).LoadAsync();
+        // Load navigation properties
+        await _context.Entry(user).Reference(u => u.Role).LoadAsync();
+        if (user.BranchId.HasValue)
+            await _context.Entry(user).Reference(u => u.Branch).LoadAsync();
 
-        return MapToDto(created);
+        return MapToDto(user);
     }
 
-    // ========== READ ALL ==========
     public async Task<List<UserDto>> GetAllAsync()
     {
         var users = await _context.Users
@@ -55,7 +53,6 @@ public class UserService : IUserService
         return users.Select(MapToDto).ToList();
     }
 
-    // ========== READ ONE ==========
     public async Task<UserDto?> GetByIdAsync(int id)
     {
         var user = await _context.Users
@@ -64,17 +61,14 @@ public class UserService : IUserService
             .FirstOrDefaultAsync(u => u.Id == id);
 
         if (user == null) return null;
-
         return MapToDto(user);
     }
 
-    // ========== UPDATE ==========
     public async Task<UserDto?> UpdateAsync(int id, UpdateUserDto dto)
     {
         var user = await _userRepo.GetByIdAsync(id);
         if (user == null) return null;
 
-        // Update basic info
         user.FirstName = dto.FirstName;
         user.LastName = dto.LastName;
         user.UserName = dto.Username;
@@ -82,15 +76,14 @@ public class UserService : IUserService
         user.BranchId = dto.BranchId;
         user.ModifiedOn = DateTime.UtcNow;
 
-        // Only hash new password if provided
         if (!string.IsNullOrWhiteSpace(dto.Password))
         {
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         }
 
-        await _userRepo.UpdateAsync(user);
+        _userRepo.Update(user);        // ← void
+        await _userRepo.SaveAsync();   // ← Must save
 
-        // Reload navigation properties
         await _context.Entry(user).Reference(u => u.Role).LoadAsync();
         if (user.BranchId.HasValue)
             await _context.Entry(user).Reference(u => u.Branch).LoadAsync();
@@ -98,17 +91,17 @@ public class UserService : IUserService
         return MapToDto(user);
     }
 
-    // ========== DELETE ==========
     public async Task<bool> DeleteAsync(int id)
     {
-        if (!await _userRepo.ExistsAsync(id))
-            return false;
+        var user = await _userRepo.GetByIdAsync(id);
+        if (user == null) return false;
 
-        await _userRepo.DeleteAsync(id);
+        _userRepo.Delete(user);        // ← pass entity, void
+        await _userRepo.SaveAsync();   // ← Must save
+
         return true;
     }
 
-    // ========== PRIVATE HELPER: Map Model → DTO ==========
     private static UserDto MapToDto(User user)
     {
         return new UserDto

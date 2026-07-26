@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Order_MS.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,7 @@ builder.Services.AddScoped<IBranchService, BranchService>();
 //builder.Services.AddScoped<IInventoryService, InventoryService>();
 //builder.Services.AddScoped<ITransportService, TransportService>();
 //builder.Services.AddScoped<IDeliveryService, DeliveryService>(); 
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

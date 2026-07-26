@@ -53,4 +53,36 @@ public class OrderRequestController : ControllerBase
         return Ok(request);
     }
 
+    [HttpPut("{id}/approve")]
+    public async Task<IActionResult> ApproveOrderRequest(
+    int id,
+    ApproveOrderRequestDTO dto)
+    {
+        var result = await _orderRequestService
+    .ApproveOrderRequest(id, dto.ApprovedBy);
+
+        if (result == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPut("{id}/reject")]
+    public async Task<IActionResult> RejectOrderRequest(
+    int id,
+    ApproveOrderRequestDTO dto)
+    {
+        var result = await _orderRequestService
+    .RejectOrderRequest(id);
+
+        if (result == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
 }

@@ -9,4 +9,8 @@ public interface IOrderRequestService
     Task<List<OrderRequestListDTO>> GetAllOrderRequests();
 
     Task<OrderRequestResponseDTO?> GetOrderRequestById(int id);
+
+    Task<OrderRequestResponseDTO?> ApproveOrderRequest(int id, int approvedBy);
+
+    Task<OrderRequestResponseDTO?> RejectOrderRequest(int id);
 }

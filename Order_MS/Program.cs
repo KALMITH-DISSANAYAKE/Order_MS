@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 using System.Text;
-//using Order_MS.Services;
-=======
-using Order_MS.Data;
-using Order_MS.Services;
->>>>>>> 52c19a13ea4561a3295abf023cdcc3aa8e195d7e
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

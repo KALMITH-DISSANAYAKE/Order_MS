@@ -6,6 +6,7 @@ namespace Order_MS.DTOs
         public string ItemName { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
         public int ReorderLevel { get; set; }
+        public bool? IsActive { get; set; }
         public string SupplierName { get; set; } = string.Empty;
     }
 

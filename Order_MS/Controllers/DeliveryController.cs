@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Services;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
 namespace Order_MS.Controllers

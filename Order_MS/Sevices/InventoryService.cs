@@ -26,6 +26,7 @@ namespace Order_MS.Services
         {
             return await _context.Items
                 .Include(i => i.Supplier)
+                .Where(i => i.IsActive != true)
                 .Select(i => new ItemDto
                 {
                     ItemId = i.ItemId,
@@ -41,6 +42,7 @@ namespace Order_MS.Services
         {
             var item = await _context.Items
                 .Include(i => i.Supplier)
+                .Where(i => i.IsActive != true)
                 .FirstOrDefaultAsync(i => i.ItemId == id);
 
             if (item == null) return null;
@@ -180,9 +182,12 @@ namespace Order_MS.Services
         public async Task<bool> DeleteItemAsync(int id)
         {
             var item = await _itemRepo.GetByIdAsync(id) as Item;
-            if (item == null) return false;
+            if (item == null || item.IsActive == true) return false;  // <-- ADD IsDeleted CHECK
 
-            _itemRepo.Delete(item);
+            item.IsActive = true;  // <-- SOFT DELETE: just flip the flag
+            item.ModifiedOn = DateTime.Now;
+
+            _itemRepo.Update(item);  // <-- UPDATE, not DELETE
             await _itemRepo.SaveAsync();
             return true;
         }

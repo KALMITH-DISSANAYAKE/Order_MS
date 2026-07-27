@@ -108,7 +108,7 @@ public class OrderService : IOrderService
         };
     }
 
-    public async Task<OrderResponseDtos> CreateOrderFromOrderRequest(int orderReqId, int createdBy)
+    public async Task<OrderResponseDtos> CreateOrderFromOrderRequest(int orderReqId)
     {
         var orderRequest = await _context.OrderRequests
             .Include(or => or.OrderRequestLines)
@@ -136,10 +136,10 @@ public class OrderService : IOrderService
             OrderReqId = orderRequest.OrderReqId,
             ConnectionId = selectedConnectionId,
             Price = orderRequest.TotalPrice,
-            OrderStatus = "Delivered",
-            CreatedBy = createdBy,
+            OrderStatus = "Pending",
+            CreatedBy = orderRequest.RequestedBy,
             CreatedOn = DateTime.UtcNow,
-            ModifiedBy = createdBy,
+            ModifiedBy = orderRequest.RequestedBy,
             ModifiedOn = DateTime.UtcNow,
             OrderRemark = orderRequest.OrderReqRemark
         };

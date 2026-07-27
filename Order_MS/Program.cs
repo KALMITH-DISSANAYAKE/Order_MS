@@ -53,7 +53,8 @@ builder.Services.AddDbContext<OrderMSDbContext>(options =>
 
 // Register Services (Dependency Injection)
 
-builder.Services.AddScoped<IAuthService, AuthService>();
+
+//builder.Services.AddScoped<IBranchService, BranchService>();
 // Generic Repository — works for ANY entity
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 

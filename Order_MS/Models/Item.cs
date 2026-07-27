@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Order_MS.Models;
 
@@ -16,6 +17,8 @@ public partial class Item
     public int? SupplierId { get; set; }
 
     public int? CreatedBy { get; set; }
+
+    public bool? IsActive { get; set; }
 
     public DateTime? CreatedOn { get; set; }
 

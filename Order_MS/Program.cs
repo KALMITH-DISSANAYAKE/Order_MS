@@ -56,13 +56,24 @@ builder.Services.AddDbContext<OrderMSDbContext>(options =>
 
 
 //builder.Services.AddScoped<IBranchService, BranchService>();
+
 // Generic Repository — works for ANY entity
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 // Your services
 builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+
+//builder.Services.AddScoped<IBranchService, BranchService>();
+//builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+
 builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();

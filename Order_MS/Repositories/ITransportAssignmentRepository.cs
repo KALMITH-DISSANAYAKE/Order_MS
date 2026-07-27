@@ -10,6 +10,7 @@ namespace Order_MS.Repositories
         Task<bool> UpdateOrderRequestStatusAsync(int orderReqId, string newStatus);
 
         Task<IEnumerable<DriverVehicleLink>> GetAvailableDriverVehicleLinksAsync();
+
         Task<IEnumerable<TransportAssignment>> GetAllAssignmentsAsync();
         Task<IEnumerable<TransportAssignment>> GetAssignmentsByOrderRequestAsync(int orderReqId);
         Task<TransportAssignment?> GetAssignmentWithDetailsAsync(int assignmentId);

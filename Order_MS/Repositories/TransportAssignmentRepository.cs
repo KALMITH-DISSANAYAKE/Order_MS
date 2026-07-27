@@ -62,7 +62,7 @@ namespace Order_MS.Repositories
         public async Task<IEnumerable<TransportAssignment>> GetAllAssignmentsAsync()
         {
             return await _context.TransportAssignments
-    \
+   
                 .Include(ta => ta.OrderReq)
                     .ThenInclude(or => or!.Branch)
                 .Include(ta => ta.Connection)

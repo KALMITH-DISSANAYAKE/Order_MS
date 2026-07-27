@@ -6,5 +6,6 @@ namespace Order_MS.DTOs
     {
         [Required]
         public string? OrderRemark { get; set; }
+        public string? OrderStatus { get; set; }
     }
 }

@@ -166,10 +166,6 @@ public class OrderRequestService : IOrderRequestService
         _context.TransportAssignments.Add(transportAssignment);
 
         await _context.SaveChangesAsync();
-        //added here the order creation logic after approval
-        await _orderService.CreateOrderFromOrderRequest(
-        request.OrderReqId,
-        approvedBy);
 
 
         return new OrderRequestResponseDTO
@@ -230,6 +226,11 @@ public class OrderRequestService : IOrderRequestService
         request.ReqStatus = "PaymentSuccessful";
 
         await _context.SaveChangesAsync();
+        //added here the order creation logic after payment
+        await _orderService.CreateOrderFromOrderRequest(
+        request.OrderReqId,
+        request.ApprovedBy);
+
 
         return new OrderRequestResponseDTO
         {

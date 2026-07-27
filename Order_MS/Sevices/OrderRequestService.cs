@@ -3,27 +3,19 @@ using Order_MS.Data;
 using Order_MS.DTOs;
 using Order_MS.Interfaces;
 using Order_MS.Models;
-using Order_MS.Repositories;
-using Order_MS.Sevices;
 
 namespace Order_MS.Services;
 
 public class OrderRequestService : IOrderRequestService
 {
     private readonly OrderMSDbContext _context;
-    private readonly IOrderService _orderService;
-    private readonly IOrderRepository<Order> _repository;
 
 
-    public OrderRequestService(OrderMSDbContext context,
-    IOrderRepository<Order> repository,
-    IOrderService orderService)
+    public OrderRequestService(OrderMSDbContext context)
     {
-
-        _repository = repository;
-        _orderService = orderService;
         _context = context;
     }
+
 
     public async Task<OrderRequestResponseDTO> CreateOrderRequest(CreateOrderRequestDTO dto)
     {
@@ -169,11 +161,6 @@ public class OrderRequestService : IOrderRequestService
         _context.TransportAssignments.Add(transportAssignment);
 
         await _context.SaveChangesAsync();
-        //added here the order creation logic after approval
-        await _orderService.CreateOrderFromOrderRequest(
-        request.OrderReqId,
-        approvedBy);
-
 
         return new OrderRequestResponseDTO
         {

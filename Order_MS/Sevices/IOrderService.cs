@@ -8,7 +8,7 @@ namespace Order_MS.Sevices
 
         Task<OrderResponseDtos?> GetOrderById(int id);
 
-        Task<OrderResponseDtos> CreateOrderFromOrderRequest(int orderReqId, int createdBy);
+        Task<OrderResponseDtos> CreateOrderFromOrderRequest(int orderReqId);
 
         Task CreateOrder(OrderCreateDtos OrderDto);
 

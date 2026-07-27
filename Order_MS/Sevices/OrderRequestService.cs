@@ -12,17 +12,14 @@ public class OrderRequestService : IOrderRequestService
 {
     private readonly OrderMSDbContext _context;
     private readonly IOrderService _orderService;
-    private readonly IOrderRepository<Order> _repository;
 
 
-    public OrderRequestService(OrderMSDbContext context,
-    IOrderRepository<Order> repository,
+    public OrderRequestService(
+    OrderMSDbContext context,
     IOrderService orderService)
     {
-
-        _repository = repository;
-        _orderService = orderService;
         _context = context;
+        _orderService = orderService;
     }
 
     public async Task<OrderRequestResponseDTO> CreateOrderRequest(CreateOrderRequestDTO dto)
@@ -202,6 +199,35 @@ public class OrderRequestService : IOrderRequestService
         }
 
         request.ReqStatus = "Rejected";
+
+        await _context.SaveChangesAsync();
+
+        return new OrderRequestResponseDTO
+        {
+            OrderReqId = request.OrderReqId,
+            Status = request.ReqStatus,
+            TotalQuantity = request.TotalQuantity ?? 0,
+            TotalPrice = request.TotalPrice ?? 0,
+            RequestedOn = request.RequestedOn ?? DateTime.Now
+        };
+    }
+
+    public async Task<OrderRequestResponseDTO?> MakePayment(int id)
+    {
+        var request = await _context.OrderRequests
+            .FirstOrDefaultAsync(x => x.OrderReqId == id);
+
+        if (request == null)
+        {
+            return null;
+        }
+
+        if (request.ReqStatus != "TransportAssigned")
+        {
+            return null;
+        }
+
+        request.ReqStatus = "PaymentSuccessful";
 
         await _context.SaveChangesAsync();
 

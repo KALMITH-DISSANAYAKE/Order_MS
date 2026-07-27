@@ -25,12 +25,31 @@ public class OrderRequestService : IOrderRequestService
 
     public async Task<OrderRequestResponseDTO> CreateOrderRequest(CreateOrderRequestDTO dto)
     {
+
+        // ✅ AFTER — Fetch user's branch and set it
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == dto.RequestedBy);
+
+        if (user == null)
+            throw new Exception($"User with ID {dto.RequestedBy} not found");
+
+        if (user.BranchId == null)
+            throw new Exception($"User {user.UserName} is not assigned to any branch");
+
         var orderRequest = new OrderRequest
+        {
+            RequestedBy = dto.RequestedBy,
+            BranchId = user.BranchId.Value,   // ← This line was added
+            ReqStatus = "SubmittedForReview",
+            RequestedOn = DateTime.Now
+        };
+
+        /*var orderRequest = new OrderRequest
         {
             RequestedBy = dto.RequestedBy,
             ReqStatus = "SubmittedForReview",
             RequestedOn = DateTime.Now
-        };
+        }; */
 
         _context.OrderRequests.Add(orderRequest);
 

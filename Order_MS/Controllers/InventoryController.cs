@@ -8,7 +8,7 @@ namespace Order_MS.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-   //[Authorize]
+   [Authorize]
     public class InventoryController : ControllerBase
     {
         private readonly IInventoryService _inventoryService;
@@ -28,7 +28,7 @@ namespace Order_MS.Controllers
 
         // POST: api/inventory/items
         [HttpPost("items")]
-        //[Authorize(Roles = "InventoryManager")]
+        [Authorize(Roles = "InventoryManager")]
         public async Task<IActionResult> CreateItem([FromBody] CreateItemDto dto)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -55,7 +55,7 @@ namespace Order_MS.Controllers
 
         // DELETE: api/inventory/items/1
         [HttpDelete("items/{id}")]
-        //[Authorize(Roles = "InventoryManager")]
+        [Authorize(Roles = "InventoryManager")]
         public async Task<IActionResult> DeleteItem(int id)
         {
             var success = await _inventoryService.DeleteItemAsync(id);

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Services;
 
@@ -6,6 +7,7 @@ namespace Order_MS.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TransportController : ControllerBase
     {
         private readonly ITransportService _transportService;
@@ -16,6 +18,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("order-requests")]
+        [Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> GetApprovedOrderRequests()
         {
             var result = await _transportService.GetApprovedOrderRequestsAsync();
@@ -23,6 +26,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("available-links")]
+        [Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> GetAvailableDriverVehicleLinks()
         {
             var result = await _transportService.GetAvailableDriverVehicleLinksAsync();
@@ -30,6 +34,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("assignments")]
+        [Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> GetAllAssignments()
         {
             var result = await _transportService.GetAllAssignmentsAsync();
@@ -37,6 +42,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("assignments/order-request/{orderReqId:int}")]
+        [Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> GetAssignmentsByOrderRequest(int orderReqId)
         {
             var result = await _transportService.GetAssignmentsByOrderRequestAsync(orderReqId);
@@ -45,6 +51,7 @@ namespace Order_MS.Controllers
 
   
         [HttpPost("assign")]
+        [Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> AssignTransport([FromBody] AssignTransportDto dto)
         {
             var (success, message, data) = await _transportService.AssignTransportAsync(dto);
@@ -55,6 +62,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpPut("assignments/{id:int}/status")]
+        [Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> UpdateAssignmentStatus(
             int id, [FromBody] UpdateAssignmentStatusDto dto)
         {

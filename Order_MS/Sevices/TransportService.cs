@@ -84,7 +84,7 @@ namespace Order_MS.Services
                         $"Vehicle '{link.Vehicle.VehicleNumber}' has capacity " +
                         $"{link.Vehicle.Capacity} but was assigned {item.Quantity} units.", null);
             }
-
+             
      
             foreach (var item in dto.Assignments)
             {

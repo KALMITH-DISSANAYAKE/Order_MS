@@ -63,11 +63,16 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 // Your services
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+
 //builder.Services.AddScoped<IBranchService, BranchService>();
 //builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
 
 builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
@@ -78,6 +83,7 @@ builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 // Generic repo 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+builder.Services.AddScoped(typeof(IOrderRepository<>), typeof(OrderRepository<>));
 // Specific repo (transport management)
 builder.Services.AddScoped<ITransportAssignmentRepository, TransportAssignmentRepository>();
 

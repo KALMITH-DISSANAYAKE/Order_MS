@@ -13,4 +13,6 @@ public interface IOrderRequestService
     Task<OrderRequestResponseDTO?> ApproveOrderRequest(int id, int approvedBy);
 
     Task<OrderRequestResponseDTO?> RejectOrderRequest(int id);
+
+    Task<OrderRequestResponseDTO?> MakePayment(int id);
 }

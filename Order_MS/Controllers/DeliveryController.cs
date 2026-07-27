@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Services;
 
@@ -6,6 +7,7 @@ namespace Order_MS.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class DeliveryController : ControllerBase
     {
         private readonly IDeliveryService _deliveryService;
@@ -16,6 +18,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "DeliveryDepartment")]   
         public async Task<IActionResult> GetAllDeliveries()
         {
             var result = await _deliveryService.GetAllDeliveriesAsync();
@@ -23,6 +26,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "DeliveryDepartment,InventoryManager")]
         public async Task<IActionResult> GetDeliveryById(int id)
         {
             var result = await _deliveryService.GetDeliveryByIdAsync(id);
@@ -33,6 +37,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpPut("{id:int}/status")]
+        [Authorize(Roles = "DeliveryDepartment,InventoryManager")]
         public async Task<IActionResult> UpdateDeliveryStatus(
             int id, [FromBody] UpdateDeliveryStatusDto dto)
         {

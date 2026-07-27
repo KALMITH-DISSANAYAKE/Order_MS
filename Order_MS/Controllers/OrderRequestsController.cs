@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Interfaces;
 using Order_MS.Services;
@@ -33,6 +34,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "BranchManager,InventoryManager")]
     public async Task<IActionResult> GetAllOrderRequests()
     {
         var result = await _orderRequestService.GetAllOrderRequests();
@@ -41,6 +43,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "BranchManager,InventoryManager")]
     public async Task<IActionResult> GetOrderRequestById(int id)
     {
         var request = await _orderRequestService.GetOrderRequestById(id);
@@ -54,6 +57,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPut("{id}/approve")]
+    [Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> ApproveOrderRequest(
     int id,
     ApproveOrderRequestDTO dto)
@@ -70,6 +74,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPut("{id}/reject")]
+    [Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> RejectOrderRequest(
     int id,
     ApproveOrderRequestDTO dto)
@@ -84,5 +89,23 @@ public class OrderRequestController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPut("{id}/payment")]
+    [Authorize(Roles = "InventoryManager")]
+
+    public async Task<IActionResult> MakePayment(
+    int id)
+    {
+        var result = await _orderRequestService
+    .MakePayment(id);
+
+        if (result == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
 
 }

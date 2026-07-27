@@ -120,14 +120,15 @@ CREATE TABLE driver (
 );
 
 -- ============================================================
--- 8. VEHICLE TABLE (Fixed typo: vehical -> vehicle)
+-- 8. VEHICLE TABLE 
 -- ============================================================
 CREATE TABLE vehicle (
-    vehical_id INT PRIMARY KEY IDENTITY(1,1),
-    vehical_number VARCHAR(20) NOT NULL UNIQUE,
+    vehicle_id INT PRIMARY KEY IDENTITY(1,1),
+    vehicle_number VARCHAR(20) NOT NULL UNIQUE,
     [Available] VARCHAR(20) DEFAULT 'Available',
     created_on DATETIME DEFAULT GETDATE(),
-    modified_on DATETIME
+    modified_on DATETIME,
+    capacity INT NULL
 );
 
 -- ============================================================
@@ -136,12 +137,12 @@ CREATE TABLE vehicle (
 CREATE TABLE driver_vehicle_link (
     connection_id INT PRIMARY KEY IDENTITY(1,1),
     driver_id INT NOT NULL,
-    vehical_id INT NOT NULL,
+    vehicle_id INT NOT NULL,
     created_on DATETIME DEFAULT GETDATE(),
     
     CONSTRAINT FK_dvl_driver FOREIGN KEY (driver_id) REFERENCES driver(driver_id),
-    CONSTRAINT FK_dvl_vehicle FOREIGN KEY (vehical_id) REFERENCES vehicle(vehical_id),
-    CONSTRAINT UQ_dvl_driver_vehicle UNIQUE (driver_id, vehical_id)
+    CONSTRAINT FK_dvl_vehicle FOREIGN KEY (vehicle_id) REFERENCES vehicle(vehicle_id),
+    CONSTRAINT UQ_dvl_driver_vehicle UNIQUE (driver_id, vehicle_id)
 );
 
 -- ============================================================
@@ -154,18 +155,19 @@ CREATE TABLE order_request (
     total_price DECIMAL(18,2),
     requested_by INT NOT NULL,
     requested_on DATETIME DEFAULT GETDATE(),
+    branch_id INT NOT NULL,
     approved_by INT,
     approved_on DATETIME,
     modified_by INT,
     modified_on DATETIME,
     received_by INT,
     received_on DATETIME,
-    order_req_remark NVARCHAR,
-
+    order_req_remark NVARCHAR(MAX),
     
     CONSTRAINT FK_order_request_requested_by FOREIGN KEY (requested_by) REFERENCES [user](id),
     CONSTRAINT FK_order_request_approved_by FOREIGN KEY (approved_by) REFERENCES [user](id),
-    CONSTRAINT FK_order_request_modified_by FOREIGN KEY (modified_by) REFERENCES [user](id)
+    CONSTRAINT FK_order_request_modified_by FOREIGN KEY (modified_by) REFERENCES [user](id),
+    CONSTRAINT FK_order_request_branch FOREIGN KEY (branch_id) REFERENCES branch(branch_id)
 );
 
 -- ============================================================
@@ -195,7 +197,7 @@ CREATE TABLE orders (
     created_on DATETIME DEFAULT GETDATE(),
     modified_by INT,
     modified_on DATETIME,
-    order_remark NVARCHAR,
+    order_remark NVARCHAR(MAX),
     
     CONSTRAINT FK_orders_order_request FOREIGN KEY (order_req_id) REFERENCES order_request(order_req_id),
     CONSTRAINT FK_orders_connection FOREIGN KEY (connection_id) REFERENCES driver_vehicle_link(connection_id),
@@ -223,21 +225,18 @@ CREATE TABLE order_line (
 -- ============================================================
 -- 14. TRANSPORTER_ASSIGNMENT TABLE
 -- ============================================================
-
 CREATE TABLE TransportAssignment (
     assignment_id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id INT NOT NULL,
-    vehicle_id INT NOT NULL,
-    driver_id INT NOT NULL,
+    order_req_id INT NOT NULL,
+    connection_id INT NULL,
     assigned_on DATETIME2 NOT NULL,
     status NVARCHAR(50) NULL,
+    quantity INT NULL,
 
     -- Foreign Key Constraints
-    CONSTRAINT FK_TransportAssignment_Order FOREIGN KEY (order_id) REFERENCES orders (order_id) ON DELETE CASCADE,
-    CONSTRAINT FK_TransportAssignment_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehical_id),
-    CONSTRAINT FK_TransportAssignment_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id )
+    CONSTRAINT FK_TransportAssignment_order_request FOREIGN KEY (order_req_id) REFERENCES order_request (order_req_id),
+    CONSTRAINT FK_TransportAssignment_driver_vehicle_link FOREIGN KEY (connection_id) REFERENCES driver_vehicle_link (connection_id)
 );
-
 
 -- ============================================================
 -- SEED DATA
@@ -298,11 +297,17 @@ INSERT INTO driver (drivers_name, license_number, [Available]) VALUES
 ('Mahesh Silva', 'L-789123456', 'Available');
 
 -- Vehicles
-INSERT INTO vehicle (vehical_number, [Available]) VALUES
+INSERT INTO vehicle (vehicle_number, [Available]) VALUES
 ('WP-CAB-1234', 'Available'),
 ('WP-L-5678', 'Available'),
 ('WP-KA-9012', 'Available'),
 ('WP-G-3456', 'Available');
+
+INSERT INTO driver_vehicle_link (driver_id, vehicle_id) VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4);
 
 PRINT 'Database OrderMS_DB created successfully!';
 GO

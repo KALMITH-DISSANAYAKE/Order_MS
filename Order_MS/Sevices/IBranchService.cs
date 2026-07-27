@@ -4,9 +4,12 @@ namespace Order_MS.Services;
 
 public interface IBranchService
 {
-    // Get all branches
+    // Existing
     Task<List<BranchDto>> GetAllAsync();
-
-    // Get one branch by ID (returns null if not found)
     Task<BranchDto?> GetByIdAsync(int id);
+
+    // NEW: Full CRUD
+    Task<BranchDto> CreateAsync(CreateBranchDto dto);
+    Task<BranchDto?> UpdateAsync(int id, UpdateBranchDto dto);
+    Task<bool> DeleteAsync(int id);
 }

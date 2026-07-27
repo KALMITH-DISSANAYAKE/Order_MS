@@ -229,7 +229,7 @@ public class OrderRequestService : IOrderRequestService
         //added here the order creation logic after payment
         await _orderService.CreateOrderFromOrderRequest(
         request.OrderReqId,
-        request.ApprovedBy);
+        (int)request.ApprovedBy);
 
 
         return new OrderRequestResponseDTO

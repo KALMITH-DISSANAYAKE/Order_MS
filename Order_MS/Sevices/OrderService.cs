@@ -136,7 +136,7 @@ public class OrderService : IOrderService
             OrderReqId = orderRequest.OrderReqId,
             ConnectionId = selectedConnectionId,
             Price = orderRequest.TotalPrice,
-            OrderStatus = "Delivered",
+            OrderStatus = "Pending",
             CreatedBy = createdBy,
             CreatedOn = DateTime.UtcNow,
             ModifiedBy = createdBy,
@@ -236,6 +236,9 @@ public class OrderService : IOrderService
             return;
 
         order.OrderRemark = dto.OrderRemark;
+        if (!string.IsNullOrEmpty(dto.OrderStatus))
+            order.OrderStatus = dto.OrderStatus;
+
         order.ModifiedBy = modifiedBy;
         order.ModifiedOn = DateTime.UtcNow;
 

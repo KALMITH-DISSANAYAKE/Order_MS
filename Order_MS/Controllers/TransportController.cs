@@ -49,7 +49,6 @@ namespace Order_MS.Controllers
             var result = await _transportService.GetAssignmentsByOrderRequestAsync(orderReqId);
             return Ok(result);
         }
-
   
         [HttpPost("assign")]
         [Authorize(Roles = "TransportDepartment")]

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Order_MS.Data;
 using Order_MS.DTOs;
+using Order_MS.Exceptions; 
 using Order_MS.Models;
 using Order_MS.Repositories;
 
@@ -26,13 +27,13 @@ namespace Order_MS.Services
         {
             return await _context.Items
                 .Include(i => i.Supplier)
-                .Where(i => i.IsActive != true)
+                .Where(i => i.IsActive != false)
                 .Select(i => new ItemDto
                 {
                     ItemId = i.ItemId,
                     ItemName = i.ItemName,
                     UnitPrice = i.UnitPrice,
-                    ReorderLevel = i.ReorderLevel ?? 0,  
+                    ReorderLevel = i.ReorderLevel ?? 0,
                     SupplierName = i.Supplier != null ? i.Supplier.SupplierName : "N/A"
                 })
                 .ToListAsync();
@@ -42,17 +43,18 @@ namespace Order_MS.Services
         {
             var item = await _context.Items
                 .Include(i => i.Supplier)
-                .Where(i => i.IsActive != true)
+                .Where(i => i.IsActive != false)
                 .FirstOrDefaultAsync(i => i.ItemId == id);
 
-            if (item == null) return null;
+            if (item == null)
+                throw new BusinessException($"Item with ID {id} not found.", 404);
 
             return new ItemDetailDto
             {
                 ItemId = item.ItemId,
                 ItemName = item.ItemName,
                 UnitPrice = item.UnitPrice,
-                ReorderLevel = item.ReorderLevel ?? 0,  
+                ReorderLevel = item.ReorderLevel ?? 0,
                 Supplier = item.Supplier == null ? null! : new SupplierDto
                 {
                     SupplierId = item.Supplier.SupplierId,
@@ -65,7 +67,8 @@ namespace Order_MS.Services
         public async Task<IEnumerable<BranchInventoryDto>> GetBranchInventoryAsync(int branchId)
         {
             var branchExists = await _context.Branches.AnyAsync(b => b.BranchId == branchId);
-            if (!branchExists) return new List<BranchInventoryDto>();
+            if (!branchExists)
+                throw new BusinessException($"Branch with ID {branchId} does not exist.", 404);
 
             return await _context.Inventories
                 .Include(i => i.Item)
@@ -80,8 +83,8 @@ namespace Order_MS.Services
                     ItemId = i.ItemId,
                     ItemName = i.Item != null ? i.Item.ItemName : "",
                     Quantity = i.Quantity,
-                    ReorderLevel = i.ReorderLevel ?? 0,  
-                    IsBelowReorderLevel = (i.Quantity < (i.ReorderLevel ?? 0))  
+                    ReorderLevel = i.ReorderLevel ?? 0,
+                    IsBelowReorderLevel = i.Quantity < (i.ReorderLevel ?? 0)
                 })
                 .ToListAsync();
         }
@@ -91,7 +94,7 @@ namespace Order_MS.Services
             var query = _context.Inventories
                 .Include(i => i.Item)
                 .Include(i => i.Branch)
-                .Where(i => i.Quantity < (i.ReorderLevel ?? 0))  
+                .Where(i => i.Quantity < (i.ReorderLevel ?? 0))
                 .AsQueryable();
 
             if (branchId.HasValue)
@@ -106,15 +109,16 @@ namespace Order_MS.Services
                     ItemId = i.ItemId,
                     ItemName = i.Item != null ? i.Item.ItemName : "",
                     CurrentQuantity = i.Quantity,
-                    ReorderLevel = i.ReorderLevel ?? 0  
+                    ReorderLevel = i.ReorderLevel ?? 0
                 })
                 .ToListAsync();
         }
 
-        public async Task<UpdateStockResponseDto?> UpdateStockAsync(UpdateStockDto dto, int modifiedBy)
+        public async Task<UpdateStockResponseDto> UpdateStockAsync(UpdateStockDto dto, int? modifiedBy)
         {
             var inventory = await _inventoryRepo.GetByIdAsync(dto.InventoryId) as Inventory;
-            if (inventory == null) return null;
+            if (inventory == null)
+                throw new BusinessException($"Inventory record with ID {dto.InventoryId} not found.", 404);
 
             var item = await _itemRepo.GetByIdAsync(inventory.ItemId) as Item;
 
@@ -125,7 +129,7 @@ namespace Order_MS.Services
             _inventoryRepo.Update(inventory);
             await _inventoryRepo.SaveAsync();
 
-            int reorderLevel = inventory.ReorderLevel ?? 0;  
+            int reorderLevel = inventory.ReorderLevel ?? 0;
             bool isLow = inventory.Quantity < reorderLevel;
 
             return new UpdateStockResponseDto
@@ -141,55 +145,89 @@ namespace Order_MS.Services
             };
         }
 
-        public async Task<ItemDetailDto> CreateItemAsync(CreateItemDto dto, int createdBy)
+        public async Task<ItemDetailDto> CreateItemAsync(CreateItemDto dto, int? createdBy)
         {
+            var supplierExists = await _context.Suppliers.AnyAsync(s => s.SupplierId == dto.SupplierId);
+            if (!supplierExists)
+                throw new BusinessException($"Supplier with ID {dto.SupplierId} does not exist.", 400);
+
             var item = new Item
             {
                 ItemName = dto.ItemName,
                 UnitPrice = dto.UnitPrice,
                 ReorderLevel = dto.ReorderLevel,
                 SupplierId = dto.SupplierId,
-                CreatedBy = createdBy,
+                IsActive = true,
                 CreatedOn = DateTime.Now
             };
 
-            await _itemRepo.AddAsync(item);
-            await _itemRepo.SaveAsync();
+            if (createdBy.HasValue && createdBy.Value > 0)
+                item.CreatedBy = createdBy.Value;
 
-            // Reload with supplier info
-            return await GetItemByIdAsync(item.ItemId)
-                ?? throw new InvalidOperationException("Failed to retrieve created item.");
+            try
+            {
+                await _itemRepo.AddAsync(item);
+                await _itemRepo.SaveAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new BusinessException($"Database error: {ex.InnerException?.Message ?? ex.Message}", 400);
+            }
+
+            var result = await GetItemByIdAsync(item.ItemId);
+            if (result == null)
+                throw new BusinessException("Item was created but could not be retrieved.", 500);
+
+            return result;
         }
 
-        public async Task<ItemDetailDto?> UpdateItemAsync(int id, UpdateItemDto dto, int modifiedBy)
+        public async Task<ItemDetailDto> UpdateItemAsync(int id, UpdateItemDto dto, int? modifiedBy)
         {
             var item = await _itemRepo.GetByIdAsync(id) as Item;
-            if (item == null) return null;
+            if (item == null || item.IsActive == false)
+                throw new BusinessException($"Item with ID {id} not found or has been deleted.", 404);
+
+            var supplierExists = await _context.Suppliers.AnyAsync(s => s.SupplierId == dto.SupplierId);
+            if (!supplierExists)
+                throw new BusinessException($"Supplier with ID {dto.SupplierId} does not exist.", 400);
 
             item.ItemName = dto.ItemName;
             item.UnitPrice = dto.UnitPrice;
             item.ReorderLevel = dto.ReorderLevel;
             item.SupplierId = dto.SupplierId;
-            item.ModifiedBy = modifiedBy;
             item.ModifiedOn = DateTime.Now;
 
-            _itemRepo.Update(item);
-            await _itemRepo.SaveAsync();
+            if (modifiedBy.HasValue && modifiedBy.Value > 0)
+                item.ModifiedBy = modifiedBy.Value;
+
+            try
+            {
+                _itemRepo.Update(item);
+                await _itemRepo.SaveAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new BusinessException($"Database error: {ex.InnerException?.Message ?? ex.Message}", 400);
+            }
 
             return await GetItemByIdAsync(id);
         }
 
-        public async Task<bool> DeleteItemAsync(int id)
+        public async Task DeleteItemAsync(int id)
         {
             var item = await _itemRepo.GetByIdAsync(id) as Item;
-            if (item == null || item.IsActive == true) return false;  // <-- ADD IsDeleted CHECK
+            if (item == null || item.IsActive == false)
+                throw new BusinessException($"Item with ID {id} not found or already deleted.", 404);
 
-            item.IsActive = true;  // <-- SOFT DELETE: just flip the flag
+            bool hasInventory = await _context.Inventories.AnyAsync(i => i.ItemId == id);
+            if (hasInventory)
+                throw new BusinessException("Cannot delete item that exists in branch inventory. Remove stock from all branches first.", 400);
+
+            item.IsActive = false;
             item.ModifiedOn = DateTime.Now;
 
-            _itemRepo.Update(item);  // <-- UPDATE, not DELETE
+            _itemRepo.Update(item);
             await _itemRepo.SaveAsync();
-            return true;
         }
     }
 }

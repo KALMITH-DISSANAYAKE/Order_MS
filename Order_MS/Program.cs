@@ -1,13 +1,14 @@
-using Order_MS.Data;
-using Order_MS.Services;
-using Order_MS.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
+using Order_MS.Data;
 using Order_MS.Interfaces;
+using Order_MS.Middleware;
+using Order_MS.Repositories;
+using Order_MS.Services;
 using Order_MS.Sevices;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,23 +55,10 @@ builder.Services.AddDbContext<OrderMSDbContext>(options =>
 
 // Register Services (Dependency Injection)
 
-
-//builder.Services.AddScoped<IBranchService, BranchService>();
-
 // Your services
 builder.Services.AddScoped<IAuthService, AuthService>();
-
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
-
-//builder.Services.AddScoped<IBranchService, BranchService>();
-//builder.Services.AddScoped<IUserService, UserService>();
-
-builder.Services.AddScoped<IBranchService, BranchService>();
-builder.Services.AddScoped<IUserService, UserService>();
-
-
 builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
@@ -111,6 +99,15 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+//ErrorHandlingMiddleware
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
 // Configure middleware pipeline
 if (app.Environment.IsDevelopment())

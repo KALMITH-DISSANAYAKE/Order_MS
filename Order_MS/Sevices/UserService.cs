@@ -3,6 +3,7 @@ using Order_MS.DTOs;
 using Order_MS.Models;
 using Order_MS.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Order_MS.Exceptions;
 
 namespace Order_MS.Services;
 
@@ -19,6 +20,15 @@ public class UserService : IUserService
 
     public async Task<UserDto> CreateAsync(CreateUserDto dto)
     {
+
+        // Check for duplicate username
+        var existing = await _context.Users
+       .FirstOrDefaultAsync(u => u.UserName == dto.Username);
+
+        if (existing != null)
+            throw new BusinessException($"Username '{dto.Username}' already exists", 409);
+        //-----
+
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
         var user = new User
@@ -67,7 +77,15 @@ public class UserService : IUserService
     public async Task<UserDto?> UpdateAsync(int id, UpdateUserDto dto)
     {
         var user = await _userRepo.GetByIdAsync(id);
-        if (user == null) return null;
+        if (user == null) 
+            throw new BusinessException($"User with ID {id} not found", 404);
+
+        // Check duplicate username (excluding current user)
+        var duplicate = await _context.Users
+        .FirstOrDefaultAsync(u => u.UserName == dto.Username && u.Id != id);
+
+        if (duplicate != null)
+            throw new BusinessException($"Username '{dto.Username}' already taken", 409);
 
         user.FirstName = dto.FirstName;
         user.LastName = dto.LastName;

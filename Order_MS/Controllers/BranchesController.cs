@@ -30,9 +30,9 @@ public class BranchesController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var branch = await _branchService.GetByIdAsync(id);
-        if (branch == null)
+        /*if (branch == null)
             return NotFound(new { message = "Branch not found" });
-
+        */
         return Ok(branch);
     }
 

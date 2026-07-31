@@ -1,6 +1,6 @@
 ﻿using Order_MS.DTOs;
 
-namespace Order_MS.Sevices
+namespace Order_MS.Services
 {
     public interface IOrderService
     {

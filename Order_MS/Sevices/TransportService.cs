@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Order_MS.DTOs;
+using Order_MS.Exceptions;  
 using Order_MS.Models;
 using Order_MS.Repositories;
 
@@ -46,25 +48,20 @@ namespace Order_MS.Services
             
             var orderRequest = await _repo.GetOrderRequestWithDetailsAsync(dto.OrderReqId);
             if (orderRequest is null)
-                return (false, $"Order request #{dto.OrderReqId} not found.", null);
+                throw new BusinessException($"Order request #{dto.OrderReqId} not found.", 404);
 
             if (orderRequest.ReqStatus != "Approved")
-                return (false,
-                    $"Order request must be 'Approved' before transport can be assigned. " +
-                    $"Current status: '{orderRequest.ReqStatus}'.", null);
+                throw new BusinessException($"Order request must be 'Approved' before transport can be assigned. Current status: '{orderRequest.ReqStatus}'.", 400);
 
             if (dto.Assignments is null || !dto.Assignments.Any())
-                return (false, "At least one driver-vehicle assignment is required.", null);
+                throw new BusinessException("At least one driver-vehicle assignment is required.", 400);
 
             
             int requiredQty = orderRequest.TotalQuantity ?? 0;
             int assignedQty = dto.Assignments.Sum(a => a.Quantity);
 
             if (assignedQty < requiredQty)
-                return (false,
-                    $"Assigned quantity ({assignedQty}) is less than " +
-                    $"the order's total quantity ({requiredQty}). " +
-                    "Add more vehicles or increase per-vehicle quantities.", null);
+                  throw new BusinessException($"Assigned quantity ({assignedQty}) is less than the order's total quantity ({requiredQty}). Add more vehicles or increase per-vehicle quantities.", 400);
 
             
             var availableLinks = (await _repo.GetAvailableDriverVehicleLinksAsync())
@@ -73,18 +70,12 @@ namespace Order_MS.Services
             foreach (var item in dto.Assignments)
             {
                 if (!availableLinks.TryGetValue(item.ConnectionId, out var link))
-                    return (false,
-                        $"Driver-vehicle link #{item.ConnectionId} is not available " +
-                        "or does not exist. Refresh the available-links list and try again.", null);
-
+                    throw new BusinessException($"Driver-vehicle link #{item.ConnectionId} is not available or does not exist. Refresh the available-links list and try again.", 404);
                 
-                if (link.Vehicle?.Capacity.HasValue == true &&
-                    item.Quantity > link.Vehicle.Capacity.Value)
-                    return (false,
-                        $"Vehicle '{link.Vehicle.VehicleNumber}' has capacity " +
-                        $"{link.Vehicle.Capacity} but was assigned {item.Quantity} units.", null);
+                if (link.Vehicle?.Capacity.HasValue == true && item.Quantity > link.Vehicle.Capacity.Value)
+                    throw new BusinessException($"Vehicle '{link.Vehicle.VehicleNumber}' has capacity {link.Vehicle.Capacity} but was assigned {item.Quantity} units.", 400);   
             }
-
+             
      
             foreach (var item in dto.Assignments)
             {
@@ -100,8 +91,14 @@ namespace Order_MS.Services
 
             await _repo.UpdateOrderRequestStatusAsync(dto.OrderReqId, "TransportAssigned");
 
-            await _repo.SaveAsync();
-
+            try
+            {
+                await _repo.SaveAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new BusinessException($"Database error: {ex.InnerException?.Message ?? ex.Message}", 400);
+    }
   
             var saved = await _repo.GetAssignmentsByOrderRequestAsync(dto.OrderReqId);
             return (true, "Transport assigned successfully.", saved.Select(ToAssignmentDto));
@@ -113,13 +110,21 @@ namespace Order_MS.Services
             UpdateAssignmentStatusAsync(int assignmentId, UpdateAssignmentStatusDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Status))
-                return (false, "Status value cannot be empty.");
-
+                throw new BusinessException("Status value cannot be empty.", 400);
+                
             var updated = await _repo.UpdateAssignmentStatusAsync(assignmentId, dto.Status);
-            if (!updated) return (false, $"Assignment #{assignmentId} not found.");
+            if (!updated)
+                throw new BusinessException($"Assignment #{assignmentId} not found.", 404);
 
-            await _repo.SaveAsync();
-            return (true, $"Assignment #{assignmentId} status updated to '{dto.Status}'.");
+           try
+            {
+                await _repo.SaveAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new BusinessException($"Database error: {ex.InnerException?.Message ?? ex.Message}", 400);
+            }
+            return (true, $"Assignment #{assignmentId} status updated to '{dto.Status}'."); 
         }
 
 

@@ -1,13 +1,13 @@
-using Order_MS.Data;
-using Order_MS.Services;
-using Order_MS.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
+using Order_MS.Data;
 using Order_MS.Interfaces;
-using Order_MS.Sevices;
+using Order_MS.Middleware;
+using Order_MS.Repositories;
+using Order_MS.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,8 +52,7 @@ builder.Services.AddDbContext<OrderMSDbContext>(options =>
 // AutoMapper
 //builder.Services.AddAutoMapper(typeof(Program));
 
-// Generic Repository — works for ANY entity
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+// Register Services (Dependency Injection)
 
 // Your services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -68,6 +67,7 @@ builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 // Generic repo 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+builder.Services.AddScoped(typeof(IOrderRepository<>), typeof(OrderRepository<>));
 // Specific repo (transport management)
 builder.Services.AddScoped<ITransportAssignmentRepository, TransportAssignmentRepository>();
 
@@ -98,6 +98,15 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+//ErrorHandlingMiddleware
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
 // Configure middleware pipeline
 if (app.Environment.IsDevelopment())

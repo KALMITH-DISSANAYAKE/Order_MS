@@ -3,6 +3,8 @@ using Order_MS.DTOs;
 using Order_MS.Models;
 using Order_MS.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Order_MS.Exceptions;
+
 
 namespace Order_MS.Services;
 
@@ -31,7 +33,9 @@ public class BranchService : IBranchService
     public async Task<BranchDto?> GetByIdAsync(int id)
     {
         var branch = await _branchRepo.GetByIdAsync(id);
-        if (branch == null) return null;
+        if (branch == null) 
+            //ErrorHandle
+        throw new BusinessException($"Branch with ID {id} not found", 404);
 
         return new BranchDto
         {
@@ -64,7 +68,9 @@ public class BranchService : IBranchService
     public async Task<BranchDto?> UpdateAsync(int id, UpdateBranchDto dto)
     {
         var branch = await _branchRepo.GetByIdAsync(id);
-        if (branch == null) return null;
+        if (branch == null)
+            //ErrorHandle
+        throw new BusinessException($"Branch with ID {id} not found", 404);
 
         branch.BranchCode = dto.BranchCode;
         branch.Location = dto.Location;
@@ -84,7 +90,9 @@ public class BranchService : IBranchService
     public async Task<bool> DeleteAsync(int id)
     {
         var branch = await _branchRepo.GetByIdAsync(id);
-        if (branch == null) return false;
+        if (branch == null)
+            //ErrorHandle
+        throw new BusinessException($"Branch with ID {id} not found", 404);
 
         _branchRepo.Delete(branch);        // ← void, pass entity not int
         await _branchRepo.SaveAsync();     // ← NEW: Must call SaveAsync!

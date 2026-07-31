@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Order_MS.Data;
 using Order_MS.DTOs;
 using Order_MS.Models;
+using Order_MS.Exceptions;
 
 namespace Order_MS.Services
 {
@@ -53,7 +54,8 @@ namespace Order_MS.Services
                     .ThenInclude(ol => ol.Item)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
-            if (order is null) return null;
+            if (order is null)
+                throw new BusinessException($"Order with ID {orderId} not found.", 404);
 
             return new DeliveryDetailDto
             {
@@ -84,14 +86,23 @@ namespace Order_MS.Services
             UpdateDeliveryStatusAsync(int orderId, UpdateDeliveryStatusDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Status))
-                return (false, "Status cannot be empty.");
+                throw new BusinessException("Status cannot be empty.", 400);
 
             var order = await _context.Orders.FindAsync(orderId);
-            if (order is null) return (false, $"Order #{orderId} not found.");
+            if (order is null)
+                throw new BusinessException($"Order #{orderId} not found.", 404);
 
             order.OrderStatus = dto.Status;
             order.ModifiedOn = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new BusinessException($"Database error: {ex.InnerException?.Message ?? ex.Message}", 400);
+            }
 
             return (true, $"Order #{orderId} status updated to '{dto.Status}'.");
         }

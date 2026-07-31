@@ -154,18 +154,6 @@ public class OrderService : IOrderService
 
         try
         {
-<<<<<<< Updated upstream
-            OrderReqId = orderRequest.OrderReqId,
-            ConnectionId = selectedConnectionId,
-            Price = orderRequest.TotalPrice,
-            OrderStatus = "Delivered",
-            CreatedBy = createdBy,
-            CreatedOn = DateTime.UtcNow,
-            ModifiedBy = createdBy,
-            ModifiedOn = DateTime.UtcNow,
-            OrderRemark = orderRequest.OrderReqRemark
-        };
-=======
             var orderRequest = await _context.OrderRequests
                 .Include(or => or.OrderRequestLines)
                     .ThenInclude(orl => orl.Item)
@@ -177,7 +165,6 @@ public class OrderService : IOrderService
                     .ThenInclude(ta => ta.Connection)
                         .ThenInclude(c => c!.Vehicle)
                 .FirstOrDefaultAsync(or => or.OrderReqId == orderReqId);
->>>>>>> Stashed changes
 
             if (orderRequest == null)
                 throw new BusinessException($"Order request {orderReqId} was not found.", 404);
@@ -333,6 +320,9 @@ public class OrderService : IOrderService
 
 <<<<<<< Updated upstream
         order.OrderRemark = dto.OrderRemark;
+        if (!string.IsNullOrEmpty(dto.OrderStatus))
+            order.OrderStatus = dto.OrderStatus;
+
         order.ModifiedBy = modifiedBy;
         order.ModifiedOn = DateTime.UtcNow;
 =======
@@ -341,7 +331,6 @@ public class OrderService : IOrderService
 
         if (modifiedBy <= 0)
             throw new BusinessException("Modified by user ID must be greater than zero.", 400);
->>>>>>> Stashed changes
 
         try
         {

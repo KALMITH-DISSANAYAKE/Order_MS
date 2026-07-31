@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Order_MS.Exceptions;
 
 namespace Order_MS.Services;
 
@@ -26,8 +27,17 @@ public class AuthService : IAuthService
             .Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.UserName == request.Username);
 
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            return null;
+        //ErrorHandling
+
+        if (user == null)
+            throw new BusinessException("Invalid username or password", 401);
+
+        bool passwordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+
+        if (!passwordValid)
+            throw new BusinessException("Invalid username or password", 401);
+
+        //---
 
         var token = GenerateJwtToken(user);
         var expiresHours = int.Parse(_config["Jwt:ExpireHours"]!);

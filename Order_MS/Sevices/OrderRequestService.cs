@@ -5,6 +5,7 @@ using Order_MS.Interfaces;
 using Order_MS.Models;
 using Order_MS.Repositories;
 using Order_MS.Sevices;
+using System.Security.Claims;
 
 namespace Order_MS.Services;
 
@@ -12,24 +13,32 @@ public class OrderRequestService : IOrderRequestService
 {
     private readonly OrderMSDbContext _context;
     private readonly IOrderService _orderService;
-    private readonly IOrderRepository<Order> _repository;
 
 
-    public OrderRequestService(OrderMSDbContext context,
-    IOrderRepository<Order> repository,
+    public OrderRequestService(
+    OrderMSDbContext context,
     IOrderService orderService)
     {
-
-        _repository = repository;
-        _orderService = orderService;
         _context = context;
+        _orderService = orderService;
     }
 
     public async Task<OrderRequestResponseDTO> CreateOrderRequest(CreateOrderRequestDTO dto)
     {
+        // Look up the requesting user to get their BranchId
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == dto.RequestedBy);
+
+        if (user == null)
+            throw new Exception($"User with ID {dto.RequestedBy} not found");
+
+        if (user.BranchId == null)
+            throw new Exception($"User {user.UserName} is not assigned to any branch");
+
         var orderRequest = new OrderRequest
         {
             RequestedBy = dto.RequestedBy,
+            BranchId = user.BranchId.Value,
             ReqStatus = "SubmittedForReview",
             RequestedOn = DateTime.Now
         };
@@ -78,13 +87,27 @@ public class OrderRequestService : IOrderRequestService
 
         await _context.SaveChangesAsync();
 
+        // Reload with lines and items to build the response
+        var savedRequest = await _context.OrderRequests
+            .Include(x => x.OrderRequestLines)
+            .ThenInclude(x => x.Item)
+            .FirstAsync(x => x.OrderReqId == orderRequest.OrderReqId);
+
         return new OrderRequestResponseDTO
         {
-            OrderReqId = orderRequest.OrderReqId,
-            Status = orderRequest.ReqStatus,
-            TotalQuantity = orderRequest.TotalQuantity ?? 0,
-            TotalPrice = orderRequest.TotalPrice ?? 0,
-            RequestedOn = orderRequest.RequestedOn ?? DateTime.Now
+            OrderReqId = savedRequest.OrderReqId,
+            Status = savedRequest.ReqStatus,
+            TotalQuantity = savedRequest.TotalQuantity ?? 0,
+            TotalPrice = savedRequest.TotalPrice ?? 0,
+            RequestedOn = savedRequest.RequestedOn ?? DateTime.Now,
+            Items = savedRequest.OrderRequestLines.Select(line => new OrderRequestLineResponseDTO
+            {
+                ItemId = line.ItemId,
+                ItemName = line.Item.ItemName,
+                Quantity = line.Quantity,
+                UnitPrice = line.Price ?? 0,
+                LineTotal = line.Quantity * (line.Price ?? 0)
+            }).ToList()
         };
     }
 
@@ -93,7 +116,7 @@ public class OrderRequestService : IOrderRequestService
         var requests = await _context.OrderRequests
          .Include(x => x.RequestedByNavigation)
             .Select(x => new OrderRequestListDTO
-             {
+            {
                 OrderReqId = x.OrderReqId,
                 Status = x.ReqStatus,
                 TotalQuantity = x.TotalQuantity ?? 0,
@@ -102,7 +125,7 @@ public class OrderRequestService : IOrderRequestService
                 RequestedBy = x.RequestedByNavigation.UserName
             })
             .ToListAsync();
-            return requests;
+        return requests;
 
 
     }
@@ -129,13 +152,13 @@ public class OrderRequestService : IOrderRequestService
 
             Items = request.OrderRequestLines
                .Select(line => new OrderRequestLineResponseDTO
-                {
-                    ItemId = line.ItemId,
-                    ItemName = line.Item.ItemName,
-                    Quantity = line.Quantity,
-                    UnitPrice = line.Price ?? 0,
-                    LineTotal = line.Quantity * line.Price ?? 0
-                })
+               {
+                   ItemId = line.ItemId,
+                   ItemName = line.Item.ItemName,
+                   Quantity = line.Quantity,
+                   UnitPrice = line.Price ?? 0,
+                   LineTotal = line.Quantity * line.Price ?? 0
+               })
                 .ToList()
         };
     }
@@ -143,9 +166,11 @@ public class OrderRequestService : IOrderRequestService
     public async Task<OrderRequestResponseDTO?> ApproveOrderRequest(int id, int approvedBy)
     {
         var request = await _context.OrderRequests
+            .Include(x => x.OrderRequestLines)
+            .ThenInclude(x => x.Item)
             .FirstOrDefaultAsync(x => x.OrderReqId == id);
 
-        if(request == null)
+        if (request == null)
         {
             return null;
         }
@@ -169,11 +194,6 @@ public class OrderRequestService : IOrderRequestService
         _context.TransportAssignments.Add(transportAssignment);
 
         await _context.SaveChangesAsync();
-        //added here the order creation logic after approval
-        await _orderService.CreateOrderFromOrderRequest(
-        request.OrderReqId,
-        approvedBy);
-
 
         return new OrderRequestResponseDTO
         {
@@ -181,7 +201,15 @@ public class OrderRequestService : IOrderRequestService
             Status = request.ReqStatus,
             TotalQuantity = request.TotalQuantity ?? 0,
             TotalPrice = request.TotalPrice ?? 0,
-            RequestedOn = request.RequestedOn ?? DateTime.Now
+            RequestedOn = request.RequestedOn ?? DateTime.Now,
+            Items = request.OrderRequestLines.Select(line => new OrderRequestLineResponseDTO
+            {
+                ItemId = line.ItemId,
+                ItemName = line.Item.ItemName,
+                Quantity = line.Quantity,
+                UnitPrice = line.Price ?? 0,
+                LineTotal = line.Quantity * (line.Price ?? 0)
+            }).ToList()
         };
 
     }
@@ -189,6 +217,8 @@ public class OrderRequestService : IOrderRequestService
     public async Task<OrderRequestResponseDTO?> RejectOrderRequest(int id)
     {
         var request = await _context.OrderRequests
+            .Include(x => x.OrderRequestLines)
+            .ThenInclude(x => x.Item)
             .FirstOrDefaultAsync(x => x.OrderReqId == id);
 
         if (request == null)
@@ -211,8 +241,60 @@ public class OrderRequestService : IOrderRequestService
             Status = request.ReqStatus,
             TotalQuantity = request.TotalQuantity ?? 0,
             TotalPrice = request.TotalPrice ?? 0,
-            RequestedOn = request.RequestedOn ?? DateTime.Now
+            RequestedOn = request.RequestedOn ?? DateTime.Now,
+            Items = request.OrderRequestLines.Select(line => new OrderRequestLineResponseDTO
+            {
+                ItemId = line.ItemId,
+                ItemName = line.Item.ItemName,
+                Quantity = line.Quantity,
+                UnitPrice = line.Price ?? 0,
+                LineTotal = line.Quantity * (line.Price ?? 0)
+            }).ToList()
+        };
+    }
+
+    public async Task<OrderRequestResponseDTO?> MakePayment(int id)
+    {
+        var request = await _context.OrderRequests
+            .Include(x => x.OrderRequestLines)
+            .ThenInclude(x => x.Item)
+            .FirstOrDefaultAsync(x => x.OrderReqId == id);
+
+        if (request == null)
+        {
+            return null;
+        }
+
+        if (request.ReqStatus != "TransportAssigned")
+        {
+            return null;
+        }
+
+        request.ReqStatus = "PaymentSuccessful";
+
+        await _context.SaveChangesAsync();
+        //added here the order creation logic after payment
+
+        await _orderService.CreateOrderFromOrderRequest(
+        request.OrderReqId,
+        (int)request.ApprovedBy);
+
+
+        return new OrderRequestResponseDTO
+        {
+            OrderReqId = request.OrderReqId,
+            Status = request.ReqStatus,
+            TotalQuantity = request.TotalQuantity ?? 0,
+            TotalPrice = request.TotalPrice ?? 0,
+            RequestedOn = request.RequestedOn ?? DateTime.Now,
+            Items = request.OrderRequestLines.Select(line => new OrderRequestLineResponseDTO
+            {
+                ItemId = line.ItemId,
+                ItemName = line.Item.ItemName,
+                Quantity = line.Quantity,
+                UnitPrice = line.Price ?? 0,
+                LineTotal = line.Quantity * (line.Price ?? 0)
+            }).ToList()
         };
     }
 }
-

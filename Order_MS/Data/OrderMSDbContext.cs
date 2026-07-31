@@ -200,7 +200,7 @@ public partial class OrderMSDbContext : DbContext
             entity.Property(e => e.UnitPrice)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("unit_price");
-
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.ItemCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("FK_item_created_by");

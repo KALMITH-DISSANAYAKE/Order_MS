@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Exceptions;
-using Order_MS.Sevices;
+using Order_MS.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 

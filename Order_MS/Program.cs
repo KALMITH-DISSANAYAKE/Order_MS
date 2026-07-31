@@ -7,7 +7,6 @@ using Order_MS.Interfaces;
 using Order_MS.Middleware;
 using Order_MS.Repositories;
 using Order_MS.Services;
-using Order_MS.Sevices;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

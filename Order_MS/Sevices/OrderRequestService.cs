@@ -1,11 +1,13 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Order_MS.Data;
 using Order_MS.DTOs;
+using Order_MS.Exceptions;
 using Order_MS.Interfaces;
 using Order_MS.Models;
 using Order_MS.Repositories;
 using Order_MS.Sevices;
-using System.Security.Claims;
+using Order_MS.Middleware;
 
 namespace Order_MS.Services;
 
@@ -25,15 +27,23 @@ public class OrderRequestService : IOrderRequestService
 
     public async Task<OrderRequestResponseDTO> CreateOrderRequest(CreateOrderRequestDTO dto)
     {
-        // Look up the requesting user to get their BranchId
+      
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == dto.RequestedBy);
 
         if (user == null)
-            throw new Exception($"User with ID {dto.RequestedBy} not found");
+        {
+            throw new BusinessException(
+                $"User with ID {dto.RequestedBy} not found.",
+                404);
+        }
 
         if (user.BranchId == null)
-            throw new Exception($"User {user.UserName} is not assigned to any branch");
+        {
+            throw new BusinessException(
+                $"User {user.UserName} is not assigned to any branch.",
+                400);
+        }
 
         var orderRequest = new OrderRequest
         {
@@ -58,7 +68,9 @@ public class OrderRequestService : IOrderRequestService
 
             if (dbItem == null)
             {
-                throw new Exception($"Item with ID {item.ItemId} not found");
+                throw new BusinessException(
+                    $"Item with ID {item.ItemId} not found.",
+                    404);
             }
 
             var orderRequestLine = new OrderRequestLine
@@ -87,7 +99,7 @@ public class OrderRequestService : IOrderRequestService
 
         await _context.SaveChangesAsync();
 
-        // Reload with lines and items to build the response
+  
         var savedRequest = await _context.OrderRequests
             .Include(x => x.OrderRequestLines)
             .ThenInclude(x => x.Item)
@@ -139,7 +151,9 @@ public class OrderRequestService : IOrderRequestService
 
         if (request == null)
         {
-            return null;
+            throw new BusinessException(
+                $"Order request with ID {id} was not found.",
+                404);
         }
 
         return new OrderRequestResponseDTO
@@ -172,12 +186,16 @@ public class OrderRequestService : IOrderRequestService
 
         if (request == null)
         {
-            return null;
+            throw new BusinessException(
+                $"Order request with ID {id} was not found.",
+                404);
         }
 
         if (request.ReqStatus != "SubmittedForReview")
         {
-            return null;
+            throw new BusinessException(
+                "Only order requests submitted for review can be approved.",
+                400);
         }
 
         request.ReqStatus = "Approved";
@@ -223,12 +241,16 @@ public class OrderRequestService : IOrderRequestService
 
         if (request == null)
         {
-            return null;
+            throw new BusinessException(
+                $"Order request with ID {id} was not found.",
+                404);
         }
 
         if (request.ReqStatus != "SubmittedForReview")
         {
-            return null;
+            throw new BusinessException(
+                "Only order requests submitted for review can be rejected.",
+                400);
         }
 
         request.ReqStatus = "Rejected";
@@ -262,18 +284,21 @@ public class OrderRequestService : IOrderRequestService
 
         if (request == null)
         {
-            return null;
+            throw new BusinessException(
+                $"Order request with ID {id} was not found.",
+                404);
         }
 
         if (request.ReqStatus != "TransportAssigned")
         {
-            return null;
+            throw new BusinessException(
+                "Payment can only be made after transport has been assigned.",
+                400);
         }
 
         request.ReqStatus = "PaymentSuccessful";
 
         await _context.SaveChangesAsync();
-        //added here the order creation logic after payment
 
         await _orderService.CreateOrderFromOrderRequest(
         request.OrderReqId,

@@ -45,6 +45,38 @@ public class OrderRequestService : IOrderRequestService
                 400);
         }
 
+        var duplicateItemIds = dto.Items
+            .GroupBy(x => x.ItemId)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicateItemIds.Any())
+        {
+            throw new BusinessException(
+                $"Duplicate item IDs are not allowed: {string.Join(", ", duplicateItemIds)}.",
+                400);
+        }
+
+        var itemIds = dto.Items
+            .Select(x => x.ItemId)
+            .ToList();
+
+        var dbItems = await _context.Items
+                .Where(x => itemIds.Contains(x.ItemId))
+                .ToListAsync();
+
+        var missingItemIds = itemIds
+            .Except(dbItems.Select(x => x.ItemId))
+            .ToList();
+
+        if (missingItemIds.Any())
+        {
+            throw new BusinessException(
+                $"The following item IDs were not found: {string.Join(", ", missingItemIds)}.",
+                404);
+        }
+
         var orderRequest = new OrderRequest
         {
             RequestedBy = dto.RequestedBy,
@@ -55,47 +87,31 @@ public class OrderRequestService : IOrderRequestService
 
         _context.OrderRequests.Add(orderRequest);
 
-        await _context.SaveChangesAsync();
-
         int totalQuantity = 0;
         decimal totalPrice = 0;
 
         foreach (var item in dto.Items)
         {
-
-            var dbItem = await _context.Items
-                .FirstOrDefaultAsync(x => x.ItemId == item.ItemId);
-
-            if (dbItem == null)
-            {
-                throw new BusinessException(
-                    $"Item with ID {item.ItemId} not found.",
-                    404);
-            }
+            var dbItem = dbItems
+                .First(x => x.ItemId == item.ItemId);
 
             var orderRequestLine = new OrderRequestLine
             {
-                OrderReqId = orderRequest.OrderReqId,
+                OrderReq = orderRequest,
                 ItemId = item.ItemId,
                 Quantity = item.Quantity,
                 Price = dbItem.UnitPrice
             };
 
-
             _context.OrderRequestLines.Add(orderRequestLine);
 
             totalQuantity += item.Quantity;
-
             totalPrice += item.Quantity * dbItem.UnitPrice;
-
-
         }
 
         orderRequest.TotalQuantity = totalQuantity;
 
         orderRequest.TotalPrice = totalPrice;
-
-        _context.OrderRequests.Update(orderRequest);
 
         await _context.SaveChangesAsync();
 

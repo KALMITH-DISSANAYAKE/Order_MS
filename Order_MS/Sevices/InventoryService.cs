@@ -116,6 +116,14 @@ namespace Order_MS.Services
 
         public async Task<UpdateStockResponseDto> UpdateStockAsync(UpdateStockDto dto, int? modifiedBy)
         {
+
+            if (dto.InventoryId <= 0)
+                throw new BusinessException("Inventory ID must be greater than 0.", 400);
+
+            if (dto.NewQuantity < 0)
+                throw new BusinessException("Quantity cannot be negative.", 400);
+
+
             var inventory = await _inventoryRepo.GetByIdAsync(dto.InventoryId) as Inventory;
             if (inventory == null)
                 throw new BusinessException($"Inventory record with ID {dto.InventoryId} not found.", 404);
@@ -147,6 +155,13 @@ namespace Order_MS.Services
 
         public async Task<ItemDetailDto> CreateItemAsync(CreateItemDto dto, int? createdBy)
         {
+
+            if (dto.UnitPrice <= 0)
+                throw new BusinessException("Unit price must be greater than 0.", 400);
+
+            if (dto.ReorderLevel < 0)
+                throw new BusinessException("Reorder level cannot be negative.", 400);
+
             var supplierExists = await _context.Suppliers.AnyAsync(s => s.SupplierId == dto.SupplierId);
             if (!supplierExists)
                 throw new BusinessException($"Supplier with ID {dto.SupplierId} does not exist.", 400);
@@ -183,6 +198,15 @@ namespace Order_MS.Services
 
         public async Task<ItemDetailDto> UpdateItemAsync(int id, UpdateItemDto dto, int? modifiedBy)
         {
+            if (id <= 0)
+                throw new BusinessException("Item ID must be greater than 0.", 400);
+
+            if (dto.UnitPrice <= 0)
+                throw new BusinessException("Unit price must be greater than 0.", 400);
+
+            if (dto.ReorderLevel < 0)
+                throw new BusinessException("Reorder level cannot be negative.", 400);
+
             var item = await _itemRepo.GetByIdAsync(id) as Item;
             if (item == null || item.IsActive == false)
                 throw new BusinessException($"Item with ID {id} not found or has been deleted.", 404);

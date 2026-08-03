@@ -6,7 +6,7 @@ using Order_MS.Exceptions;
 using Order_MS.Interfaces;
 using Order_MS.Models;
 using Order_MS.Repositories;
-using Order_MS.Sevices;
+using Order_MS.Services;
 using Order_MS.Middleware;
 
 namespace Order_MS.Services;

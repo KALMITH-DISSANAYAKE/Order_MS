@@ -6,7 +6,7 @@ using Order_MS.Exceptions;
 using Order_MS.Interfaces;
 using Order_MS.Models;
 using Order_MS.Repositories;
-using Order_MS.Sevices;
+using Order_MS.Services;
 
 namespace Order_MS.Services;
 
@@ -318,14 +318,6 @@ public class OrderService : IOrderService
         if (dto == null)
             throw new BusinessException("Order update payload is required.", 400);
 
-<<<<<<< Updated upstream
-        order.OrderRemark = dto.OrderRemark;
-        if (!string.IsNullOrEmpty(dto.OrderStatus))
-            order.OrderStatus = dto.OrderStatus;
-
-        order.ModifiedBy = modifiedBy;
-        order.ModifiedOn = DateTime.UtcNow;
-=======
         if (string.IsNullOrWhiteSpace(dto.OrderRemark))
             throw new BusinessException("Order remark is required.", 400);
 

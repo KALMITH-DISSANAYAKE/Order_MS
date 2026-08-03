@@ -1,15 +1,26 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Order_MS.DTOs;
 
 public class CreateOrderRequestDTO
 {
+    [Range(1, int.MaxValue,
+    ErrorMessage = "RequestedBy must be greater than 0.")]
     public int RequestedBy { get; set; }
 
-    public List<OrderRequestLineDTO> Items { get; set; }
+    [Required(ErrorMessage = "Items are required.")]
+    [MinLength(1, ErrorMessage = "At least one item is required.")]
+    public List<OrderRequestLineDTO> Items { get; set; } = new();
 }
 
 public class OrderRequestLineDTO
 {
+    [Range(1, int.MaxValue,
+    ErrorMessage = "ItemId must be greater than 0.")]
     public int ItemId { get; set; }
+
+    [Range(1, int.MaxValue,
+    ErrorMessage = "Quantity must be greater than 0.")]
     public int Quantity { get; set; }
 }
 
@@ -61,5 +72,7 @@ public class OrderRequestListDTO
 
 public class ApproveOrderRequestDTO
 {
+    [Range(1, int.MaxValue,
+        ErrorMessage = "ApprovedBy must be greater than 0.")]
     public int ApprovedBy { get; set; }
 }

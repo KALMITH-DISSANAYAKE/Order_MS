@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Frontend",
+    "\\Frontend\\src",
+    "\\Frontend\\src\\api",
+    "\\Frontend\\src\\pages",
+    "\\Frontend\\src\\pages\\auth",
+    "\\Frontend\\src\\pages\\dashboard",
+    "\\Frontend\\src\\pages\\inventory"
+  ],
+  "SelectedNode": "\\Frontend\\src\\pages\\inventory\\inventory.tsx",
+  "PreviewInSolutionExplorer": false
+}

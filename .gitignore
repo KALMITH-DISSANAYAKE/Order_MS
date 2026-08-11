@@ -19,3 +19,6 @@ packages/
 .env
 /Order_MS/Data/OrderMSDbContext.cs
 /Order_MS/appsettings.json
+
+node_modules/
+

@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@mui/material": "^9.3.1"
+  },
+  "devDependencies": {
+    "@types/react-router-dom": "^5.3.3",
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.3.3"
+  }
+}

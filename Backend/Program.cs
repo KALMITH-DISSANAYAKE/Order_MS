@@ -11,6 +11,16 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // Add controllers
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -114,6 +124,11 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseCors("AllowFrontend");
+app.MapControllers();
 
 // Configure middleware pipeline
 if (app.Environment.IsDevelopment())

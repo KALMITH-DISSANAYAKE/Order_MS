@@ -19,18 +19,24 @@ import { useState } from 'react'
 const drawerWidth = 260
 
 const navItems = [
-  { label: 'Dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" /> },
-  { label: 'Inventory', path: '/inventory', icon: <Inventory fontSize="small" /> },
-  { label: 'Order Requests', path: '/order-requests', icon: <RequestQuote fontSize="small" /> },
-  { label: 'Orders', path: '/orders', icon: <RequestQuote fontSize="small" /> },
-  { label: 'Transport', path: '/transport', icon: <LocalShipping fontSize="small" /> },
-  { label: 'Delivery', path: '/delivery', icon: <DeliveryDining fontSize="small" /> },
-  { label: 'Users', path: '/users', icon: <People fontSize="small" /> },
-  { label: 'Branches', path: '/branches', icon: <AccountTree fontSize="small" /> },
-]
+  { label: 'Dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" />, roles: ['Admin', 'BranchManager', 'InventoryManager', 'TransportDepartment'] },
+  { label: 'Inventory', path: '/inventory', icon: <Inventory fontSize="small" />, roles: ['Admin', 'BranchManager', 'InventoryManager'] },
+  { label: 'Order Requests', path: '/order-requests', icon: <RequestQuote fontSize="small" />, roles: ['Admin', 'BranchManager', 'InventoryManager'] },
+  { label: 'Orders', path: '/orders', icon: <RequestQuote fontSize="small" />, roles: ['Admin', 'InventoryManager', 'BranchManager'] },
+  { label: 'Transport', path: '/transport', icon: <LocalShipping fontSize="small" />, roles: ['Admin', 'TransportDepartment'] },
+  { label: 'Delivery', path: '/delivery', icon: <DeliveryDining fontSize="small" />, roles: ['Admin', 'TransportDepartment'] },
+  { label: 'Users', path: '/users', icon: <People fontSize="small" />, roles: ['Admin'] },
+  { label: 'Branches', path: '/branches', icon: <AccountTree fontSize="small" />, roles: ['Admin'] },
+];
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth()
+
+  const visibleNavItems = navItems.filter
+  (item => 
+  item.roles.includes(user?.role || '')
+  );
+
   const navigate = useNavigate()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -55,7 +61,7 @@ export default function DashboardLayout() {
       </Box>
       <Divider />
       <List className="px-3 pt-2">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive = location.pathname === item.path
           return (
             <ListItem key={item.label} disablePadding className="mb-1">

@@ -12,7 +12,7 @@ export default function Dashboard() {
           { label: 'Low Stock Items', value: '3' },
           { label: 'Deliveries Today', value: '5' },
         ].map((stat) => (
-          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={stat.label}>
+          <Grid item xs={12} sm={6} md={3} key={stat.label}>
             <Paper className="p-5 rounded-xl shadow-sm">
               <Typography className="!text-gray-500 !text-sm !mb-1">{stat.label}</Typography>
               <Typography className="!text-3xl !font-bold !text-[#1A1A1A]">{stat.value}</Typography>

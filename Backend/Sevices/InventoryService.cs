@@ -33,7 +33,6 @@ namespace Order_MS.Services
                     ItemId = i.ItemId,
                     ItemName = i.ItemName,
                     UnitPrice = i.UnitPrice,
-                    ReorderLevel = i.ReorderLevel ?? 0,
                     SupplierName = i.Supplier != null ? i.Supplier.SupplierName : "N/A"
                 })
                 .ToListAsync();
@@ -54,7 +53,6 @@ namespace Order_MS.Services
                 ItemId = item.ItemId,
                 ItemName = item.ItemName,
                 UnitPrice = item.UnitPrice,
-                ReorderLevel = item.ReorderLevel ?? 0,
                 Supplier = item.Supplier == null ? null! : new SupplierDto
                 {
                     SupplierId = item.Supplier.SupplierId,
@@ -175,7 +173,6 @@ namespace Order_MS.Services
             {
                 ItemName = dto.ItemName,
                 UnitPrice = dto.UnitPrice,
-                ReorderLevel = dto.ReorderLevel,
                 SupplierId = dto.SupplierId,
                 IsActive = true,
                 CreatedOn = DateTime.Now
@@ -213,7 +210,6 @@ namespace Order_MS.Services
 
             item.ItemName = dto.ItemName;
             item.UnitPrice = dto.UnitPrice;
-            item.ReorderLevel = dto.ReorderLevel;
             item.SupplierId = dto.SupplierId;
             item.ModifiedOn = DateTime.Now;
 

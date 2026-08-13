@@ -83,7 +83,6 @@ export default function Inventory() {
 
   const [newItemName, setNewItemName] = useState('')
   const [newUnitPrice, setNewUnitPrice] = useState<number | string>('')
-  const [newReorderLevel, setNewReorderLevel] = useState<number | string>('')
   const [newSupplierId, setNewSupplierId] = useState<number | string>('')
   const [editingItemId, setEditingItemId] = useState<number | null>(null)
 
@@ -157,7 +156,6 @@ export default function Inventory() {
       setEditingItemId(fullItem.itemId);
       setNewItemName(fullItem.itemName);
       setNewUnitPrice(fullItem.unitPrice);
-      setNewReorderLevel(fullItem.reorderLevel);
       setNewSupplierId(fullItem.supplier?.supplierId || '');
       setOpenMasterModal(true);
     } catch (e) {
@@ -180,7 +178,7 @@ export default function Inventory() {
   }
 
   const handleSaveMasterItem = async () => {
-    if (!newItemName || newUnitPrice === '' || newReorderLevel === '' || newSupplierId === '') {
+    if (!newItemName || newUnitPrice === '' || newSupplierId === '') {
       alert("Please fill all fields")
       return
     }
@@ -188,7 +186,6 @@ export default function Inventory() {
       const payload = {
         itemName: newItemName,
         unitPrice: Number(newUnitPrice),
-        reorderLevel: Number(newReorderLevel),
         supplierId: Number(newSupplierId),
       }
       
@@ -206,7 +203,6 @@ export default function Inventory() {
       
       setNewItemName('')
       setNewUnitPrice('')
-      setNewReorderLevel('')
       setNewSupplierId('')
     } catch (error: any) {
       console.error("Failed to save item", error)
@@ -235,7 +231,6 @@ export default function Inventory() {
                 setEditingItemId(null);
                 setNewItemName('');
                 setNewUnitPrice('');
-                setNewReorderLevel('');
                 setNewSupplierId('');
                 setOpenMasterModal(true);
               }}
@@ -352,7 +347,6 @@ export default function Inventory() {
                   <TableCell className="!font-bold !text-gray-700">Item Name</TableCell>
                   <TableCell className="!font-bold !text-gray-700">Supplier</TableCell>
                   <TableCell align="right" className="!font-bold !text-gray-700">Unit Price (LKR)</TableCell>
-                  <TableCell align="right" className="!font-bold !text-gray-700">Reorder Level</TableCell>
                   <TableCell align="center" className="!font-bold !text-gray-700">Status</TableCell>
                   <TableCell align="center" className="!font-bold !text-gray-700">Actions</TableCell>
                 </TableRow>
@@ -364,7 +358,6 @@ export default function Inventory() {
                     <TableCell className="!font-medium">{row.itemName}</TableCell>
                     <TableCell>{row.supplierName}</TableCell>
                     <TableCell align="right">{row.unitPrice.toFixed(2)}</TableCell>
-                    <TableCell align="right">{row.reorderLevel}</TableCell>
                     <TableCell align="center">
                       {row.isActive ? (
                         <Chip label="Active" color="success" size="small" className="!font-medium" />
@@ -516,11 +509,6 @@ export default function Inventory() {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Reorder Level" type="number" variant="outlined" fullWidth size="small" value={newReorderLevel}
-                onChange={(e) => setNewReorderLevel(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12}>
               <TextField label="Supplier ID" type="number" variant="outlined" fullWidth size="small" value={newSupplierId}
                 onChange={(e) => setNewSupplierId(e.target.value)}
               />

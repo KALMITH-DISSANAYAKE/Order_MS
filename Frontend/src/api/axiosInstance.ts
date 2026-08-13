@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const axiosInstance = axios.create({
-  baseURL: 'https://localhost:7001/api',
+  baseURL: 'http://localhost:5076/api',
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -14,10 +14,11 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
-    }
+    // BYPASS AUTHENTICATION FOR TESTING
+    // if (error.response?.status === 401) {
+    //   localStorage.removeItem('token')
+    //   window.location.href = '/login'
+    // }
     return Promise.reject(error)
   }
 )

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Services;
@@ -10,7 +10,7 @@ namespace Order_MS.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     public class TransportController : ControllerBase
     {
         private readonly ITransportService _transportService;
@@ -21,7 +21,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("order-requests")]
-        [Authorize(Roles = "TransportDepartment")]
+        //[Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> GetApprovedOrderRequests()
         {
             try{
@@ -35,7 +35,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("available-links")]
-        [Authorize(Roles = "TransportDepartment")]
+        //[Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> GetAvailableDriverVehicleLinks()
         {
             try{
@@ -48,8 +48,59 @@ namespace Order_MS.Controllers
             }       
         }
 
+        [HttpGet("links")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> GetAllDriverVehicleLinks()
+        {
+            try
+            {
+                var result = await _transportService.GetAllDriverVehicleLinksAsync();
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new {message = "An unexpected error occurred while fetching driver-vehicle links", details = ex.Message });
+            }       
+        }
+
+        [HttpPost("links")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> CreateDriverVehicleLink([FromBody] CreateDriverVehicleLinkDto dto)
+        {
+            try
+            {
+                var (success, message, data) = await _transportService.CreateDriverVehicleLinkAsync(dto);
+                if (!success)
+                    return BadRequest(new { message });
+
+                return Ok(new { message, link = data });
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new {message = "An unexpected error occurred while creating driver-vehicle link", details = ex.InnerException?.Message ?? ex.Message });
+            }
+        }
+
+        [HttpDelete("links/{id:int}")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> DeleteDriverVehicleLink(int id)
+        {
+            try
+            {
+                var (success, message) = await _transportService.DeleteDriverVehicleLinkAsync(id);
+                if (!success)
+                    return NotFound(new { message });
+
+                return Ok(new { message });
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new {message = "An unexpected error occurred while deleting driver-vehicle link", details = ex.Message });
+            }
+        }
+
         [HttpGet("assignments")]
-        [Authorize(Roles = "TransportDepartment")]
+        //[Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> GetAllAssignments()
         {
             try
@@ -64,7 +115,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("assignments/order-request/{orderReqId:int}")]
-        [Authorize(Roles = "TransportDepartment")]
+        //[Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> GetAssignmentsByOrderRequest(int orderReqId)
         {
             try{
@@ -78,7 +129,7 @@ namespace Order_MS.Controllers
         }
   
         [HttpPost("assign")]
-        [Authorize(Roles = "TransportDepartment")]
+        //[Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> AssignTransport([FromBody] AssignTransportDto dto)
         {
             try
@@ -100,7 +151,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpPut("assignments/{id:int}/status")]
-        [Authorize(Roles = "TransportDepartment")]
+        //[Authorize(Roles = "TransportDepartment")]
         public async Task<IActionResult> UpdateAssignmentStatus(
             int id, [FromBody] UpdateAssignmentStatusDto dto)
         {
@@ -119,6 +170,76 @@ namespace Order_MS.Controllers
             {
                 return StatusCode(500, new {message = "An unexpected error occurred while updating assignment status    ", details = ex.Message });
             }   
+        }
+
+        // --- Vehicles ---
+
+        [HttpGet("vehicles")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> GetAllVehicles()
+        {
+            try
+            {
+                var result = await _transportService.GetAllVehiclesAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching vehicles", details = ex.Message });
+            }
+        }
+
+        [HttpPost("vehicles")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> CreateVehicle([FromBody] CreateVehicleDto dto)
+        {
+            try
+            {
+                var (success, message, data) = await _transportService.CreateVehicleAsync(dto);
+                if (!success)
+                    return BadRequest(new { message });
+
+                return Ok(new { message, vehicle = data });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while creating vehicle", details = ex.InnerException?.Message ?? ex.Message });
+            }
+        }
+
+        // --- Drivers ---
+
+        [HttpGet("drivers")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> GetAllDrivers()
+        {
+            try
+            {
+                var result = await _transportService.GetAllDriversAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching drivers", details = ex.Message });
+            }
+        }
+
+        [HttpPost("drivers")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> CreateDriver([FromBody] CreateDriverDto dto)
+        {
+            try
+            {
+                var (success, message, data) = await _transportService.CreateDriverAsync(dto);
+                if (!success)
+                    return BadRequest(new { message });
+
+                return Ok(new { message, driver = data });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while creating driver", details = ex.InnerException?.Message ?? ex.Message });
+            }
         }
     }
 }

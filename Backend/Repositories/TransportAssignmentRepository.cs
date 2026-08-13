@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Order_MS.Data;
 using Order_MS.Models;
 
@@ -58,6 +58,28 @@ namespace Order_MS.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<DriverVehicleLink>> GetAllDriverVehicleLinksAsync()
+        {
+            return await _context.DriverVehicleLinks
+                .Include(dvl => dvl.Driver)
+                .Include(dvl => dvl.Vehicle)
+                .ToListAsync();
+        }
+
+        public async Task AddDriverVehicleLinkAsync(DriverVehicleLink link)
+        {
+            await _context.DriverVehicleLinks.AddAsync(link);
+        }
+
+        public async Task<bool> DeleteDriverVehicleLinkAsync(int connectionId)
+        {
+            var link = await _context.DriverVehicleLinks.FindAsync(connectionId);
+            if (link is null) return false;
+
+            _context.DriverVehicleLinks.Remove(link);
+            return true;
+        }
+
 
         public async Task<IEnumerable<TransportAssignment>> GetAllAssignmentsAsync()
         {
@@ -108,6 +130,28 @@ namespace Order_MS.Repositories
 
             assignment.Status = newStatus;
             return true;
+        }
+
+        // Driver and Vehicle
+
+        public async Task<IEnumerable<Vehicle>> GetVehiclesAsync()
+        {
+            return await _context.Vehicles.ToListAsync();
+        }
+
+        public async Task AddVehicleAsync(Vehicle vehicle)
+        {
+            await _context.Vehicles.AddAsync(vehicle);
+        }
+
+        public async Task<IEnumerable<Driver>> GetDriversAsync()
+        {
+            return await _context.Drivers.ToListAsync();
+        }
+
+        public async Task AddDriverAsync(Driver driver)
+        {
+            await _context.Drivers.AddAsync(driver);
         }
 
         public async Task SaveAsync()

@@ -8,6 +8,9 @@ namespace Order_MS.Services
         Task<IEnumerable<OrderRequestForTransportDto>> GetApprovedOrderRequestsAsync();
 
         Task<IEnumerable<AvailableDriverVehicleLinkDto>> GetAvailableDriverVehicleLinksAsync();
+        Task<IEnumerable<AvailableDriverVehicleLinkDto>> GetAllDriverVehicleLinksAsync();
+        Task<(bool Success, string Message, AvailableDriverVehicleLinkDto? Data)> CreateDriverVehicleLinkAsync(CreateDriverVehicleLinkDto dto);
+        Task<(bool Success, string Message)> DeleteDriverVehicleLinkAsync(int connectionId);
 
         Task<IEnumerable<TransportAssignmentResponseDto>> GetAllAssignmentsAsync();
         Task<IEnumerable<TransportAssignmentResponseDto>> GetAssignmentsByOrderRequestAsync(int orderReqId);
@@ -17,5 +20,13 @@ namespace Order_MS.Services
 
         Task<(bool Success, string Message)>
             UpdateAssignmentStatusAsync(int assignmentId, UpdateAssignmentStatusDto dto);
+
+        // Vehicles
+        Task<IEnumerable<VehicleDto>> GetAllVehiclesAsync();
+        Task<(bool Success, string Message, VehicleDto? Data)> CreateVehicleAsync(CreateVehicleDto dto);
+
+        // Drivers
+        Task<IEnumerable<DriverDto>> GetAllDriversAsync();
+        Task<(bool Success, string Message, DriverDto? Data)> CreateDriverAsync(CreateDriverDto dto);
     }
 }

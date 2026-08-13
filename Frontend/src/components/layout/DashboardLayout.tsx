@@ -68,8 +68,10 @@ export default function DashboardLayout() {
                 </span>
                 <ListItemText
                   primary={item.label}
-                  primaryTypographyProps={{
-                    className: `!text-sm !font-medium ${isActive ? '!text-cargills-red' : '!text-gray-700'}`,
+                  slotProps={{
+                    primary: {
+                      className: `!text-sm !font-medium ${isActive ? '!text-cargills-red' : '!text-gray-700'}`,
+                    }
                   }}
                 />
               </ListItemButton>

@@ -5,7 +5,7 @@ namespace Order_MS.Services
     public interface IDeliveryService
     {
         Task<IEnumerable<DeliveryListDto>> GetAllDeliveriesAsync();
-        Task<DeliveryDetailDto?> GetDeliveryByIdAsync(int orderId);
-        Task<(bool Success, string Message)> UpdateDeliveryStatusAsync(int orderId, UpdateDeliveryStatusDto dto);
+        Task<DeliveryDetailDto?> GetDeliveryByIdAsync(int orderReqId);
+        Task<(bool Success, string Message)> AssignDeliveryAsync(int orderReqId, AssignDeliveryDto dto);
     }
 }

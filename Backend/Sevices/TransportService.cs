@@ -28,6 +28,58 @@ namespace Order_MS.Services
             return list.Select(ToAvailableLinkDto);
         }
 
+        public async Task<IEnumerable<AvailableDriverVehicleLinkDto>> GetAllDriverVehicleLinksAsync()
+        {
+            var list = await _repo.GetAllDriverVehicleLinksAsync();
+            return list.Select(ToAvailableLinkDto);
+        }
+
+        public async Task<(bool Success, string Message, AvailableDriverVehicleLinkDto? Data)> CreateDriverVehicleLinkAsync(CreateDriverVehicleLinkDto dto)
+        {
+            var link = new DriverVehicleLink
+            {
+                DriverId = dto.DriverId,
+                VehicleId = dto.VehicleId,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            await _repo.AddDriverVehicleLinkAsync(link);
+            
+            try
+            {
+                await _repo.SaveAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return (false, $"Database error: {ex.InnerException?.Message ?? ex.Message}", null);
+            }
+
+            // Fetch again to get related Driver and Vehicle data for the DTO
+            var allLinks = await _repo.GetAllDriverVehicleLinksAsync();
+            var savedLink = allLinks.FirstOrDefault(l => l.ConnectionId == link.ConnectionId);
+
+            return (true, "Driver-vehicle link created successfully.", savedLink != null ? ToAvailableLinkDto(savedLink) : null);
+        }
+
+        public async Task<(bool Success, string Message)> DeleteDriverVehicleLinkAsync(int connectionId)
+        {
+            var deleted = await _repo.DeleteDriverVehicleLinkAsync(connectionId);
+            if (!deleted)
+                return (false, $"Driver-vehicle link #{connectionId} not found.");
+
+            try
+            {
+                await _repo.SaveAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return (false, $"Database error: {ex.InnerException?.Message ?? ex.Message}");
+            }
+
+            return (true, $"Driver-vehicle link #{connectionId} deleted successfully.");
+        }
+
+
         public async Task<IEnumerable<TransportAssignmentResponseDto>> GetAllAssignmentsAsync()
         {
             var list = await _repo.GetAllAssignmentsAsync();
@@ -127,6 +179,79 @@ namespace Order_MS.Services
             return (true, $"Assignment #{assignmentId} status updated to '{dto.Status}'."); 
         }
 
+        // Vehicles
+
+        public async Task<IEnumerable<VehicleDto>> GetAllVehiclesAsync()
+        {
+            var vehicles = await _repo.GetVehiclesAsync();
+            return vehicles.Select(v => new VehicleDto
+            {
+                VehicleId = v.VehicleId,
+                VehicleNumber = v.VehicleNumber,
+                Capacity = v.Capacity,
+                Available = v.Available ?? "Available"
+            });
+        }
+
+        public async Task<(bool Success, string Message, VehicleDto? Data)> CreateVehicleAsync(CreateVehicleDto dto)
+        {
+            var vehicle = new Vehicle
+            {
+                VehicleNumber = dto.VehicleNumber,
+                Capacity = dto.Capacity,
+                Available = dto.Available
+            };
+
+            await _repo.AddVehicleAsync(vehicle);
+            await _repo.SaveAsync();
+
+            var result = new VehicleDto
+            {
+                VehicleId = vehicle.VehicleId,
+                VehicleNumber = vehicle.VehicleNumber,
+                Capacity = vehicle.Capacity,
+                Available = vehicle.Available ?? "Available"
+            };
+
+            return (true, "Vehicle added successfully.", result);
+        }
+
+        // Drivers
+
+        public async Task<IEnumerable<DriverDto>> GetAllDriversAsync()
+        {
+            var drivers = await _repo.GetDriversAsync();
+            return drivers.Select(d => new DriverDto
+            {
+                DriverId = d.DriverId,
+                DriversName = d.DriversName,
+                LicenseNumber = d.LicenseNumber,
+                Available = d.Available ?? "Available"
+            });
+        }
+
+        public async Task<(bool Success, string Message, DriverDto? Data)> CreateDriverAsync(CreateDriverDto dto)
+        {
+            var driver = new Driver
+            {
+                DriversName = dto.DriversName,
+                LicenseNumber = dto.LicenseNumber,
+                Available = dto.Available
+            };
+
+            await _repo.AddDriverAsync(driver);
+            await _repo.SaveAsync();
+
+            var result = new DriverDto
+            {
+                DriverId = driver.DriverId,
+                DriversName = driver.DriversName,
+                LicenseNumber = driver.LicenseNumber,
+                Available = driver.Available ?? "Available"
+            };
+
+            return (true, "Driver added successfully.", result);
+        }
 
         private static OrderRequestForTransportDto ToOrderRequestDto(OrderRequest or) => new()
         {

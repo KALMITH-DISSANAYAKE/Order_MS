@@ -6,10 +6,13 @@ import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 import DashboardLayout from './components/layout/DashboardLayout'
 import Dashboard from './pages/dashboard/Dashboard'
+import TransportList from './pages/transport/TransportList'
+import DeliveryList from './pages/delivery/DeliveryList'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+  return <>{children}</>
+  //return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
 function App() {
@@ -29,6 +32,8 @@ function App() {
               }
             >
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="transport" element={<TransportList />} />
+              <Route path="delivery" element={<DeliveryList />} />
               <Route path="" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Routes>

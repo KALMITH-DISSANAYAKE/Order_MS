@@ -29,6 +29,7 @@ namespace Order_MS.DTOs
     {
         public int InventoryId { get; set; }
         public int NewQuantity { get; set; }
+        public int? ReorderLevel { get; set; }
     }
 
     public class UpdateStockResponseDto
@@ -39,5 +40,13 @@ namespace Order_MS.DTOs
         public int NewQuantity { get; set; }
         public bool IsBelowReorderLevel { get; set; }
         public string Message { get; set; } = string.Empty;
+    }
+
+    public class AddBranchInventoryDto
+    {
+        public int BranchId { get; set; }
+        public int ItemId { get; set; }
+        public int Quantity { get; set; }
+        public int ReorderLevel { get; set; }
     }
 }

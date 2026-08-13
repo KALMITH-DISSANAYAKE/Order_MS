@@ -6,6 +6,12 @@ namespace Order_MS.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+
+
+
+
+
+
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -24,4 +30,6 @@ public class AuthController : ControllerBase
         */
         return Ok(result);
     }
+
+
 }

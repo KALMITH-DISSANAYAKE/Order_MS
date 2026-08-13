@@ -1,8 +1,22 @@
 {
   "ExpandedNodes": [
     "",
+<<<<<<< HEAD
     "\\Backend"
   ],
   "SelectedNode": "\\Backend\\Order_MS.slnx",
+=======
+    "\\Backend",
+    "\\Backend\\Controllers",
+    "\\Backend\\DTOs",
+    "\\Frontend",
+    "\\Frontend\\src",
+    "\\Frontend\\src\\pages",
+    "\\Frontend\\src\\pages\\auth",
+    "\\Frontend\\src\\pages\\dashboard",
+    "\\Frontend\\src\\pages\\inventory"
+  ],
+  "SelectedNode": "\\Backend\\DTOs\\OrderLineResponse.cs",
+>>>>>>> origin/inventory_frontend
   "PreviewInSolutionExplorer": false
 }

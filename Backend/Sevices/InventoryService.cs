@@ -33,7 +33,6 @@ namespace Order_MS.Services
                     ItemId = i.ItemId,
                     ItemName = i.ItemName,
                     UnitPrice = i.UnitPrice,
-                    ReorderLevel = i.ReorderLevel ?? 0,
                     SupplierName = i.Supplier != null ? i.Supplier.SupplierName : "N/A"
                 })
                 .ToListAsync();
@@ -54,7 +53,6 @@ namespace Order_MS.Services
                 ItemId = item.ItemId,
                 ItemName = item.ItemName,
                 UnitPrice = item.UnitPrice,
-                ReorderLevel = item.ReorderLevel ?? 0,
                 Supplier = item.Supplier == null ? null! : new SupplierDto
                 {
                     SupplierId = item.Supplier.SupplierId,
@@ -62,6 +60,26 @@ namespace Order_MS.Services
                     Availability = item.Supplier.Availability ?? "Unknown"
                 }
             };
+        }
+
+        public async Task<IEnumerable<BranchInventoryDto>> GetAllBranchInventoryAsync()
+        {
+            return await _context.Inventories
+                .Include(i => i.Item)
+                .Include(i => i.Branch)
+                .Select(i => new BranchInventoryDto
+                {
+                    InventoryId = i.InventoryId,
+                    BranchId = i.BranchId,
+                    BranchCode = i.Branch != null ? i.Branch.BranchCode : "",
+                    BranchLocation = i.Branch != null ? i.Branch.Location : "",
+                    ItemId = i.ItemId,
+                    ItemName = i.Item != null ? i.Item.ItemName : "",
+                    Quantity = i.Quantity,
+                    ReorderLevel = i.ReorderLevel ?? 0,
+                    IsBelowReorderLevel = i.Quantity < (i.ReorderLevel ?? 0)
+                })
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<BranchInventoryDto>> GetBranchInventoryAsync(int branchId)
@@ -124,6 +142,9 @@ namespace Order_MS.Services
 
             int oldQuantity = inventory.Quantity;
             inventory.Quantity = dto.NewQuantity;
+            if (dto.ReorderLevel.HasValue)
+                inventory.ReorderLevel = dto.ReorderLevel.Value;
+                
             inventory.ModifiedOn = DateTime.Now;
 
             _inventoryRepo.Update(inventory);
@@ -145,6 +166,61 @@ namespace Order_MS.Services
             };
         }
 
+        public async Task DeleteBranchStockAsync(int inventoryId)
+        {
+            var inventory = await _inventoryRepo.GetByIdAsync(inventoryId) as Inventory;
+            if (inventory == null)
+                throw new BusinessException($"Inventory record with ID {inventoryId} not found.", 404);
+
+            _context.Inventories.Remove(inventory);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<BranchInventoryDto> AddBranchInventoryAsync(AddBranchInventoryDto dto, int? createdBy)
+        {
+            var branchExists = await _context.Branches.AnyAsync(b => b.BranchId == dto.BranchId);
+            if (!branchExists)
+                throw new BusinessException($"Branch with ID {dto.BranchId} does not exist.", 400);
+
+            var itemExists = await _context.Items.AnyAsync(i => i.ItemId == dto.ItemId && i.IsActive != false);
+            if (!itemExists)
+                throw new BusinessException($"Active Item with ID {dto.ItemId} does not exist.", 400);
+
+            var existingInventory = await _context.Inventories
+                .FirstOrDefaultAsync(i => i.BranchId == dto.BranchId && i.ItemId == dto.ItemId);
+
+            if (existingInventory != null)
+                throw new BusinessException("Inventory already exists for this item in this branch.", 400);
+
+            var inventory = new Inventory
+            {
+                BranchId = dto.BranchId,
+                ItemId = dto.ItemId,
+                Quantity = dto.Quantity,
+                ReorderLevel = dto.ReorderLevel,
+                ModifiedOn = DateTime.Now
+            };
+
+            _context.Inventories.Add(inventory);
+            await _context.SaveChangesAsync();
+
+            var created = await _context.Inventories
+                .Include(i => i.Branch)
+                .Include(i => i.Item)
+                .FirstOrDefaultAsync(i => i.InventoryId == inventory.InventoryId);
+
+            return new BranchInventoryDto
+            {
+                InventoryId = created!.InventoryId,
+                BranchId = created.BranchId,
+                BranchCode = created.Branch.BranchCode,
+                BranchLocation = created.Branch.Location,
+                ItemId = created.ItemId,
+                ItemName = created.Item.ItemName,
+                Quantity = created.Quantity,
+            };
+        }
+
         public async Task<ItemDetailDto> CreateItemAsync(CreateItemDto dto, int? createdBy)
         {
             var supplierExists = await _context.Suppliers.AnyAsync(s => s.SupplierId == dto.SupplierId);
@@ -155,7 +231,6 @@ namespace Order_MS.Services
             {
                 ItemName = dto.ItemName,
                 UnitPrice = dto.UnitPrice,
-                ReorderLevel = dto.ReorderLevel,
                 SupplierId = dto.SupplierId,
                 IsActive = true,
                 CreatedOn = DateTime.Now
@@ -193,7 +268,6 @@ namespace Order_MS.Services
 
             item.ItemName = dto.ItemName;
             item.UnitPrice = dto.UnitPrice;
-            item.ReorderLevel = dto.ReorderLevel;
             item.SupplierId = dto.SupplierId;
             item.ModifiedOn = DateTime.Now;
 

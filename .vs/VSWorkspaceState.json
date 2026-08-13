@@ -1,14 +1,16 @@
 {
   "ExpandedNodes": [
     "",
+    "\\Backend",
+    "\\Backend\\Controllers",
+    "\\Backend\\DTOs",
     "\\Frontend",
     "\\Frontend\\src",
-    "\\Frontend\\src\\api",
     "\\Frontend\\src\\pages",
     "\\Frontend\\src\\pages\\auth",
     "\\Frontend\\src\\pages\\dashboard",
     "\\Frontend\\src\\pages\\inventory"
   ],
-  "SelectedNode": "\\Frontend\\src\\pages\\inventory\\inventory.tsx",
+  "SelectedNode": "\\Backend\\DTOs\\OrderLineResponse.cs",
   "PreviewInSolutionExplorer": false
 }

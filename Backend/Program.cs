@@ -97,16 +97,23 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("TransportDepartment", policy => policy.RequireRole("TransportDepartment"));
 });
 
+// Enable CORS for frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 //ErrorHandlingMiddleware
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
 
 // Configure middleware pipeline
 if (app.Environment.IsDevelopment())
@@ -115,7 +122,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
 
 // IMPORTANT: Authentication MUST come before Authorization
 app.UseAuthentication();

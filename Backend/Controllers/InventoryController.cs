@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Services;
@@ -8,7 +8,7 @@ namespace Order_MS.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    //
     public class InventoryController : ControllerBase
     {
         private readonly IInventoryService _inventoryService;
@@ -33,7 +33,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpPost("items")]
-        [Authorize(Roles = "InventoryManager")]
+       // [Authorize(Roles = "InventoryManager")]
         public async Task<IActionResult> CreateItem([FromBody] CreateItemDto dto)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -44,7 +44,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpPut("items/{id}")]
-        [Authorize(Roles = "InventoryManager")]
+       // [Authorize(Roles = "InventoryManager")]
         public async Task<IActionResult> UpdateItem(int id, [FromBody] UpdateItemDto dto)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -55,11 +55,18 @@ namespace Order_MS.Controllers
         }
 
         [HttpDelete("items/{id}")]
-        [Authorize(Roles = "InventoryManager")]
+       // [Authorize(Roles = "InventoryManager")]
         public async Task<IActionResult> DeleteItem(int id)
         {
             await _inventoryService.DeleteItemAsync(id);
             return NoContent();
+        }
+
+       [HttpGet("branch")]
+        public async Task<IActionResult> GetAllBranchInventory()
+        {
+            var inventory = await _inventoryService.GetAllBranchInventoryAsync();
+            return Ok(inventory);
         }
 
         [HttpGet("branch/{branchId}")]
@@ -73,7 +80,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("low-stock")]
-        [Authorize(Roles = "BranchManager,InventoryManager")]
+        //[Authorize(Roles = "BranchManager,InventoryManager")]
         public async Task<IActionResult> GetLowStock([FromQuery] int? branchId = null)
         {
             var lowStock = await _inventoryService.GetLowStockItemsAsync(branchId);

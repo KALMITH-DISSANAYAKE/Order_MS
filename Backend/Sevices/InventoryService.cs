@@ -64,6 +64,26 @@ namespace Order_MS.Services
             };
         }
 
+        public async Task<IEnumerable<BranchInventoryDto>> GetAllBranchInventoryAsync()
+        {
+            return await _context.Inventories
+                .Include(i => i.Item)
+                .Include(i => i.Branch)
+                .Select(i => new BranchInventoryDto
+                {
+                    InventoryId = i.InventoryId,
+                    BranchId = i.BranchId,
+                    BranchCode = i.Branch != null ? i.Branch.BranchCode : "",
+                    BranchLocation = i.Branch != null ? i.Branch.Location : "",
+                    ItemId = i.ItemId,
+                    ItemName = i.Item != null ? i.Item.ItemName : "",
+                    Quantity = i.Quantity,
+                    ReorderLevel = i.ReorderLevel ?? 0,
+                    IsBelowReorderLevel = i.Quantity < (i.ReorderLevel ?? 0)
+                })
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<BranchInventoryDto>> GetBranchInventoryAsync(int branchId)
         {
             var branchExists = await _context.Branches.AnyAsync(b => b.BranchId == branchId);

@@ -6,6 +6,7 @@ namespace Order_MS.Services
     {
         Task<IEnumerable<ItemDto>> GetAllItemsAsync();
         Task<ItemDetailDto> GetItemByIdAsync(int id);         
+        Task<IEnumerable<BranchInventoryDto>> GetAllBranchInventoryAsync();
         Task<IEnumerable<BranchInventoryDto>> GetBranchInventoryAsync(int branchId);
         Task<IEnumerable<LowStockAlertDto>> GetLowStockItemsAsync(int? branchId = null);
         Task<UpdateStockResponseDto> UpdateStockAsync(UpdateStockDto dto, int? modifiedBy); 

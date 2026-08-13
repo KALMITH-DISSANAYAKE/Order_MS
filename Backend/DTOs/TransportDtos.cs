@@ -89,11 +89,25 @@ namespace Order_MS.DTOs
         public string Available { get; set; } = string.Empty;
     }
 
+    public class UpdateVehicleDto
+    {
+        public string VehicleNumber { get; set; } = string.Empty;
+        public int? Capacity { get; set; }
+        public string Available { get; set; } = string.Empty;
+    }
+
     public class CreateDriverDto
     {
         public string DriversName { get; set; } = string.Empty;
         public string LicenseNumber { get; set; } = string.Empty;
         public string Available { get; set; } = "Available";
+    }
+
+    public class UpdateDriverDto
+    {
+        public string DriversName { get; set; } = string.Empty;
+        public string LicenseNumber { get; set; } = string.Empty;
+        public string Available { get; set; } = string.Empty;
     }
 
     public class DriverDto

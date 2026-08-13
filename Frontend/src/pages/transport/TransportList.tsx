@@ -87,13 +87,16 @@ export default function TransportList() {
   // --- Handlers ---
   const handleSaveVehicle = async (vehicle: Vehicle) => {
     try {
-      // Create new vehicle
       const payload = {
         vehicleNumber: vehicle.licensePlate,
         capacity: vehicle.capacity,
         available: vehicle.availability
       }
-      await axiosInstance.post('/Transport/vehicles', payload)
+      if (editingVehicle) {
+        await axiosInstance.put(`/Transport/vehicles/${editingVehicle.id}`, payload)
+      } else {
+        await axiosInstance.post('/Transport/vehicles', payload)
+      }
       fetchVehicles()
     } catch (err) {
       console.error('Error saving vehicle', err)
@@ -107,13 +110,16 @@ export default function TransportList() {
 
   const handleSaveDriver = async (driver: Driver) => {
     try {
-      // Create new driver
       const payload = {
         driversName: driver.name,
         licenseNumber: driver.licenseNumber,
         available: driver.availability
       }
-      await axiosInstance.post('/Transport/drivers', payload)
+      if (editingDriver) {
+        await axiosInstance.put(`/Transport/drivers/${editingDriver.id}`, payload)
+      } else {
+        await axiosInstance.post('/Transport/drivers', payload)
+      }
       fetchDrivers()
     } catch (err) {
       console.error('Error saving driver', err)

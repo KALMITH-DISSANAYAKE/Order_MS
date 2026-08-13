@@ -216,6 +216,31 @@ namespace Order_MS.Services
             return (true, "Vehicle added successfully.", result);
         }
 
+        public async Task<(bool Success, string Message, VehicleDto? Data)> UpdateVehicleAsync(int vehicleId, UpdateVehicleDto dto)
+        {
+            var vehicle = await _repo.GetVehicleByIdAsync(vehicleId);
+            if (vehicle is null)
+            {
+                return (false, "Vehicle not found.", null);
+            }
+
+            vehicle.VehicleNumber = dto.VehicleNumber;
+            vehicle.Capacity = dto.Capacity;
+            vehicle.Available = dto.Available;
+
+            await _repo.SaveAsync();
+
+            var result = new VehicleDto
+            {
+                VehicleId = vehicle.VehicleId,
+                VehicleNumber = vehicle.VehicleNumber,
+                Capacity = vehicle.Capacity,
+                Available = vehicle.Available ?? "Available"
+            };
+
+            return (true, "Vehicle updated successfully.", result);
+        }
+
         // Drivers
 
         public async Task<IEnumerable<DriverDto>> GetAllDriversAsync()
@@ -251,6 +276,31 @@ namespace Order_MS.Services
             };
 
             return (true, "Driver added successfully.", result);
+        }
+
+        public async Task<(bool Success, string Message, DriverDto? Data)> UpdateDriverAsync(int driverId, UpdateDriverDto dto)
+        {
+            var driver = await _repo.GetDriverByIdAsync(driverId);
+            if (driver is null)
+            {
+                return (false, "Driver not found.", null);
+            }
+
+            driver.DriversName = dto.DriversName;
+            driver.LicenseNumber = dto.LicenseNumber;
+            driver.Available = dto.Available;
+
+            await _repo.SaveAsync();
+
+            var result = new DriverDto
+            {
+                DriverId = driver.DriverId,
+                DriversName = driver.DriversName,
+                LicenseNumber = driver.LicenseNumber,
+                Available = driver.Available ?? "Available"
+            };
+
+            return (true, "Driver updated successfully.", result);
         }
 
         private static OrderRequestForTransportDto ToOrderRequestDto(OrderRequest or) => new()

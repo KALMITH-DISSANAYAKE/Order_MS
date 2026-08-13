@@ -207,6 +207,24 @@ namespace Order_MS.Controllers
             }
         }
 
+        [HttpPut("vehicles/{id:int}")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> UpdateVehicle(int id, [FromBody] UpdateVehicleDto dto)
+        {
+            try
+            {
+                var (success, message, data) = await _transportService.UpdateVehicleAsync(id, dto);
+                if (!success)
+                    return NotFound(new { message });
+
+                return Ok(new { message, vehicle = data });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating vehicle", details = ex.InnerException?.Message ?? ex.Message });
+            }
+        }
+
         // --- Drivers ---
 
         [HttpGet("drivers")]
@@ -239,6 +257,23 @@ namespace Order_MS.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while creating driver", details = ex.InnerException?.Message ?? ex.Message });
+            }
+        }
+        [HttpPut("drivers/{id:int}")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> UpdateDriver(int id, [FromBody] UpdateDriverDto dto)
+        {
+            try
+            {
+                var (success, message, data) = await _transportService.UpdateDriverAsync(id, dto);
+                if (!success)
+                    return NotFound(new { message });
+
+                return Ok(new { message, driver = data });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating driver", details = ex.InnerException?.Message ?? ex.Message });
             }
         }
     }

@@ -139,6 +139,11 @@ namespace Order_MS.Repositories
             return await _context.Vehicles.ToListAsync();
         }
 
+        public async Task<Vehicle?> GetVehicleByIdAsync(int vehicleId)
+        {
+            return await _context.Vehicles.FindAsync(vehicleId);
+        }
+
         public async Task AddVehicleAsync(Vehicle vehicle)
         {
             await _context.Vehicles.AddAsync(vehicle);
@@ -147,6 +152,11 @@ namespace Order_MS.Repositories
         public async Task<IEnumerable<Driver>> GetDriversAsync()
         {
             return await _context.Drivers.ToListAsync();
+        }
+
+        public async Task<Driver?> GetDriverByIdAsync(int driverId)
+        {
+            return await _context.Drivers.FindAsync(driverId);
         }
 
         public async Task AddDriverAsync(Driver driver)

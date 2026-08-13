@@ -22,8 +22,10 @@ namespace Order_MS.Repositories
         
         // Driver and Vehicle
         Task<IEnumerable<Vehicle>> GetVehiclesAsync();
+        Task<Vehicle?> GetVehicleByIdAsync(int vehicleId);
         Task AddVehicleAsync(Vehicle vehicle);
         Task<IEnumerable<Driver>> GetDriversAsync();
+        Task<Driver?> GetDriverByIdAsync(int driverId);
         Task AddDriverAsync(Driver driver);
 
         Task SaveAsync();

@@ -24,9 +24,11 @@ namespace Order_MS.Services
         // Vehicles
         Task<IEnumerable<VehicleDto>> GetAllVehiclesAsync();
         Task<(bool Success, string Message, VehicleDto? Data)> CreateVehicleAsync(CreateVehicleDto dto);
+        Task<(bool Success, string Message, VehicleDto? Data)> UpdateVehicleAsync(int vehicleId, UpdateVehicleDto dto);
 
         // Drivers
         Task<IEnumerable<DriverDto>> GetAllDriversAsync();
         Task<(bool Success, string Message, DriverDto? Data)> CreateDriverAsync(CreateDriverDto dto);
+        Task<(bool Success, string Message, DriverDto? Data)> UpdateDriverAsync(int driverId, UpdateDriverDto dto);
     }
 }

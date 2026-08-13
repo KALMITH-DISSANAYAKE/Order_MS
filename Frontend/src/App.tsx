@@ -8,11 +8,11 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import UsersPage from './pages/users/UsersPage';
 import BranchesPage from './pages/branches/BranchesPage';
-import Inventory from './pages/inventory/Inventory';
-import OrderRequests from './pages/order-requests/OrderRequests';
-import Orders from './pages/orders/Orders';
-import Transport from './pages/transport/Transport';
-import Delivery from './pages/delivery/Delivery';
+//import Inventory from './pages/inventory/Inventory';
+//import OrderRequests from './pages/order-requests/OrderRequests';
+//import Orders from './pages/orders/Orders';
+//import Transport from './pages/transport/Transport';
+//import Delivery from './pages/delivery/Delivery';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -50,11 +50,11 @@ function App() {
               <Route path="branches" element={<RoleRoute allowedRoles={['Admin']}><BranchesPage /></RoleRoute>} />
               
               {/* Other pages (placeholders for now) */}
-              <Route path="inventory" element={<RoleRoute allowedRoles={['Admin', 'BranchManager','InventoryManager']}><Inventory/></RoleRoute>} />
-              <Route path="order-requests" element={<RoleRoute allowedRoles={['Admin', 'BranchManager', 'InventoryManager']}><OrderRequests/></RoleRoute>} />
-              <Route path="orders" element={<RoleRoute allowedRoles={['Admin', 'InventoryManager', 'BranchManager']}><Orders/></RoleRoute>} />
-              <Route path="transport" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><Transport/></RoleRoute>} />
-              <Route path="delivery" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><Delivery/></RoleRoute>} />
+              <Route path="inventory" element={<RoleRoute allowedRoles={['Admin', 'BranchManager','InventoryManager']}><div className="p-4">Inventory</div></RoleRoute>} />
+              <Route path="order-requests" element={<RoleRoute allowedRoles={['Admin', 'BranchManager', 'InventoryManager']}><div className="p-4">Order Requests</div></RoleRoute>} />
+              <Route path="orders" element={<RoleRoute allowedRoles={['Admin', 'InventoryManager', 'BranchManager']}><div className="p-4">Orders</div></RoleRoute>} />
+              <Route path="transport" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><div className="p-4">Transport</div></RoleRoute>} />
+              <Route path="delivery" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><div className="p-4">Delivery</div></RoleRoute>} />
               
               <Route path="" element={<Navigate to="/dashboard" replace />} />
             </Route>

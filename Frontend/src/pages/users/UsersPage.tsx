@@ -83,27 +83,43 @@ export default function UsersPage() {
     fetchUsers()
   }, [])
 
-  const fetchUsers = async () => {
-    try {
-      setTableLoading(true)
-      const res = await axiosInstance.get('/users')
-      // Map backend DTO to frontend format
-      const mapped = res.data.map((u: any) => ({
-        id: u.id,
-        firstName: u.firstName,
-        lastName: u.lastName,
-        username: u.userName,
-        role: u.role,
-        branch: u.branchName || '-',
-        isActive: true, // Add isActive to your backend UserDto if you want this
-      }))
-      setUsers(mapped)
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to load users')
-    } finally {
-      setTableLoading(false)
-    }
+const fetchUsers = async () => {
+  try {
+    setTableLoading(true)
+    const res = await axiosInstance.get('/users')
+    
+    console.log('RAW:', res.data)
+
+    const mapped = res.data.map((u: any, index: number) => {
+      // Helper: get property regardless of casing
+      const get = (key: string) => {
+        const lower = key.toLowerCase()
+        const keys = Object.keys(u)
+        const match = keys.find(k => k.toLowerCase() === lower)
+        return match ? u[match] : undefined
+      }
+
+      const id = get('id') ?? get('userid') ?? get('user_id') ?? index + 1
+      
+      return {
+        id: Number(id),  // Force to number
+        firstName: get('firstname') ?? get('first_name') ?? '',
+        lastName: get('lastname') ?? get('last_name') ?? '',
+        username: get('username') ?? get('user_name') ?? get('userName') ?? '',
+        role: get('role') ?? get('rolename') ?? get('role_name') ?? '',
+        branch: get('branchname') ?? get('branch_name') ?? get('branch') ?? '-',
+        isActive: true,
+      }
+    })
+
+    console.log('MAPPED:', mapped)
+    setUsers(mapped)
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Failed to load users')
+  } finally {
+    setTableLoading(false)
   }
+}
 
   const filtered = users.filter((u) =>
     `${u.firstName} ${u.lastName} ${u.username} ${u.role}`.toLowerCase().includes(search.toLowerCase())
@@ -117,7 +133,7 @@ export default function UsersPage() {
         lastName: user.lastName,
         username: user.username,
         password: '',
-        role: user.role,
+        role: user.role || '', // Fallback to random role if undefined
         branch: user.branch === '-' ? '' : user.branch,
       })
     } else {
@@ -136,12 +152,12 @@ export default function UsersPage() {
   // ─── CREATE / UPDATE ───
   const handleSave = async () => {
     const payload = {
-      firstName: form.firstName,
-      lastName: form.lastName,
-      userName: form.username,
-      password: form.password,
-      roleId: roleToId[form.role],
-      branchId: isBranchManager && form.branch ? branchToId[form.branch] : null,
+      FirstName: form.firstName,
+      LastName: form.lastName,
+      Username: form.username,
+      Password: form.password,
+      RoleId: roleToId[form.role],
+      BranchId: isBranchManager && form.branch ? branchToId[form.branch] : null,
     }
 
     try {
@@ -218,22 +234,22 @@ export default function UsersPage() {
       ),
     },
     {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 120,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: GridRenderCellParams<UserRow>) => (
-        <Box className="flex gap-1">
-          <IconButton size="small" onClick={() => handleOpen(params.row)} className="!text-blue-600">
-            <Edit fontSize="small" />
-          </IconButton>
-          <IconButton size="small" onClick={() => handleDelete(params.row.id)} className="!text-red-600">
-            <Delete fontSize="small" />
-          </IconButton>
-        </Box>
-      ),
-    },
+        field: 'actions',
+        headerName: 'Actions',
+        width: 120,
+        sortable: false,
+        filterable: false,
+        renderCell: (params: GridRenderCellParams<UserRow>) => (
+          <Box className="flex gap-1">
+            <IconButton size="small" onClick={() => handleOpen(params.row)} className="!text-blue-600">
+              <Edit fontSize="small" />
+            </IconButton>
+            <IconButton size="small" onClick={() => handleDelete(params.id)} className="!text-red-600">
+              <Delete fontSize="small" />
+            </IconButton>
+          </Box>
+        ),
+      },
   ]
 
   return (
@@ -270,6 +286,7 @@ export default function UsersPage() {
         <DataGrid
           rows={filtered}
           columns={columns}
+          //getRowId={(row) => row.id ?? row.Id ?? 0} 
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           pageSizeOptions={[5, 10, 25]}
           disableRowSelectionOnClick

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -14,6 +14,7 @@ import {
   IconButton,
   Chip,
   InputAdornment,
+  CircularProgress,
 } from '@mui/material'
 import {
   DataGrid,
@@ -29,6 +30,7 @@ import {
   VisibilityOff,
 } from '@mui/icons-material'
 import PageHeader from '../../components/common/PageHeader'
+import axiosInstance from '../../api/axiosInstance'
 
 interface UserRow {
   id: number
@@ -40,23 +42,32 @@ interface UserRow {
   isActive: boolean
 }
 
-const mockUsers: UserRow[] = [
-  { id: 1, firstName: 'Kamal', lastName: 'Perera', username: 'bm_colombo', role: 'BranchManager', branch: 'Colombo - Bambalapitiya', isActive: true },
-  { id: 2, firstName: 'Nimal', lastName: 'Fernando', username: 'inv_manager', role: 'InventoryManager', branch: '-', isActive: true },
-  { id: 3, firstName: 'Sunil', lastName: 'Silva', username: 'transport_user', role: 'TransportDepartment', branch: '-', isActive: true },
-  { id: 4, firstName: 'Amara', lastName: 'Bandara', username: 'bm_kandy', role: 'BranchManager', branch: 'Kandy - City Center', isActive: false },
-  { id: 5, firstName: 'Sajith', lastName: 'Rajapaksa', username: 'bm_galle', role: 'BranchManager', branch: 'Galle - Fort', isActive: true },
-]
-
 const roleOptions = ['BranchManager', 'InventoryManager', 'TransportDepartment']
 const branchOptions = ['Colombo - Bambalapitiya', 'Colombo - Nugegoda', 'Kandy - City Center', 'Galle - Fort']
 
+// Map role name to role_id (must match your DB)
+const roleToId: Record<string, number> = {
+  'BranchManager': 1,
+  'InventoryManager': 2,
+  'TransportDepartment': 3,
+}
+
+// Map branch name to branch_id (must match your DB)
+const branchToId: Record<string, number> = {
+  'Colombo - Bambalapitiya': 1,
+  'Colombo - Nugegoda': 2,
+  'Kandy - City Center': 3,
+  'Galle - Fort': 4,
+}
+
 export default function UsersPage() {
-  const [users, setUsers] = useState<UserRow[]>(mockUsers)
+  const [users, setUsers] = useState<UserRow[]>([])
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<UserRow | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [tableLoading, setTableLoading] = useState(false)
 
   const [form, setForm] = useState({
     firstName: '',
@@ -66,6 +77,33 @@ export default function UsersPage() {
     role: '',
     branch: '',
   })
+
+  // ─── FETCH FROM BACKEND ON LOAD ───
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+
+  const fetchUsers = async () => {
+    try {
+      setTableLoading(true)
+      const res = await axiosInstance.get('/users')
+      // Map backend DTO to frontend format
+      const mapped = res.data.map((u: any) => ({
+        id: u.id,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        username: u.userName,
+        role: u.role,
+        branch: u.branchName || '-',
+        isActive: true, // Add isActive to your backend UserDto if you want this
+      }))
+      setUsers(mapped)
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to load users')
+    } finally {
+      setTableLoading(false)
+    }
+  }
 
   const filtered = users.filter((u) =>
     `${u.firstName} ${u.lastName} ${u.username} ${u.role}`.toLowerCase().includes(search.toLowerCase())
@@ -95,33 +133,41 @@ export default function UsersPage() {
     setEditing(null)
   }
 
-  const handleSave = () => {
-    if (editing) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editing.id
-            ? { ...u, firstName: form.firstName, lastName: form.lastName, username: form.username, role: form.role, branch: form.branch || '-' }
-            : u
-        )
-      )
-    } else {
-      const newUser: UserRow = {
-        id: Math.max(...users.map((u) => u.id), 0) + 1,
-        firstName: form.firstName,
-        lastName: form.lastName,
-        username: form.username,
-        role: form.role,
-        branch: form.branch || '-',
-        isActive: true,
-      }
-      setUsers((prev) => [...prev, newUser])
+  // ─── CREATE / UPDATE ───
+  const handleSave = async () => {
+    const payload = {
+      firstName: form.firstName,
+      lastName: form.lastName,
+      userName: form.username,
+      password: form.password,
+      roleId: roleToId[form.role],
+      branchId: isBranchManager && form.branch ? branchToId[form.branch] : null,
     }
-    handleClose()
+
+    try {
+      setLoading(true)
+      if (editing) {
+        await axiosInstance.put(`/users/${editing.id}`, payload)
+      } else {
+        await axiosInstance.post('/users', payload)
+      }
+      await fetchUsers() // Refresh from DB
+      handleClose()
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to save user')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleDelete = (id: number) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      setUsers((prev) => prev.filter((u) => u.id !== id))
+  // ─── DELETE ───
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this user?')) return
+    try {
+      await axiosInstance.delete(`/users/${id}`)
+      await fetchUsers() // Refresh from DB
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to delete user')
     }
   }
 
@@ -194,7 +240,6 @@ export default function UsersPage() {
     <div>
       <PageHeader title="User Management" subtitle="Manage staff accounts, roles, and branch assignments" />
 
-      {/* Toolbar */}
       <Box className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <TextField
           placeholder="Search users..."
@@ -221,7 +266,6 @@ export default function UsersPage() {
         </Button>
       </Box>
 
-      {/* Table */}
       <Box className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <DataGrid
           rows={filtered}
@@ -229,6 +273,7 @@ export default function UsersPage() {
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           pageSizeOptions={[5, 10, 25]}
           disableRowSelectionOnClick
+          loading={tableLoading}
           sx={{
             border: 'none',
             '& .MuiDataGrid-columnHeaders': {
@@ -243,7 +288,6 @@ export default function UsersPage() {
         />
       </Box>
 
-      {/* Add/Edit Dialog */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle className="!font-bold !text-lg">
           {editing ? 'Edit User' : 'Add New User'}
@@ -324,8 +368,15 @@ export default function UsersPage() {
           <Button onClick={handleClose} variant="outlined" color="inherit" className="!normal-case">
             Cancel
           </Button>
-          <Button onClick={handleSave} variant="contained" color="primary" className="!normal-case !font-semibold">
-            {editing ? 'Save Changes' : 'Create User'}
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            color="primary"
+            className="!normal-case !font-semibold"
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
+          >
+            {loading ? 'Saving...' : editing ? 'Save Changes' : 'Create User'}
           </Button>
         </DialogActions>
       </Dialog>

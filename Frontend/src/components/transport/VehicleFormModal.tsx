@@ -1,15 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  MenuItem,
-  Grid,
-  Typography,
-} from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Grid, Typography, } from '@mui/material'
 
 export interface Vehicle {
   id: string
@@ -60,7 +50,7 @@ export default function VehicleFormModal({ open, onClose, onSave, initialData }:
     } else if (!/^[A-Z0-9-\s]{4,15}$/i.test(formData.licensePlate)) {
       newErrors.licensePlate = 'Invalid format (e.g., WP BAC-1234)'
     }
-    
+
     if (!formData.capacity || formData.capacity <= 0) {
       newErrors.capacity = 'Capacity must be greater than 0'
     }

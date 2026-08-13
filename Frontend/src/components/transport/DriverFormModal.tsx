@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  MenuItem,
-  Grid,
-  Typography,
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Grid, Typography,
 } from '@mui/material'
 
 export interface Driver {
@@ -57,7 +49,7 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
     const newErrors: Record<string, string> = {}
     if (!formData.name?.trim()) newErrors.name = 'Name is required'
     if (!formData.licenseNumber?.trim()) newErrors.licenseNumber = 'License Number is required'
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }

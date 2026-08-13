@@ -8,6 +8,7 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import UsersPage from './pages/users/UsersPage';
 import BranchesPage from './pages/branches/BranchesPage';
+import Inventory from './pages/inventory/inventory';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -45,8 +46,8 @@ function App() {
               <Route path="branches" element={<RoleRoute allowedRoles={['Admin']}><BranchesPage /></RoleRoute>} />
               
               {/* Other pages (placeholders for now) */}
-              <Route path="inventory" element={<RoleRoute allowedRoles={['Admin', 'BranchManager','InventoryManager']}><div className="p-4">Inventory Page</div></RoleRoute>} />
-              <Route path="order-requests" element={<RoleRoute allowedRoles={['Admin', 'BranchManager', 'InventoryManager']}><div className="p-4">Order Requests</div></RoleRoute>} />
+              <Route path="inventory" element={<RoleRoute allowedRoles={['Admin', 'BranchManager','InventoryManager']}><Inventory /></RoleRoute>} />
+              <Route path="order-requests" element={<RoleRoute allowedRoles={['Admin', 'BranchManager', 'InventoryManager']}>OrderRequest</RoleRoute>} />
               <Route path="orders" element={<RoleRoute allowedRoles={['Admin', 'InventoryManager', 'BranchManager']}><div className="p-4">Orders</div></RoleRoute>} />
               <Route path="transport" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><div className="p-4">Transport</div></RoleRoute>} />
               <Route path="delivery" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><div className="p-4">Delivery</div></RoleRoute>} />

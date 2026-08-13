@@ -11,8 +11,7 @@ import DeliveryList from './pages/delivery/DeliveryList'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
-  return <>{children}</>
-  //return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
 function App() {

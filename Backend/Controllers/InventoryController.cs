@@ -87,8 +87,19 @@ namespace Order_MS.Controllers
             return Ok(lowStock);
         }
 
+        [HttpPost("branch")]
+        //[Authorize(Roles = "BranchManager,InventoryManager")]
+        public async Task<IActionResult> AddBranchInventory([FromBody] AddBranchInventoryDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int? createdBy = int.TryParse(userIdClaim, out int uid) && uid > 0 ? uid : null;
+
+            var result = await _inventoryService.AddBranchInventoryAsync(dto, createdBy);
+            return Ok(result);
+        }
+
         [HttpPut("update")]
-        [Authorize(Roles = "BranchManager,InventoryManager")]
+       // [Authorize(Roles = "BranchManager,InventoryManager")]
         public async Task<IActionResult> UpdateStock([FromBody] UpdateStockDto dto)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -96,6 +107,14 @@ namespace Order_MS.Controllers
 
             var result = await _inventoryService.UpdateStockAsync(dto, modifiedBy);
             return Ok(result);
+        }
+
+        [HttpDelete("branch/{id}")]
+        //[Authorize(Roles = "BranchManager,InventoryManager")]
+        public async Task<IActionResult> DeleteBranchInventory(int id)
+        {
+            await _inventoryService.DeleteBranchStockAsync(id);
+            return NoContent();
         }
     }
 }

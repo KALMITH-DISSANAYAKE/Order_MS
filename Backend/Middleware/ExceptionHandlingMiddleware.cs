@@ -1,4 +1,4 @@
-﻿using Order_MS.DTOs;
+using Order_MS.DTOs;
 using Order_MS.Exceptions;
 using System.Net;
 using System.Text.Json;
@@ -64,7 +64,11 @@ public class ExceptionHandlingMiddleware
             Details = details  // Only populated in Development
         };
 
-        var json = JsonSerializer.Serialize(response);
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        var json = JsonSerializer.Serialize(response, jsonOptions);
         return context.Response.WriteAsync(json);
     }
 }

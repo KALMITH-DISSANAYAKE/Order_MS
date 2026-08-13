@@ -62,6 +62,18 @@ const inventoryService = {
   getBranchStock: async (branchId: number) => {
     const response = await axiosInstance.get(`/inventory/branch/${branchId}`);
     return response.data;
+  },
+  addBranchInventory: async (data: any) => {
+    const response = await axiosInstance.post('/inventory/branch', data);
+    return response.data;
+  },
+  updateBranchStock: async (data: any) => {
+    const response = await axiosInstance.put('/inventory/update', data);
+    return response.data;
+  },
+  deleteBranchStock: async (id: number) => {
+    const response = await axiosInstance.delete(`/inventory/branch/${id}`);
+    return response.data;
   }
 };
 
@@ -85,6 +97,11 @@ export default function Inventory() {
   const [newUnitPrice, setNewUnitPrice] = useState<number | string>('')
   const [newSupplierId, setNewSupplierId] = useState<number | string>('')
   const [editingItemId, setEditingItemId] = useState<number | null>(null)
+
+  const [editingBranchStockId, setEditingBranchStockId] = useState<number | null>(null)
+  const [newBranchStockItemId, setNewBranchStockItemId] = useState<number | string>('')
+  const [newBranchStockQuantity, setNewBranchStockQuantity] = useState<number | string>('')
+  const [newBranchStockReorderLevel, setNewBranchStockReorderLevel] = useState<number | string>('')
 
   useEffect(() => {
     const loadData = async () => {
@@ -146,8 +163,70 @@ export default function Inventory() {
     return acc
   }, {} as Record<string, any[]>)
 
-  const handleTabChange = (event: SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
     setTabIndex(newValue)
+  }
+
+  const handleSaveBranchStock = async () => {
+    if (newBranchStockItemId === '' || newBranchStockQuantity === '' || newBranchStockReorderLevel === '') {
+      alert("Please fill all fields")
+      return
+    }
+    try {
+      if (editingBranchStockId) {
+        const payload = {
+          inventoryId: editingBranchStockId,
+          newQuantity: Number(newBranchStockQuantity),
+          reorderLevel: Number(newBranchStockReorderLevel)
+        }
+        await inventoryService.updateBranchStock(payload)
+      } else {
+        const payload = {
+          branchId: 1, // Hardcoded until auth is implemented
+          itemId: Number(newBranchStockItemId),
+          quantity: Number(newBranchStockQuantity),
+          reorderLevel: Number(newBranchStockReorderLevel)
+        }
+        await inventoryService.addBranchInventory(payload)
+      }
+      setOpenBranchModal(false)
+      setEditingBranchStockId(null)
+      
+      const branchData = await inventoryService.getBranchStock(1)
+      const allBranchData = await inventoryService.getAllBranchStock()
+      setInventory(branchData)
+      setAllBranchStock(allBranchData)
+
+      setNewBranchStockItemId('')
+      setNewBranchStockQuantity('')
+      setNewBranchStockReorderLevel('')
+    } catch (error: any) {
+      console.error("Failed to save branch stock", error)
+      alert("Failed to save branch stock. " + (error.response?.data?.message || error.response?.data?.Message || "Make sure Branch ID and Item ID are valid."))
+    }
+  }
+
+  const handleOpenBranchEdit = (row: any) => {
+    setEditingBranchStockId(row.inventoryId);
+    setNewBranchStockItemId(row.itemId);
+    setNewBranchStockQuantity(row.quantity);
+    setNewBranchStockReorderLevel(row.reorderLevel);
+    setOpenBranchModal(true);
+  }
+
+  const handleDeleteBranchStock = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this branch stock?")) {
+      try {
+        await inventoryService.deleteBranchStock(id);
+        const branchData = await inventoryService.getBranchStock(1);
+        const allBranchData = await inventoryService.getAllBranchStock();
+        setInventory(branchData);
+        setAllBranchStock(allBranchData);
+      } catch (error) {
+        console.error("Failed to delete branch stock", error);
+        alert("Failed to delete branch stock.");
+      }
+    }
   }
 
   const handleOpenEdit = async (item: any) => {
@@ -219,7 +298,13 @@ export default function Inventory() {
           tabIndex === 0 ? (
             <Button
               variant="contained"
-              onClick={() => setOpenBranchModal(true)}
+              onClick={() => {
+                setEditingBranchStockId(null)
+                setNewBranchStockItemId('')
+                setNewBranchStockQuantity('')
+                setNewBranchStockReorderLevel('')
+                setOpenBranchModal(true)
+              }}
               className="!bg-[#E21E26] hover:!bg-[#C61A22] !shadow-none !normal-case !font-medium !rounded-lg"
             >
               Add Branch Stock
@@ -289,6 +374,7 @@ export default function Inventory() {
                   <TableCell align="right" className="!font-bold !text-gray-700">Quantity</TableCell>
                   <TableCell align="right" className="!font-bold !text-gray-700">Reorder Level</TableCell>
                   <TableCell align="center" className="!font-bold !text-gray-700">Status</TableCell>
+                  <TableCell align="center" className="!font-bold !text-gray-700">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -304,6 +390,14 @@ export default function Inventory() {
                       ) : (
                         <Chip label="In Stock" color="success" size="small" className="!font-medium" />
                       )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton size="small" color="primary" onClick={() => handleOpenBranchEdit(row)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleDeleteBranchStock(row.inventoryId)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -430,7 +524,7 @@ export default function Inventory() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {items.map((row: any) => (
+                        {(items as any[]).map((row: any) => (
                           <TableRow key={row.inventoryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} className="hover:bg-gray-50 transition-colors">
                             <TableCell>{row.itemId}</TableCell>
                             <TableCell>{row.itemName}</TableCell>
@@ -457,32 +551,25 @@ export default function Inventory() {
 
 
       <Dialog open={openBranchModal} onClose={() => setOpenBranchModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle className="!font-bold !text-[#1A1A1A]">Add Branch Stock</DialogTitle>
+        <DialogTitle className="!font-bold !text-[#1A1A1A]">
+          {editingBranchStockId ? "Edit Branch Stock" : "Add Branch Stock"}
+        </DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={3} className="pt-2">
-            <Grid item xs={12} sm={6}>
-              <TextField label="Item Code" variant="outlined" fullWidth size="small" />
+            <Grid item xs={12}>
+              <TextField label="Item ID" type="number" variant="outlined" fullWidth size="small" disabled={!!editingBranchStockId} value={newBranchStockItemId} onChange={(e) => setNewBranchStockItemId(e.target.value)} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Item Name" variant="outlined" fullWidth size="small" />
+              <TextField label="Quantity" type="number" variant="outlined" fullWidth size="small" value={newBranchStockQuantity} onChange={(e) => setNewBranchStockQuantity(e.target.value)} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Quantity" type="number" variant="outlined" fullWidth size="small" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField label="Reorder Level" type="number" variant="outlined" fullWidth size="small" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField label="Branch Code" variant="outlined" fullWidth size="small" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField label="Branch Location" variant="outlined" fullWidth size="small" />
+              <TextField label="Reorder Level" type="number" variant="outlined" fullWidth size="small" value={newBranchStockReorderLevel} onChange={(e) => setNewBranchStockReorderLevel(e.target.value)} />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions className="p-4">
           <Button onClick={() => setOpenBranchModal(false)} color="inherit" className="!normal-case !font-medium">Cancel</Button>
-          <Button onClick={() => setOpenBranchModal(false)} variant="contained" className="!bg-[#E21E26] hover:!bg-[#C61A22] !shadow-none !normal-case !font-medium">Save Stock</Button>
+          <Button onClick={handleSaveBranchStock} variant="contained" className="!bg-[#E21E26] hover:!bg-[#C61A22] !shadow-none !normal-case !font-medium">Save Stock</Button>
         </DialogActions>
       </Dialog>
 

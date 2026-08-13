@@ -142,6 +142,9 @@ namespace Order_MS.Services
 
             int oldQuantity = inventory.Quantity;
             inventory.Quantity = dto.NewQuantity;
+            if (dto.ReorderLevel.HasValue)
+                inventory.ReorderLevel = dto.ReorderLevel.Value;
+                
             inventory.ModifiedOn = DateTime.Now;
 
             _inventoryRepo.Update(inventory);
@@ -160,6 +163,61 @@ namespace Order_MS.Services
                 Message = isLow
                     ? $"Warning: Stock is below reorder level ({reorderLevel})!"
                     : "Stock updated successfully."
+            };
+        }
+
+        public async Task DeleteBranchStockAsync(int inventoryId)
+        {
+            var inventory = await _inventoryRepo.GetByIdAsync(inventoryId) as Inventory;
+            if (inventory == null)
+                throw new BusinessException($"Inventory record with ID {inventoryId} not found.", 404);
+
+            _context.Inventories.Remove(inventory);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<BranchInventoryDto> AddBranchInventoryAsync(AddBranchInventoryDto dto, int? createdBy)
+        {
+            var branchExists = await _context.Branches.AnyAsync(b => b.BranchId == dto.BranchId);
+            if (!branchExists)
+                throw new BusinessException($"Branch with ID {dto.BranchId} does not exist.", 400);
+
+            var itemExists = await _context.Items.AnyAsync(i => i.ItemId == dto.ItemId && i.IsActive != false);
+            if (!itemExists)
+                throw new BusinessException($"Active Item with ID {dto.ItemId} does not exist.", 400);
+
+            var existingInventory = await _context.Inventories
+                .FirstOrDefaultAsync(i => i.BranchId == dto.BranchId && i.ItemId == dto.ItemId);
+
+            if (existingInventory != null)
+                throw new BusinessException("Inventory already exists for this item in this branch.", 400);
+
+            var inventory = new Inventory
+            {
+                BranchId = dto.BranchId,
+                ItemId = dto.ItemId,
+                Quantity = dto.Quantity,
+                ReorderLevel = dto.ReorderLevel,
+                ModifiedOn = DateTime.Now
+            };
+
+            _context.Inventories.Add(inventory);
+            await _context.SaveChangesAsync();
+
+            var created = await _context.Inventories
+                .Include(i => i.Branch)
+                .Include(i => i.Item)
+                .FirstOrDefaultAsync(i => i.InventoryId == inventory.InventoryId);
+
+            return new BranchInventoryDto
+            {
+                InventoryId = created!.InventoryId,
+                BranchId = created.BranchId,
+                BranchCode = created.Branch.BranchCode,
+                BranchLocation = created.Branch.Location,
+                ItemId = created.ItemId,
+                ItemName = created.Item.ItemName,
+                Quantity = created.Quantity,
             };
         }
 

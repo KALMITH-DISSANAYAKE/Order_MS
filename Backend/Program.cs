@@ -18,6 +18,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod();
+              //.AllowCredentials();
     });
 });
 
@@ -114,6 +115,9 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+
+
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("AllowFrontend");

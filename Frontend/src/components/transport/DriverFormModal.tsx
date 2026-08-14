@@ -76,7 +76,7 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
           {initialData ? 'Update driver details.' : 'Enter details for the new driver.'}
         </Typography>
         <Grid container spacing={3}>
-          <Grid xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label="Name"
@@ -87,7 +87,7 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
               placeholder="Driver Name"
             />
           </Grid>
-          <Grid xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label="License Number"
@@ -98,7 +98,7 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
               placeholder="e.g. L-123456789"
             />
           </Grid>
-          <Grid xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               select

@@ -83,7 +83,7 @@ export default function AssignmentModal({ open, onClose, onAssign, deliveryId }:
           <i>Note: Only available links created in the Transport module are shown here.</i>
         </Typography>
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12 }}>
+          <Grid item xs={12}>
             <TextField
               fullWidth
               select

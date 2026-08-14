@@ -81,7 +81,7 @@ export default function VehicleFormModal({ open, onClose, onSave, initialData }:
           {initialData ? 'Update vehicle details.' : 'Enter details of the new vehicle.'}
         </Typography>
         <Grid container spacing={3}>
-          <Grid xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label="License Plate"
@@ -92,7 +92,7 @@ export default function VehicleFormModal({ open, onClose, onSave, initialData }:
               placeholder="e.g. WP-ABC-1234"
             />
           </Grid>
-          <Grid xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               type="number"
@@ -104,7 +104,7 @@ export default function VehicleFormModal({ open, onClose, onSave, initialData }:
               placeholder="e.g. 1000"
             />
           </Grid>
-          <Grid xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               select

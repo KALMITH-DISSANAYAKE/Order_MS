@@ -254,14 +254,14 @@ export default function TransportList() {
         <DialogContent>
           <Typography className="!text-sm !text-gray-500 !mb-5">Select an available driver and vehicle to link them together for deliveries.</Typography>
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12 }}>
+            <Grid item xs={12}>
               <TextField select fullWidth label="Select Driver" value={newLinkData.driverId} onChange={(e) => setNewLinkData({ ...newLinkData, driverId: e.target.value })}>
                 {drivers.filter(d => d.availability === 'Available').map((d) => (
                   <MenuItem key={d.id} value={d.id}>{d.name} ({d.licenseNumber})</MenuItem>
                 ))}
               </TextField>
             </Grid>
-            <Grid size={{ xs: 12 }}>
+            <Grid item xs={12}>
               <TextField select fullWidth label="Select Vehicle" value={newLinkData.vehicleId} onChange={(e) => setNewLinkData({ ...newLinkData, vehicleId: e.target.value })}>
                 {vehicles.filter(v => v.availability === 'Available').map((v) => (
                   <MenuItem key={v.id} value={v.id}>{v.licensePlate}</MenuItem>

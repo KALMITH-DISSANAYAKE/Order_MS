@@ -1,33 +1,7 @@
 import { useState } from 'react'
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Chip,
-  InputAdornment,
-} from '@mui/material'
-import {
-  DataGrid,
-  GridColDef,
-  GridRenderCellParams,
-} from '@mui/x-data-grid'
-import {
-  Add,
-  Edit,
-  Delete,
-  Search,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material'
+import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Chip, InputAdornment, } from '@mui/material'
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
+import { Add, Edit, Delete, Search, Visibility, VisibilityOff, } from '@mui/icons-material'
 import PageHeader from '../../components/common/PageHeader'
 
 interface UserRow {
@@ -148,8 +122,8 @@ export default function UsersPage() {
             params.value === 'BranchManager'
               ? '!bg-blue-50 !text-blue-700 !border !border-blue-200'
               : params.value === 'InventoryManager'
-              ? '!bg-purple-50 !text-purple-700 !border !border-purple-200'
-              : '!bg-orange-50 !text-orange-700 !border !border-orange-200'
+                ? '!bg-purple-50 !text-purple-700 !border !border-purple-200'
+                : '!bg-orange-50 !text-orange-700 !border !border-orange-200'
           }
         />
       ),
@@ -195,7 +169,7 @@ export default function UsersPage() {
       <PageHeader title="User Management" subtitle="Manage staff accounts, roles, and branch assignments" />
 
       {/* Toolbar */}
-      <Box className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <Box className="flex flex-col gap-4 justify-between items-start mb-6 sm:flex-row sm:items-center">
         <TextField
           placeholder="Search users..."
           size="small"
@@ -222,7 +196,7 @@ export default function UsersPage() {
       </Box>
 
       {/* Table */}
-      <Box className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <Box className="overflow-hidden bg-white rounded-xl border border-gray-200 shadow-sm">
         <DataGrid
           rows={filtered}
           columns={columns}

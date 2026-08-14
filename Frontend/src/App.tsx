@@ -11,6 +11,7 @@ import BranchesPage from './pages/branches/BranchesPage';
 import Inventory from './pages/inventory/inventory';
 import TransportList from './pages/transport/TransportList'
 import DeliveryList from './pages/delivery/DeliveryList'
+import Order from './pages/order/Order'
 
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -43,6 +44,7 @@ function App() {
               }
             >
               <Route path="dashboard" element={<Dashboard />} />
+              
 
               
               {/* Admin only */}
@@ -52,7 +54,7 @@ function App() {
               {/* Other pages (placeholders for now) */}
               <Route path="inventory" element={<RoleRoute allowedRoles={['Admin', 'BranchManager','InventoryManager']}><Inventory /></RoleRoute>} />
               <Route path="order-requests" element={<RoleRoute allowedRoles={['Admin', 'BranchManager', 'InventoryManager']}>OrderRequest</RoleRoute>} />
-              <Route path="orders" element={<RoleRoute allowedRoles={['Admin', 'InventoryManager', 'BranchManager']}><div className="p-4">Orders</div></RoleRoute>} />
+              <Route path="orders" element={<RoleRoute allowedRoles={['Admin', 'InventoryManager', 'BranchManager']}><Order /></RoleRoute>} />
               <Route path="transport" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><TransportList /></RoleRoute>} />
               <Route path="delivery" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><DeliveryList /></RoleRoute>} />
               

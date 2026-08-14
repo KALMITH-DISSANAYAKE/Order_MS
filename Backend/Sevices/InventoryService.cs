@@ -33,7 +33,8 @@ namespace Order_MS.Services
                     ItemId = i.ItemId,
                     ItemName = i.ItemName,
                     UnitPrice = i.UnitPrice,
-                    SupplierName = i.Supplier != null ? i.Supplier.SupplierName : "N/A"
+                    SupplierName = i.Supplier != null ? i.Supplier.SupplierName : "N/A",
+                    IsActive = i.IsActive
                 })
                 .ToListAsync();
         }

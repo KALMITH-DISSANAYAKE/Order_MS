@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Interfaces;
+using System.Security.Claims;
 
 namespace Order_MS.Controllers;
 
@@ -27,13 +28,24 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpGet]
-   // [Authorize(Roles = "BranchManager,InventoryManager")]
-    public async Task<IActionResult> GetAllOrderRequests()
-    {
-        var result = await _orderRequestService.GetAllOrderRequests();
+// [Authorize(Roles = "BranchManager,InventoryManager")]
+public async Task<IActionResult> GetAllOrderRequests()
+{
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        return Ok(result);
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+        return Unauthorized();
     }
+
+    if (!int.TryParse(userIdClaim, out int userId))
+    {
+        return Unauthorized();
+    }
+
+    var result = await _orderRequestService.GetAllOrderRequests(userId);
+    return Ok(result);
+}
 
     [HttpGet("{id}")]
    // [Authorize(Roles = "BranchManager,InventoryManager")]

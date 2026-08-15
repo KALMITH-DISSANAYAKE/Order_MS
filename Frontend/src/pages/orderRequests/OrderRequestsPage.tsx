@@ -141,13 +141,12 @@ export default function OrderRequestsPage() {
 
     return requests.filter((request) => {
       const matchesSearch =
-        !searchTerm ||
-        String(request.orderReqId).includes(
-          searchTerm
-        ) ||
-        String(request.requestedBy)
-          .toLowerCase()
-          .includes(searchTerm)
+  !searchTerm ||
+  String(request.orderReqId).includes(searchTerm) ||
+  `${request.firstName} ${request.lastName}`
+    .toLowerCase()
+    .includes(searchTerm) ||
+  String(request.branchCode).includes(searchTerm)
 
       const matchesStatus =
         statusFilter === 'all' ||
@@ -527,6 +526,10 @@ export default function OrderRequestsPage() {
                     </TableCell>
 
                     <TableCell>
+                      Branch
+                    </TableCell>
+
+                    <TableCell>
                       Status
                     </TableCell>
 
@@ -596,10 +599,13 @@ export default function OrderRequestsPage() {
 
                           {/* REQUESTER */}
                           <TableCell>
-                            {
-                              request.requestedBy
-                            }
+                               {request.firstName} {request.lastName}
                           </TableCell>
+
+                          {/* BRANCH */}
+                          <TableCell>
+                            {request.branchCode}
+                          </TableCell>                          
 
                           {/* STATUS */}
                           <TableCell>

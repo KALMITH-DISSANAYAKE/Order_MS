@@ -63,7 +63,7 @@ export default function OrderRequestDetailsDialog({
 
         setError(
           error.response?.data?.message ||
-            'Unable to load request details.'
+          'Unable to load request details.'
         )
       } finally {
         setLoading(false)
@@ -163,8 +163,20 @@ export default function OrderRequestDetailsDialog({
                 </Typography>
 
                 <Typography>
-                  {request.requesterName ||
-                    request.requestedBy}
+                  {request.firstName} {request.lastName}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                >
+                  Branch Code
+                </Typography>
+
+                <Typography fontWeight={600}>
+                  {request.branchCode}
                 </Typography>
               </Box>
 
@@ -228,7 +240,7 @@ export default function OrderRequestDetailsDialog({
             </Typography>
 
             {!request.items ||
-            request.items.length === 0 ? (
+              request.items.length === 0 ? (
               <Alert severity="info">
                 No items found.
               </Alert>

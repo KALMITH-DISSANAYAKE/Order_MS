@@ -3,7 +3,6 @@ import { ThemeProvider } from '@mui/material/styles';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { cargillsTheme } from './theme/theme';
 import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
 import DashboardLayout from './components/layout/DashboardLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import UsersPage from './pages/users/UsersPage';
@@ -13,9 +12,20 @@ import TransportList from './pages/transport/TransportList'
 import DeliveryList from './pages/delivery/DeliveryList'
 import Order from './pages/order/Order'
 import OrderRequest from './pages/orderRequests/OrderRequestsPage'
+import Box from '@mui/material/Box/Box';
+import CircularProgress from '@mui/material/CircularProgress/CircularProgress';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+    // ← WAIT for auth check to finish
+  if (isLoading) {
+    return (
+      <Box className="flex items-center justify-center h-screen">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
@@ -34,7 +44,6 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
             <Route
               path="/*"
               element={

@@ -1,0 +1,551 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\inventoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\inventoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\data\\ordermsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\data\\ordermsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\controllers\\orderrequestscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\controllers\\orderrequestscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\controllers\\transportcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\controllers\\transportcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\orderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\dtos\\itemdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\dtos\\itemdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\middleware\\exceptionhandlingmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\middleware\\exceptionhandlingmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\deliveryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\deliveryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\models\\inventory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\models\\inventory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\dtos\\ordercreatedtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\dtos\\ordercreatedtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\dtos\\orderrequestdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\dtos\\orderrequestdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\dtos\\transportassignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\dtos\\transportassignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\exceptions\\businessexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\exceptions\\businessexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\iinventoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\iinventoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\orderrequestservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\orderrequestservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\models\\orderrequestline.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\models\\orderrequestline.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\repositories\\transportassignmentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\repositories\\transportassignmentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\repositories\\itransportassignmentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\repositories\\itransportassignmentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\transportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\transportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\controllers\\branchescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\controllers\\branchescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\branchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\branchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\ibranchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\ibranchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\itransportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\itransportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|c:\\users\\asus\\onedrive\\desktop\\c#\\order_ms\\order_ms\\sevices\\iorderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C522B108-5082-9F20-7E73-5107F3BBE944}|Order_MS\\Order_MS.csproj|solutionrelative:order_ms\\sevices\\iorderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ExceptionHandlingMiddleware.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Middleware\\ExceptionHandlingMiddleware.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Middleware\\ExceptionHandlingMiddleware.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Middleware\\ExceptionHandlingMiddleware.cs",
+              "RelativeToolTip": "Order_MS\\Middleware\\ExceptionHandlingMiddleware.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAowCQAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-03T15:21:05.646Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "OrderService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\OrderService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\OrderService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\OrderService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\OrderService.cs",
+              "ViewState": "AgIAAIAAAAAAAAAAAAAwwFsAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T03:55:41.57Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "TransportController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\TransportController.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Controllers\\TransportController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\TransportController.cs",
+              "RelativeToolTip": "Order_MS\\Controllers\\TransportController.cs",
+              "ViewState": "AgIAAE8AAAAAAAAAAAAcwE0AAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T05:04:08.296Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "OrderRequestsController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\OrderRequestsController.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Controllers\\OrderRequestsController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\OrderRequestsController.cs",
+              "RelativeToolTip": "Order_MS\\Controllers\\OrderRequestsController.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAowEIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-27T21:38:40.806Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\appsettings.json",
+              "RelativeDocumentMoniker": "Order_MS\\appsettings.json",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\appsettings.json",
+              "RelativeToolTip": "Order_MS\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-30T04:12:28.023Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "OrderMSDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Data\\OrderMSDbContext.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Data\\OrderMSDbContext.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Data\\OrderMSDbContext.cs",
+              "RelativeToolTip": "Order_MS\\Data\\OrderMSDbContext.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAswDAAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-30T04:14:13.631Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "InventoryService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\InventoryService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\InventoryService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\InventoryService.cs*",
+              "RelativeToolTip": "Order_MS\\Sevices\\InventoryService.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAM8AAABNAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-27T20:53:48.328Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "InventoryController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\InventoryController.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Controllers\\InventoryController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\InventoryController.cs",
+              "RelativeToolTip": "Order_MS\\Controllers\\InventoryController.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAowCwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-27T19:49:20.517Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "OrdersController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\OrdersController.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Controllers\\OrdersController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\OrdersController.cs",
+              "RelativeToolTip": "Order_MS\\Controllers\\OrdersController.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAwwAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T05:01:42.579Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ItemDtos.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\ItemDtos.cs",
+              "RelativeDocumentMoniker": "Order_MS\\DTOs\\ItemDtos.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\ItemDtos.cs",
+              "RelativeToolTip": "Order_MS\\DTOs\\ItemDtos.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAA5wCgAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-03T16:59:03.305Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "DeliveryService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\DeliveryService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\DeliveryService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\DeliveryService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\DeliveryService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T04:17:19.977Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Inventory.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Models\\Inventory.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Models\\Inventory.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Models\\Inventory.cs",
+              "RelativeToolTip": "Order_MS\\Models\\Inventory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-03T16:23:49.364Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "OrderCreateDtos.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\OrderCreateDtos.cs",
+              "RelativeDocumentMoniker": "Order_MS\\DTOs\\OrderCreateDtos.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\OrderCreateDtos.cs",
+              "RelativeToolTip": "Order_MS\\DTOs\\OrderCreateDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-03T15:07:35.201Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "OrderRequestDtos.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\OrderRequestDtos.cs",
+              "RelativeDocumentMoniker": "Order_MS\\DTOs\\OrderRequestDtos.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\OrderRequestDtos.cs",
+              "RelativeToolTip": "Order_MS\\DTOs\\OrderRequestDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-03T15:45:40.02Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "TransportAssignment.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\TransportAssignment.cs",
+              "RelativeDocumentMoniker": "Order_MS\\DTOs\\TransportAssignment.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\TransportAssignment.cs",
+              "RelativeToolTip": "Order_MS\\DTOs\\TransportAssignment.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-03T15:31:19.592Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "BusinessException.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Exceptions\\BusinessException.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Exceptions\\BusinessException.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Exceptions\\BusinessException.cs",
+              "RelativeToolTip": "Order_MS\\Exceptions\\BusinessException.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-03T15:21:13.993Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "IInventoryService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\IInventoryService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\IInventoryService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\IInventoryService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\IInventoryService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-30T17:28:08.806Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "OrderRequestService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\OrderRequestService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\OrderRequestService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\OrderRequestService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\OrderRequestService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACwBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-27T19:02:26.737Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Order_MS\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAxwA4AAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T03:33:37.269Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\AuthService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\AuthService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\AuthService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\AuthService.cs",
+              "ViewState": "AgIAADgAAAAAAAAAAAAwwEEAAABYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T04:23:11.506Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "OrderRequestLine.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Models\\OrderRequestLine.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Models\\OrderRequestLine.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Models\\OrderRequestLine.cs",
+              "RelativeToolTip": "Order_MS\\Models\\OrderRequestLine.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-30T04:54:35.608Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "IBranchService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\IBranchService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\IBranchService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\IBranchService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\IBranchService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T05:03:00.459Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "BranchService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\BranchService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\BranchService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\BranchService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\BranchService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T05:03:07.31Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "ITransportAssignmentRepository.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Repositories\\ITransportAssignmentRepository.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Repositories\\ITransportAssignmentRepository.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Repositories\\ITransportAssignmentRepository.cs",
+              "RelativeToolTip": "Order_MS\\Repositories\\ITransportAssignmentRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-30T04:13:27.138Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "TransportAssignmentRepository.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Repositories\\TransportAssignmentRepository.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Repositories\\TransportAssignmentRepository.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Repositories\\TransportAssignmentRepository.cs",
+              "RelativeToolTip": "Order_MS\\Repositories\\TransportAssignmentRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-30T04:13:29.136Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "TransportService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\TransportService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\TransportService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\TransportService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\TransportService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAKkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T03:53:50.329Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "BranchesController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\BranchesController.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Controllers\\BranchesController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\BranchesController.cs",
+              "RelativeToolTip": "Order_MS\\Controllers\\BranchesController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T03:33:41.422Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "ITransportService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\ITransportService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\ITransportService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\ITransportService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\ITransportService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T05:00:48.12Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "AuthDtos.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\AuthDtos.cs",
+              "RelativeDocumentMoniker": "Order_MS\\DTOs\\AuthDtos.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\DTOs\\AuthDtos.cs",
+              "RelativeToolTip": "Order_MS\\DTOs\\AuthDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-28T04:26:47.278Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Controllers\\UsersController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "Order_MS\\Controllers\\UsersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-27T20:04:43.969Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Program.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Program.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Program.cs",
+              "RelativeToolTip": "Order_MS\\Program.cs",
+              "ViewState": "AgIAAEsAAAAAAAAAAAAAADsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-27T19:15:15.49Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "IOrderService.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\IOrderService.cs",
+              "RelativeDocumentMoniker": "Order_MS\\Sevices\\IOrderService.cs",
+              "ToolTip": "C:\\Users\\ASUS\\OneDrive\\Desktop\\C#\\Order_MS\\Order_MS\\Sevices\\IOrderService.cs",
+              "RelativeToolTip": "Order_MS\\Sevices\\IOrderService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-27T19:06:03.715Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

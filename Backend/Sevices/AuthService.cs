@@ -44,6 +44,7 @@ public class AuthService : IAuthService
 
         return new LoginResponseDto
         {
+            Id = user.Id,
             Token = token,
             Username = user.UserName,
             FullName = $"{user.FirstName} {user.LastName}",

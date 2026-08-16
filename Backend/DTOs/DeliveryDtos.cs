@@ -2,8 +2,7 @@ namespace Order_MS.DTOs
 {
     public class DeliveryListDto
     {
-        public int OrderId { get; set; }
-        public int? OrderReqId { get; set; }
+        public int OrderReqId { get; set; }
         public string OrderStatus { get; set; } = string.Empty;
         public decimal? Price { get; set; }
         public string? DriverName { get; set; }
@@ -20,17 +19,17 @@ namespace Order_MS.DTOs
 
     public class DeliveryLineDto
     {
-        public int OrderLineId { get; set; }
+        public int OrderReqLineId { get; set; }
         public int ItemId { get; set; }
         public string ItemName { get; set; } = string.Empty;
-        public int? SupplierId { get; set; }
         public int Quantity { get; set; }
         public decimal? UnitPrice { get; set; }
         public decimal? TotalPrice { get; set; }
     }
 
-    public class UpdateDeliveryStatusDto
+    public class AssignDeliveryDto
     {
-        public string Status { get; set; } = string.Empty;
+        public int ConnectionId { get; set; }
     }
 }
+

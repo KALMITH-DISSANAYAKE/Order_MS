@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Services;
@@ -10,7 +10,7 @@ namespace Order_MS.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     public class DeliveryController : ControllerBase
     {
         private readonly IDeliveryService _deliveryService;
@@ -21,7 +21,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "DeliveryDepartment")]   
+        //[Authorize(Roles = "DeliveryDepartment")]   
         public async Task<IActionResult> GetAllDeliveries()
         {
             try
@@ -36,7 +36,7 @@ namespace Order_MS.Controllers
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "DeliveryDepartment,InventoryManager")]
+        //[Authorize(Roles = "DeliveryDepartment,InventoryManager")]
         public async Task<IActionResult> GetDeliveryById(int id)
         {
             try
@@ -53,27 +53,29 @@ namespace Order_MS.Controllers
             }   
         }
 
-        [HttpPut("{id:int}/status")]
-        [Authorize(Roles = "DeliveryDepartment,InventoryManager")]
-        public async Task<IActionResult> UpdateDeliveryStatus(
-            int id, [FromBody] UpdateDeliveryStatusDto dto)
-        {
-                try
-            {
-            var (success, message) = await _deliveryService.UpdateDeliveryStatusAsync(id, dto);
-            if (!success)
-                return NotFound(new { message });
 
-            return Ok(new { message });
-            }
-            catch(BusinessException ex)
+
+        [HttpPut("{id:int}/assign")]
+        //[Authorize(Roles = "DeliveryDepartment")]
+        public async Task<IActionResult> AssignDelivery(
+            int id, [FromBody] AssignDeliveryDto dto)
+        {
+            try
             {
-                return StatusCode(400, new {message = ex.Message});
+                var (success, message) = await _deliveryService.AssignDeliveryAsync(id, dto);
+                if (!success)
+                    return NotFound(new { message });
+
+                return Ok(new { message });
             }
-            catch(Exception ex)
+            catch (BusinessException ex)
             {
-                return StatusCode(500, new {message = "An unexpected error occurred while updating delivery status", details = ex.Message });
-            }   
+                return StatusCode(400, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred while assigning delivery", details = ex.Message });
+            }
         }
     }
 }

@@ -1,24 +1,4 @@
-# Visual Studio files
-.vs/
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
+OrderMSDbContext.cs
+appsettings.json
 
-# Build folders
-bin/
-obj/
-
-# Logs
-*.log
-
-# Packages
-packages/
-
-# Environment files
-.env
-/Order_MS/Data/OrderMSDbContext.cs
-/Order_MS/appsettings.json
-
-node_modules/
 

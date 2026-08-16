@@ -17,83 +17,102 @@ namespace Order_MS.Services
 
         public async Task<IEnumerable<DeliveryListDto>> GetAllDeliveriesAsync()
         {
-     
-            var orders = await _context.Orders
-                .Include(o => o.Connection)
-                    .ThenInclude(dvl => dvl!.Driver)
-                .Include(o => o.Connection)
-                    .ThenInclude(dvl => dvl!.Vehicle)
-                .Include(o => o.OrderReq)
-                    .ThenInclude(or => or!.Branch)
-                .OrderByDescending(o => o.CreatedOn)
+            var allowedStatuses = new[] { "Approved", "TransportAssigned" };
+            
+            var requests = await _context.OrderRequests
+                .Include(or => or.Branch)
+                .Include(or => or.TransportAssignments)
+                    .ThenInclude(ta => ta.Connection)
+                        .ThenInclude(c => c!.Driver)
+                .Include(or => or.TransportAssignments)
+                    .ThenInclude(ta => ta.Connection)
+                        .ThenInclude(c => c!.Vehicle)
+                .Where(or => allowedStatuses.Contains(or.ReqStatus))
+                .OrderByDescending(or => or.RequestedOn)
                 .ToListAsync();
 
-            return orders.Select(o => new DeliveryListDto
+            return requests.Select(or => 
             {
-                OrderId = o.OrderId,
-                OrderReqId = o.OrderReqId,
-                OrderStatus = o.OrderStatus ?? string.Empty,
-                Price = o.Price,
-                DriverName = o.Connection?.Driver?.DriversName,
-                VehicleNumber = o.Connection?.Vehicle?.VehicleNumber,
-                BranchLocation = o.OrderReq?.Branch?.Location,
-                CreatedOn = o.CreatedOn
+                var assignment = or.TransportAssignments.OrderByDescending(a => a.AssignedOn).FirstOrDefault();
+                return new DeliveryListDto
+                {
+                    OrderReqId = or.OrderReqId,
+                    OrderStatus = or.ReqStatus ?? string.Empty,
+                    Price = or.TotalPrice,
+                    DriverName = assignment?.Connection?.Driver?.DriversName,
+                    VehicleNumber = assignment?.Connection?.Vehicle?.VehicleNumber,
+                    BranchLocation = or.Branch?.Location,
+                    CreatedOn = or.RequestedOn
+                };
             });
         }
 
-        public async Task<DeliveryDetailDto?> GetDeliveryByIdAsync(int orderId)
+        public async Task<DeliveryDetailDto?> GetDeliveryByIdAsync(int orderReqId)
         {
-            var order = await _context.Orders
-                .Include(o => o.Connection)
-                    .ThenInclude(dvl => dvl!.Driver)
-                .Include(o => o.Connection)
-                    .ThenInclude(dvl => dvl!.Vehicle)
-                .Include(o => o.OrderReq)
-                    .ThenInclude(or => or!.Branch)
-                .Include(o => o.OrderLines)      
-                    .ThenInclude(ol => ol.Item)
-                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+            var or = await _context.OrderRequests
+                .Include(o => o.Branch)
+                .Include(o => o.OrderRequestLines)
+                    .ThenInclude(l => l.Item)
+                .Include(o => o.TransportAssignments)
+                    .ThenInclude(ta => ta.Connection)
+                        .ThenInclude(c => c!.Driver)
+                .Include(o => o.TransportAssignments)
+                    .ThenInclude(ta => ta.Connection)
+                        .ThenInclude(c => c!.Vehicle)
+                .FirstOrDefaultAsync(o => o.OrderReqId == orderReqId);
 
-            if (order is null)
-                throw new BusinessException($"Order with ID {orderId} not found.", 404);
+            if (or is null)
+                throw new BusinessException($"Order Request with ID {orderReqId} not found.", 404);
+
+            var assignment = or.TransportAssignments.OrderByDescending(a => a.AssignedOn).FirstOrDefault();
 
             return new DeliveryDetailDto
             {
-                OrderId = order.OrderId,
-                OrderReqId = order.OrderReqId,
-                OrderStatus = order.OrderStatus ?? string.Empty,
-                Price = order.Price,
-                OrderRemark = order.OrderRemark,
-                DriverName = order.Connection?.Driver?.DriversName,
-                VehicleNumber = order.Connection?.Vehicle?.VehicleNumber,
-                BranchLocation = order.OrderReq?.Branch?.Location,
-                CreatedOn = order.CreatedOn,
-                Lines = order.OrderLines
+                OrderReqId = or.OrderReqId,
+                OrderStatus = or.ReqStatus ?? string.Empty,
+                Price = or.TotalPrice,
+                OrderRemark = "", // OrderRequest might not have Remark
+                DriverName = assignment?.Connection?.Driver?.DriversName,
+                VehicleNumber = assignment?.Connection?.Vehicle?.VehicleNumber,
+                BranchLocation = or.Branch?.Location,
+                CreatedOn = or.RequestedOn,
+                Lines = or.OrderRequestLines
                     .Select(ol => new DeliveryLineDto
                     {
-                        OrderLineId = ol.OrderlineId, 
+                        OrderReqLineId = ol.OrderReqLineId, 
                         ItemId = ol.ItemId,
                         ItemName = ol.Item?.ItemName ?? string.Empty,
-                        SupplierId = ol.SupplierId,
                         Quantity = ol.Quantity,
-                        UnitPrice = ol.UnitPrice,
-                        TotalPrice = ol.TotalPrice
+                        UnitPrice = ol.Price, 
+                        TotalPrice = ol.Price * ol.Quantity
                     }).ToList()
             };
         }
 
-        public async Task<(bool Success, string Message)>
-            UpdateDeliveryStatusAsync(int orderId, UpdateDeliveryStatusDto dto)
+
+
+        public async Task<(bool Success, string Message)> AssignDeliveryAsync(int orderReqId, AssignDeliveryDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Status))
-                throw new BusinessException("Status cannot be empty.", 400);
+            var or = await _context.OrderRequests.FindAsync(orderReqId);
+            if (or is null)
+                throw new BusinessException($"Order Request #{orderReqId} not found.", 404);
 
-            var order = await _context.Orders.FindAsync(orderId);
-            if (order is null)
-                throw new BusinessException($"Order #{orderId} not found.", 404);
+            var link = await _context.DriverVehicleLinks.FindAsync(dto.ConnectionId);
+            if (link is null)
+                throw new BusinessException($"Driver-Vehicle Link #{dto.ConnectionId} not found.", 404);
 
-            order.OrderStatus = dto.Status;
-            order.ModifiedOn = DateTime.UtcNow;
+            var assignment = new TransportAssignment
+            {
+                OrderReqId = orderReqId,
+                ConnectionId = dto.ConnectionId,
+                AssignedOn = DateTime.UtcNow,
+                Status = "Assigned",
+                Quantity = or.TotalQuantity ?? 0
+            };
+
+            await _context.TransportAssignments.AddAsync(assignment);
+            or.ReqStatus = "TransportAssigned";
+            or.ModifiedOn = DateTime.UtcNow;
 
             try
             {
@@ -104,7 +123,7 @@ namespace Order_MS.Services
                 throw new BusinessException($"Database error: {ex.InnerException?.Message ?? ex.Message}", 400);
             }
 
-            return (true, $"Order #{orderId} status updated to '{dto.Status}'.");
+            return (true, $"Delivery #{orderReqId} successfully assigned.");
         }
     }
 }

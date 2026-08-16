@@ -38,7 +38,7 @@ public class BranchesController : ControllerBase
 
     // POST /api/branches
     [HttpPost]
-    [Authorize(Roles = "InventoryManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateBranchDto dto)
     {
         var created = await _branchService.CreateAsync(dto);
@@ -47,7 +47,7 @@ public class BranchesController : ControllerBase
 
     // PUT /api/branches/1
     [HttpPut("{id}")]
-    [Authorize(Roles = "InventoryManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateBranchDto dto)
     {
         var updated = await _branchService.UpdateAsync(id, dto);
@@ -59,7 +59,7 @@ public class BranchesController : ControllerBase
 
     // DELETE /api/branches/1
     [HttpDelete("{id}")]
-    [Authorize(Roles = "InventoryManager")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var success = await _branchService.DeleteAsync(id);

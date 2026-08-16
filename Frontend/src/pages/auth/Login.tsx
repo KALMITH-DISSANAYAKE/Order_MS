@@ -1,3 +1,4 @@
+import axiosInstance from '../../api/axiosInstance';
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import {
@@ -26,29 +27,35 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
 
-    // TODO: Replace with real API call to your .NET backend
-    setTimeout(() => {
-      if (username === 'admin' && password === 'admin') {
-        login({
-          id: 1,
-          username,
-          fullName: 'Admin User',
-          role: 'Admin',
-          token: 'mock-jwt-token',
-        })
-        setLoading(false)
-        navigate('/dashboard')
-      } else {
-        setError('Invalid username or password')
-        setLoading(false)
-      }
-    }, 1000)
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
+
+  try {
+    const res = await axiosInstance.post('/auth/login', { username, password });
+    const data = res.data;
+
+    login({
+      id: data.id,
+      username: data.username,
+      fullName: data.fullName,
+      role: data.role,
+      branchId: data.branchId,
+      token: data.token,
+    });
+
+    navigate('/dashboard');
+  } catch (err: any) {
+    setError(err.response?.data?.message || 'Invalid username or password');
+  } finally {
+    setLoading(false);
   }
+};
+
+
 
   const fillDemo = (u: string) => {
     setUsername(u)

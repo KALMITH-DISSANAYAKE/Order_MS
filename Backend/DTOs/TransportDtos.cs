@@ -12,6 +12,12 @@ namespace Order_MS.DTOs
         public int? Capacity { get; set; }
     }
 
+    public class CreateDriverVehicleLinkDto
+    {
+        public int DriverId { get; set; }
+        public int VehicleId { get; set; }
+    }
+
 
     public class OrderRequestForTransportDto
     {
@@ -66,5 +72,49 @@ namespace Order_MS.DTOs
     public class UpdateAssignmentStatusDto
     {
         public string Status { get; set; } = string.Empty;
+    }
+
+    public class CreateVehicleDto
+    {
+        public string VehicleNumber { get; set; } = string.Empty;
+        public int? Capacity { get; set; }
+        public string Available { get; set; } = "Available";
+    }
+
+    public class VehicleDto
+    {
+        public int VehicleId { get; set; }
+        public string VehicleNumber { get; set; } = string.Empty;
+        public int? Capacity { get; set; }
+        public string Available { get; set; } = string.Empty;
+    }
+
+    public class UpdateVehicleDto
+    {
+        public string VehicleNumber { get; set; } = string.Empty;
+        public int? Capacity { get; set; }
+        public string Available { get; set; } = string.Empty;
+    }
+
+    public class CreateDriverDto
+    {
+        public string DriversName { get; set; } = string.Empty;
+        public string LicenseNumber { get; set; } = string.Empty;
+        public string Available { get; set; } = "Available";
+    }
+
+    public class UpdateDriverDto
+    {
+        public string DriversName { get; set; } = string.Empty;
+        public string LicenseNumber { get; set; } = string.Empty;
+        public string Available { get; set; } = string.Empty;
+    }
+
+    public class DriverDto
+    {
+        public int DriverId { get; set; }
+        public string DriversName { get; set; } = string.Empty;
+        public string LicenseNumber { get; set; } = string.Empty;
+        public string Available { get; set; } = string.Empty;
     }
 }

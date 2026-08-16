@@ -27,7 +27,7 @@ public class OrderRequestService : IOrderRequestService
 
     public async Task<OrderRequestResponseDTO> CreateOrderRequest(CreateOrderRequestDTO dto)
     {
-      
+
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == dto.RequestedBy);
 
@@ -115,7 +115,7 @@ public class OrderRequestService : IOrderRequestService
 
         await _context.SaveChangesAsync();
 
-  
+
         var savedRequest = await _context.OrderRequests
             .Include(x => x.OrderRequestLines)
             .ThenInclude(x => x.Item)
@@ -139,10 +139,35 @@ public class OrderRequestService : IOrderRequestService
         };
     }
 
-    public async Task<List<OrderRequestListDTO>> GetAllOrderRequests()
+    public async Task<List<OrderRequestListDTO>> GetAllOrderRequests(int userId)
     {
-        var requests = await _context.OrderRequests
-         .Include(x => x.RequestedByNavigation)
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+        {
+            throw new BusinessException(
+                $"User with ID {userId} not found.",
+                404);
+        }
+
+        var query = _context.OrderRequests
+            .Include(x => x.RequestedByNavigation)
+            .AsQueryable();
+
+        if (user.RoleId == 1)
+        {
+            if (user.BranchId == null)
+            {
+                throw new BusinessException(
+                    $"User {user.UserName} is not assigned to any branch.",
+                    400);
+            }
+
+            query = query.Where(x => x.BranchId == user.BranchId);
+        }
+
+        var requests = await query
             .Select(x => new OrderRequestListDTO
             {
                 OrderReqId = x.OrderReqId,
@@ -150,48 +175,61 @@ public class OrderRequestService : IOrderRequestService
                 TotalQuantity = x.TotalQuantity ?? 0,
                 TotalPrice = x.TotalPrice ?? 0,
                 RequestedOn = x.RequestedOn ?? DateTime.MinValue,
-                RequestedBy = x.RequestedByNavigation.UserName
+                RequestedBy = x.RequestedByNavigation.UserName,
+                FirstName = x.RequestedByNavigation.FirstName,
+                LastName = x.RequestedByNavigation.LastName,
+                BranchCode = x.RequestedByNavigation.Branch.BranchCode
             })
             .ToListAsync();
+
         return requests;
-
-
     }
 
     public async Task<OrderRequestResponseDTO?> GetOrderRequestById(int id)
-    {
-        var request = await _context.OrderRequests
-            .Include(x => x.OrderRequestLines)
+{
+    var request = await _context.OrderRequests
+        .Include(x => x.RequestedByNavigation)
+            .ThenInclude(u => u.Branch)
+        .Include(x => x.OrderRequestLines)
             .ThenInclude(x => x.Item)
-            .FirstOrDefaultAsync(x => x.OrderReqId == id);
+        .FirstOrDefaultAsync(x => x.OrderReqId == id);
 
-        if (request == null)
-        {
-            throw new BusinessException(
-                $"Order request with ID {id} was not found.",
-                404);
-        }
-
-        return new OrderRequestResponseDTO
-        {
-            OrderReqId = request.OrderReqId,
-            Status = request.ReqStatus,
-            TotalQuantity = request.TotalQuantity ?? 0,
-            TotalPrice = request.TotalPrice ?? 0,
-            RequestedOn = request.RequestedOn ?? DateTime.Now,
-
-            Items = request.OrderRequestLines
-               .Select(line => new OrderRequestLineResponseDTO
-               {
-                   ItemId = line.ItemId,
-                   ItemName = line.Item.ItemName,
-                   Quantity = line.Quantity,
-                   UnitPrice = line.Price ?? 0,
-                   LineTotal = line.Quantity * line.Price ?? 0
-               })
-                .ToList()
-        };
+    if (request == null)
+    {
+        throw new BusinessException(
+            $"Order request with ID {id} was not found.",
+            404);
     }
+
+    return new OrderRequestResponseDTO
+    {
+        OrderReqId = request.OrderReqId,
+        Status = request.ReqStatus,
+        TotalQuantity = request.TotalQuantity ?? 0,
+        TotalPrice = request.TotalPrice ?? 0,
+        RequestedOn = request.RequestedOn ?? DateTime.Now,
+
+        FirstName = request.RequestedByNavigation?.FirstName
+            ?? string.Empty,
+
+        LastName = request.RequestedByNavigation?.LastName
+            ?? string.Empty,
+
+        BranchCode = request.RequestedByNavigation?.Branch?.BranchCode
+            ?? string.Empty,
+
+        Items = request.OrderRequestLines
+            .Select(line => new OrderRequestLineResponseDTO
+            {
+                ItemId = line.ItemId,
+                ItemName = line.Item.ItemName,
+                Quantity = line.Quantity,
+                UnitPrice = line.Price ?? 0,
+                LineTotal = line.Quantity * (line.Price ?? 0)
+            })
+            .ToList()
+    };
+}
 
     public async Task<OrderRequestResponseDTO?> ApproveOrderRequest(int id, int approvedBy)
     {

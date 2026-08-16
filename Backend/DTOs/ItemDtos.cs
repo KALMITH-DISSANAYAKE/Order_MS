@@ -5,7 +5,6 @@ namespace Order_MS.DTOs
         public int ItemId { get; set; }
         public string ItemName { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
-        public int ReorderLevel { get; set; }
         public bool? IsActive { get; set; }
         public string SupplierName { get; set; } = string.Empty;
     }
@@ -15,7 +14,6 @@ namespace Order_MS.DTOs
         public int ItemId { get; set; }
         public string ItemName { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
-        public int ReorderLevel { get; set; }
         public SupplierDto Supplier { get; set; } = new();
     }
 
@@ -30,7 +28,6 @@ namespace Order_MS.DTOs
     {
         public string ItemName { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
-        public int ReorderLevel { get; set; }
         public int SupplierId { get; set; }
     }
 
@@ -38,7 +35,6 @@ namespace Order_MS.DTOs
     {
         public string ItemName { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
-        public int ReorderLevel { get; set; }
         public int SupplierId { get; set; }
     }
 }

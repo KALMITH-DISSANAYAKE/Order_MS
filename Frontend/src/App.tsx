@@ -3,7 +3,6 @@ import { ThemeProvider } from '@mui/material/styles';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { cargillsTheme } from './theme/theme';
 import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
 import DashboardLayout from './components/layout/DashboardLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import UsersPage from './pages/users/UsersPage';
@@ -11,10 +10,22 @@ import BranchesPage from './pages/branches/BranchesPage';
 import Inventory from './pages/inventory/inventory';
 import TransportList from './pages/transport/TransportList'
 import DeliveryList from './pages/delivery/DeliveryList'
-
+import Order from './pages/order/Order'
+import OrderRequest from './pages/orderRequests/OrderRequestsPage'
+import Box from '@mui/material/Box/Box';
+import CircularProgress from '@mui/material/CircularProgress/CircularProgress';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+    // ← WAIT for auth check to finish
+  if (isLoading) {
+    return (
+      <Box className="flex items-center justify-center h-screen">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
@@ -33,7 +44,6 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
             <Route
               path="/*"
               element={
@@ -43,6 +53,7 @@ function App() {
               }
             >
               <Route path="dashboard" element={<Dashboard />} />
+              
 
               
               {/* Admin only */}
@@ -51,8 +62,8 @@ function App() {
               
               {/* Other pages (placeholders for now) */}
               <Route path="inventory" element={<RoleRoute allowedRoles={['Admin', 'BranchManager','InventoryManager']}><Inventory /></RoleRoute>} />
-              <Route path="order-requests" element={<RoleRoute allowedRoles={['Admin', 'BranchManager', 'InventoryManager']}>OrderRequest</RoleRoute>} />
-              <Route path="orders" element={<RoleRoute allowedRoles={['Admin', 'InventoryManager', 'BranchManager']}><div className="p-4">Orders</div></RoleRoute>} />
+              <Route path="order-requests" element={<RoleRoute allowedRoles={['Admin', 'BranchManager', 'InventoryManager']}><OrderRequest /></RoleRoute>} />
+              <Route path="orders" element={<RoleRoute allowedRoles={['Admin', 'InventoryManager', 'BranchManager']}><Order /></RoleRoute>} />
               <Route path="transport" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><TransportList /></RoleRoute>} />
               <Route path="delivery" element={<RoleRoute allowedRoles={['Admin', 'TransportDepartment']}><DeliveryList /></RoleRoute>} />
               

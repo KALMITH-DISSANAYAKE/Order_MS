@@ -10,7 +10,6 @@ namespace Order_MS.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orderService;
@@ -21,7 +20,6 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> GetAll()
     {
         try
@@ -61,7 +59,6 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("from-request/{orderReqId}")]
-    [Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> CreateFromOrderRequest(int orderReqId)
     {
         try
@@ -88,7 +85,6 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "BranchManager")]
     public async Task<IActionResult> Update(int id, [FromBody] OrderUpdateDtos dto)
     {
         try
@@ -128,7 +124,6 @@ public class OrdersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> Delete(int id)
     {
         try

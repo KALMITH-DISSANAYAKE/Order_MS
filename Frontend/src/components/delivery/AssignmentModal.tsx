@@ -61,10 +61,10 @@ export default function AssignmentModal({ open, onClose, onAssign, deliveryId }:
     if (validate()) {
       const link = availableLinks.find(l => l.connectionId.toString() === selectedLinkId)
       if (link) {
-        onAssign({ 
-          driver: link.driverName, 
-          vehicle: link.vehicleNumber, 
-          connectionId: link.connectionId 
+        onAssign({
+          driver: link.driverName,
+          vehicle: link.vehicleNumber,
+          connectionId: link.connectionId
         })
         onClose()
       }
@@ -79,7 +79,7 @@ export default function AssignmentModal({ open, onClose, onAssign, deliveryId }:
       <DialogContent>
         <Typography className="!text-sm !text-gray-500 !mb-5">
           Select an available Driver-Vehicle assignment to dispatch this delivery.
-          <br/>
+          <br />
           <i>Note: Only available links created in the Transport module are shown here.</i>
         </Typography>
         <Grid container spacing={3}>

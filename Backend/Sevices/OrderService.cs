@@ -169,16 +169,18 @@ public class OrderService : IOrderService
             if (orderRequest == null)
                 throw new BusinessException($"Order request {orderReqId} was not found.", 404);
 
-            var selectedConnectionId = orderRequest.TransportAssignments
-                .FirstOrDefault(ta => ta.ConnectionId.HasValue)
-                ?.ConnectionId;
+            // Fetch the transport assignment directly to ensure we get the latest ConnectionId
+            var selectedConnectionId = await _context.TransportAssignments
+                .Where(ta => ta.OrderReqId == orderReqId && ta.ConnectionId.HasValue)
+                .Select(ta => ta.ConnectionId)
+                .FirstOrDefaultAsync();
 
             var order = new Order
             {
                 OrderReqId = orderRequest.OrderReqId,
                 ConnectionId = selectedConnectionId,
                 Price = orderRequest.TotalPrice,
-                OrderStatus = "Pending",
+                OrderStatus = "InTransit",
                 CreatedBy = createdBy,
                 CreatedOn = DateTime.UtcNow,
                 ModifiedBy = createdBy,

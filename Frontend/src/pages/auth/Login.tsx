@@ -1,11 +1,11 @@
 import axiosInstance from '../../api/axiosInstance';
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link} from 'react-router-dom'
 import {
   TextField,
   Button,
   FormControlLabel,
-  Checkbox,
+  Checkbox,  
   InputAdornment,
   IconButton,
   Paper,
@@ -110,7 +110,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               Welcome Back
             </Typography>
             <Typography variant="body1" className="!text-[#666666]">
-              Sign in to your account
+              Log in to your account
             </Typography>
           </Box>
 
@@ -155,18 +155,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               }}
             />
 
-            <div className="flex items-center justify-between">
-              <FormControlLabel
-                control={<Checkbox size="small" className="!text-cargills-red" />}
-                label={<span className="text-sm text-gray-600">Remember me</span>}
-              />
-              <Link
-                to="#"
-                className="text-sm font-semibold text-cargills-red hover:text-cargills-dark hover:underline"
-              >
-                Forgot Password?
-              </Link>
-            </div>
+
 
             <Button
               type="submit"
@@ -177,7 +166,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               disabled={loading}
               className="!mt-2 !normal-case !font-bold !tracking-wide"
             >
-              {loading ? 'Signing in...' : 'SIGN IN'}
+              {loading ? 'Logging in...' : 'Login IN'}
             </Button>
           </form>
 
@@ -186,16 +175,6 @@ const handleSubmit = async (e: React.FormEvent) => {
               or
             </Typography>
           </Divider>
-
-          <Typography className="!text-center !text-gray-600 !mb-6">
-            Don't have an account?{' '}
-            <Link
-              to="/register"
-              className="font-bold text-cargills-red hover:text-cargills-dark hover:underline"
-            >
-              Register here
-            </Link>
-          </Typography>
 
           {/* Demo accounts */}
           <Box className="bg-cargills-light border border-[#FFD6D6] rounded-xl p-4 text-center">

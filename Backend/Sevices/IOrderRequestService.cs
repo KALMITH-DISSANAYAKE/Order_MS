@@ -6,7 +6,7 @@ public interface IOrderRequestService
 {
     Task<OrderRequestResponseDTO> CreateOrderRequest(CreateOrderRequestDTO dto);
 
-    Task<List<OrderRequestListDTO>> GetAllOrderRequests();
+    Task<List<OrderRequestListDTO>> GetAllOrderRequests(int userId);
 
     Task<OrderRequestResponseDTO?> GetOrderRequestById(int id);
 

@@ -17,7 +17,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "BranchManager")]
+    //[Authorize(Roles = "BranchManager")]
     public async Task<IActionResult> CreateOrderRequest(
         CreateOrderRequestDTO dto)
     {
@@ -27,7 +27,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "BranchManager,InventoryManager")]
+    //[Authorize(Roles = "BranchManager,InventoryManager")]
     public async Task<IActionResult> GetAllOrderRequests()
     {
         var result = await _orderRequestService.GetAllOrderRequests();
@@ -36,7 +36,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Roles = "BranchManager,InventoryManager")]
+    //[Authorize(Roles = "BranchManager,InventoryManager")]
     public async Task<IActionResult> GetOrderRequestById(int id)
     {
         var result = await _orderRequestService.GetOrderRequestById(id);
@@ -45,7 +45,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPut("{id}/approve")]
-    [Authorize(Roles = "InventoryManager")]
+    //[Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> ApproveOrderRequest(
         int id,
         ApproveOrderRequestDTO dto)
@@ -57,7 +57,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPut("{id}/reject")]
-    [Authorize(Roles = "InventoryManager")]
+    //[Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> RejectOrderRequest(int id)
     {
         var result = await _orderRequestService
@@ -67,7 +67,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPut("{id}/payment")]
-    [Authorize(Roles = "InventoryManager")]
+    //[Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> MakePayment(int id)
     {
         var result = await _orderRequestService

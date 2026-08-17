@@ -6,17 +6,20 @@ interface AuthContextType {
   login: (user: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;  //for loading state when refreshing
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load from localStorage on app start
   useEffect(() => {
     const saved = localStorage.getItem('user');
     if (saved) setUser(JSON.parse(saved));
+    setIsLoading(false);  // ← done checking
   }, []);
 
   const login = (userData: User) => {
@@ -29,10 +32,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     setUser(null);
+    
   };
-
+  
+  
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ 
+      user,
+      login,
+      logout, 
+      isAuthenticated: !!user,
+      isLoading  // ← expose this
+      }}>
       {children}
     </AuthContext.Provider>
   );

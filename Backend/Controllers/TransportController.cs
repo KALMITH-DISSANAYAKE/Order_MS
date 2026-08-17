@@ -91,7 +91,11 @@ namespace Order_MS.Controllers
             {
                 var (success, message) = await _transportService.DeleteDriverVehicleLinkAsync(id);
                 if (!success)
+                {
+                    if (message.Contains("assigned to an order"))
+                        return BadRequest(new { message });
                     return NotFound(new { message });
+                }
 
                 return Ok(new { message });
             }

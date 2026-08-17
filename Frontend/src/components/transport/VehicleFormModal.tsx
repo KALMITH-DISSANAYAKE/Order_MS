@@ -5,7 +5,7 @@ export interface Vehicle {
   id: string
   licensePlate: string
   capacity: number
-  availability: 'Available' | 'Assigned' | 'Maintenance'
+  availability: 'Available' | 'Assigned' | 'Maintenance' | 'Unavailable'
 }
 
 interface VehicleFormModalProps {
@@ -15,7 +15,7 @@ interface VehicleFormModalProps {
   initialData?: Vehicle | null
 }
 
-const AVAILABILITIES = ['Available', 'Assigned', 'Maintenance']
+const AVAILABILITIES = ['Available', 'Assigned', 'Maintenance', 'Unavailable']
 
 export default function VehicleFormModal({ open, onClose, onSave, initialData }: VehicleFormModalProps) {
   const [formData, setFormData] = useState<Partial<Vehicle>>({})
@@ -47,8 +47,8 @@ export default function VehicleFormModal({ open, onClose, onSave, initialData }:
     const newErrors: Record<string, string> = {}
     if (!formData.licensePlate?.trim()) {
       newErrors.licensePlate = 'License plate is required'
-    } else if (!/^[A-Z0-9-\s]{4,15}$/i.test(formData.licensePlate)) {
-      newErrors.licensePlate = 'Invalid format (e.g., WP BAC-1234)'
+    } else if (!/^[A-Z]{2}-([A-Z]{2,3}|\d{2,3})-\d{4}$/.test(formData.licensePlate)) {
+      newErrors.licensePlate = 'Invalid format (e.g., WP-ABC-1234 or WP-123-1234)'
     }
 
     if (!formData.capacity || formData.capacity <= 0) {
@@ -96,7 +96,7 @@ export default function VehicleFormModal({ open, onClose, onSave, initialData }:
             <TextField
               fullWidth
               type="number"
-              label="Capacity"
+              label="Capacity (KG)"
               value={formData.capacity || ''}
               onChange={handleChange('capacity')}
               error={!!errors.capacity}

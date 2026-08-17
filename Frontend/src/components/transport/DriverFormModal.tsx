@@ -48,7 +48,11 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
   const validate = () => {
     const newErrors: Record<string, string> = {}
     if (!formData.name?.trim()) newErrors.name = 'Name is required'
-    if (!formData.licenseNumber?.trim()) newErrors.licenseNumber = 'License Number is required'
+    if (!formData.licenseNumber?.trim()) {
+      newErrors.licenseNumber = 'License Number is required'
+    } else if (!/^L-\d{9}$/.test(formData.licenseNumber)) {
+      newErrors.licenseNumber = 'Invalid format (e.g., L-123456789)'
+    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -106,7 +110,7 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
               value={formData.availability || ''}
               onChange={handleChange('availability')}
             >
-              {AVAILABILITIES.map((availability) => (
+              {AVAILABILITIES.filter(a => initialData || a !== 'Assigned').map((availability) => (
                 <MenuItem key={availability} value={availability}>
                   {availability}
                 </MenuItem>

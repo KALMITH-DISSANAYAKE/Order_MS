@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Button, Paper, Chip, IconButton, Typography, Grid, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, } from '@mui/material'
+import { Box, Button, Paper, Chip, IconButton, Typography, Grid, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Snackbar, Alert } from '@mui/material'
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import { Add, Edit, Delete, Link as LinkIcon } from '@mui/icons-material'
 import PageHeader from '../../components/common/PageHeader'
@@ -21,6 +21,11 @@ export default function TransportList() {
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [links, setLinks] = useState<DriverVehicleLink[]>([])
 
+  // Search state
+  const [linkSearch, setLinkSearch] = useState({ driverName: '', vehiclePlate: '' })
+  const [vehicleSearch, setVehicleSearch] = useState({ licensePlate: '', capacity: '', availability: '' })
+  const [driverSearch, setDriverSearch] = useState({ name: '', licenseNumber: '', availability: '' })
+
   // Modals state
   const [isVehicleModalOpen, setVehicleModalOpen] = useState(false)
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null)
@@ -30,6 +35,14 @@ export default function TransportList() {
 
   const [isLinkModalOpen, setLinkModalOpen] = useState(false)
   const [newLinkData, setNewLinkData] = useState({ driverId: '', vehicleId: '' })
+
+  const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success' | 'error'}>({
+    open: false,
+    message: '',
+    severity: 'success'
+  })
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false })
 
   useEffect(() => {
     fetchVehicles()
@@ -94,13 +107,16 @@ export default function TransportList() {
       }
       if (editingVehicle) {
         await axiosInstance.put(`/Transport/vehicles/${editingVehicle.id}`, payload)
+        setSnackbar({ open: true, message: 'Vehicle updated successfully!', severity: 'success' })
       } else {
         await axiosInstance.post('/Transport/vehicles', payload)
+        setSnackbar({ open: true, message: 'Vehicle added successfully!', severity: 'success' })
       }
       fetchVehicles()
-    } catch (err) {
+      setVehicleModalOpen(false)
+    } catch (err: any) {
       console.error('Error saving vehicle', err)
-      alert('Failed to save vehicle')
+      setSnackbar({ open: true, message: err.response?.data?.message || 'Failed to save vehicle', severity: 'error' })
     }
   }
 
@@ -117,13 +133,16 @@ export default function TransportList() {
       }
       if (editingDriver) {
         await axiosInstance.put(`/Transport/drivers/${editingDriver.id}`, payload)
+        setSnackbar({ open: true, message: 'Driver updated successfully!', severity: 'success' })
       } else {
         await axiosInstance.post('/Transport/drivers', payload)
+        setSnackbar({ open: true, message: 'Driver added successfully!', severity: 'success' })
       }
       fetchDrivers()
-    } catch (err) {
+      setDriverModalOpen(false)
+    } catch (err: any) {
       console.error('Error saving driver', err)
-      alert('Failed to save driver')
+      setSnackbar({ open: true, message: err.response?.data?.message || 'Failed to save driver', severity: 'error' })
     }
   }
 
@@ -142,9 +161,12 @@ export default function TransportList() {
       setLinkModalOpen(false)
       setNewLinkData({ driverId: '', vehicleId: '' })
       fetchLinks()
-    } catch (err) {
+      fetchVehicles()
+      fetchDrivers()
+      setSnackbar({ open: true, message: 'Assignment created successfully!', severity: 'success' })
+    } catch (err: any) {
       console.error('Error creating link', err)
-      alert('Failed to create assignment')
+      setSnackbar({ open: true, message: err.response?.data?.message || 'Failed to create assignment', severity: 'error' })
     }
   }
 
@@ -153,9 +175,12 @@ export default function TransportList() {
       try {
         await axiosInstance.delete(`/Transport/links/${id}`)
         fetchLinks()
-      } catch (err) {
+        fetchVehicles()
+        fetchDrivers()
+        setSnackbar({ open: true, message: 'Assignment deleted successfully!', severity: 'success' })
+      } catch (err: any) {
         console.error('Error deleting link', err)
-        alert('Failed to delete assignment')
+        setSnackbar({ open: true, message: err.response?.data?.message || 'Failed to delete assignment', severity: 'error' })
       }
     }
   }
@@ -210,6 +235,23 @@ export default function TransportList() {
     },
   ]
 
+  const filteredLinks = links.filter(l => 
+    l.driverName.toLowerCase().includes(linkSearch.driverName.toLowerCase()) &&
+    l.vehiclePlate.toLowerCase().includes(linkSearch.vehiclePlate.toLowerCase())
+  )
+
+  const filteredVehicles = vehicles.filter(v => 
+    v.licensePlate.toLowerCase().includes(vehicleSearch.licensePlate.toLowerCase()) &&
+    (vehicleSearch.capacity === '' || v.capacity >= Number(vehicleSearch.capacity)) &&
+    (vehicleSearch.availability === '' || v.availability === vehicleSearch.availability)
+  )
+
+  const filteredDrivers = drivers.filter(d => 
+    d.name.toLowerCase().includes(driverSearch.name.toLowerCase()) &&
+    d.licenseNumber.toLowerCase().includes(driverSearch.licenseNumber.toLowerCase()) &&
+    (driverSearch.availability === '' || d.availability === driverSearch.availability)
+  )
+
   return (
     <Box>
       <Box className="flex flex-col gap-4 justify-between items-start mb-6 sm:flex-row sm:items-center">
@@ -224,25 +266,55 @@ export default function TransportList() {
         </Box>
       </Box>
 
-      <Box className="flex justify-between items-end mb-6">
+      <Box className="flex justify-between items-end mb-3">
         <Typography variant="h6" className="!font-bold">Active Driver-Vehicle Assignments</Typography>
         <Button variant="outlined" color="primary" startIcon={<LinkIcon />} onClick={() => setLinkModalOpen(true)}>
           Assign Driver to Vehicle
         </Button>
       </Box>
 
+      <Box className="flex gap-4 mb-4">
+        <input type="text" placeholder="Driver Name" className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={linkSearch.driverName} onChange={(e) => setLinkSearch({ ...linkSearch, driverName: e.target.value })} />
+        <input type="text" placeholder="Vehicle Plate" className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={linkSearch.vehiclePlate} onChange={(e) => setLinkSearch({ ...linkSearch, vehiclePlate: e.target.value })} />
+      </Box>
+
       <Paper className="overflow-hidden mb-8 rounded-xl shadow-sm" style={{ height: 400, width: '100%' }}>
-        <DataGrid rows={links} columns={linkColumns} pageSizeOptions={[5, 10]} initialState={{ pagination: { paginationModel: { pageSize: 5 } } }} disableRowSelectionOnClick />
+        <DataGrid rows={filteredLinks} columns={linkColumns} pageSizeOptions={[5, 10]} initialState={{ pagination: { paginationModel: { pageSize: 5 } } }} disableRowSelectionOnClick />
       </Paper>
 
       <Typography variant="h6" className="!font-bold !mb-3">Vehicles</Typography>
+      
+      <Box className="flex gap-4 mb-4">
+        <input type="text" placeholder="License Plate" className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={vehicleSearch.licensePlate} onChange={(e) => setVehicleSearch({ ...vehicleSearch, licensePlate: e.target.value })} />
+        <input type="number" placeholder="Min Capacity" className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={vehicleSearch.capacity} onChange={(e) => setVehicleSearch({ ...vehicleSearch, capacity: e.target.value })} />
+        <select className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={vehicleSearch.availability} onChange={(e) => setVehicleSearch({ ...vehicleSearch, availability: e.target.value })}>
+          <option value="">All Statuses</option>
+          <option value="Available">Available</option>
+          <option value="Assigned">Assigned</option>
+          <option value="Unavailable">Unavailable</option>
+          <option value="Maintenance">Maintenance</option>
+        </select>
+      </Box>
+
       <Paper className="overflow-hidden mb-8 rounded-xl shadow-sm" style={{ height: 400, width: '100%' }}>
-        <DataGrid rows={vehicles} columns={vehicleColumns} pageSizeOptions={[5, 10]} initialState={{ pagination: { paginationModel: { pageSize: 5 } } }} disableRowSelectionOnClick />
+        <DataGrid rows={filteredVehicles} columns={vehicleColumns} pageSizeOptions={[5, 10]} initialState={{ pagination: { paginationModel: { pageSize: 5 } } }} disableRowSelectionOnClick />
       </Paper>
 
       <Typography variant="h6" className="!font-bold !mb-3">Drivers</Typography>
+
+      <Box className="flex gap-4 mb-4">
+        <input type="text" placeholder="Driver Name" className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={driverSearch.name} onChange={(e) => setDriverSearch({ ...driverSearch, name: e.target.value })} />
+        <input type="text" placeholder="License Number" className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={driverSearch.licenseNumber} onChange={(e) => setDriverSearch({ ...driverSearch, licenseNumber: e.target.value })} />
+        <select className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={driverSearch.availability} onChange={(e) => setDriverSearch({ ...driverSearch, availability: e.target.value })}>
+          <option value="">All Statuses</option>
+          <option value="Available">Available</option>
+          <option value="Assigned">Assigned</option>
+          <option value="Unavailable">Unavailable</option>
+        </select>
+      </Box>
+
       <Paper className="overflow-hidden mb-8 rounded-xl shadow-sm" style={{ height: 400, width: '100%' }}>
-        <DataGrid rows={drivers} columns={driverColumns} pageSizeOptions={[5, 10]} initialState={{ pagination: { paginationModel: { pageSize: 5 } } }} disableRowSelectionOnClick />
+        <DataGrid rows={filteredDrivers} columns={driverColumns} pageSizeOptions={[5, 10]} initialState={{ pagination: { paginationModel: { pageSize: 5 } } }} disableRowSelectionOnClick />
       </Paper>
 
       <VehicleFormModal open={isVehicleModalOpen} onClose={() => setVehicleModalOpen(false)} onSave={handleSaveVehicle} initialData={editingVehicle} />
@@ -275,6 +347,12 @@ export default function TransportList() {
           <Button onClick={handleCreateLink} variant="contained" color="primary" className="!rounded-lg" disabled={!newLinkData.driverId || !newLinkData.vehicleId}>Create Assignment</Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

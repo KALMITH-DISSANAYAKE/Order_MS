@@ -80,6 +80,13 @@ namespace Order_MS.Repositories
             return true;
         }
 
+        public async Task<bool> HasAssignmentsForLinkAsync(int connectionId)
+        {
+            var inTransport = await _context.TransportAssignments.AnyAsync(ta => ta.ConnectionId == connectionId);
+            var inOrders = await _context.Orders.AnyAsync(o => o.ConnectionId == connectionId);
+            return inTransport || inOrders;
+        }
+
 
         public async Task<IEnumerable<TransportAssignment>> GetAllAssignmentsAsync()
         {

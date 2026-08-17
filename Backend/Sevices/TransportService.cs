@@ -44,6 +44,12 @@ namespace Order_MS.Services
             };
 
             await _repo.AddDriverVehicleLinkAsync(link);
+
+            var driver = await _repo.GetDriverByIdAsync(dto.DriverId);
+            if (driver != null) driver.Available = "Assigned";
+
+            var vehicle = await _repo.GetVehicleByIdAsync(dto.VehicleId);
+            if (vehicle != null) vehicle.Available = "Assigned";
             
             try
             {
@@ -63,6 +69,24 @@ namespace Order_MS.Services
 
         public async Task<(bool Success, string Message)> DeleteDriverVehicleLinkAsync(int connectionId)
         {
+            var isAssigned = await _repo.HasAssignmentsForLinkAsync(connectionId);
+            if (isAssigned)
+            {
+                return (false, "Cannot delete because this link is assigned to an order request.");
+            }
+
+            var allLinks = await _repo.GetAllDriverVehicleLinksAsync();
+            var link = allLinks.FirstOrDefault(l => l.ConnectionId == connectionId);
+
+            if (link != null)
+            {
+                var driver = await _repo.GetDriverByIdAsync(link.DriverId);
+                if (driver != null) driver.Available = "Available";
+
+                var vehicle = await _repo.GetVehicleByIdAsync(link.VehicleId);
+                if (vehicle != null) vehicle.Available = "Available";
+            }
+
             var deleted = await _repo.DeleteDriverVehicleLinkAsync(connectionId);
             if (!deleted)
                 return (false, $"Driver-vehicle link #{connectionId} not found.");
@@ -257,6 +281,12 @@ namespace Order_MS.Services
 
         public async Task<(bool Success, string Message, DriverDto? Data)> CreateDriverAsync(CreateDriverDto dto)
         {
+            var existingDrivers = await _repo.GetDriversAsync();
+            if (existingDrivers.Any(d => d.LicenseNumber == dto.LicenseNumber))
+            {
+                return (false, $"Driver with License Number {dto.LicenseNumber} already exists.", null);
+            }
+
             var driver = new Driver
             {
                 DriversName = dto.DriversName,

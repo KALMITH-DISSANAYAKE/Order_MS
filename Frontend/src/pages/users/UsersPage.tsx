@@ -42,22 +42,21 @@ interface UserRow {
   isActive: boolean
 }
 
+interface BranchOption {
+  branchId: number;    
+  branchCode: string;    
+  location: string;      
+}
+
 const roleOptions = ['BranchManager', 'InventoryManager', 'TransportDepartment']
-const branchOptions = ['Colombo - Bambalapitiya', 'Colombo - Nugegoda', 'Kandy - City Center', 'Galle - Fort']
+
+
 
 // Map role name to role_id (must match your DB)
 const roleToId: Record<string, number> = {
   'BranchManager': 1,
   'InventoryManager': 2,
   'TransportDepartment': 3,
-}
-
-// Map branch name to branch_id (must match your DB)
-const branchToId: Record<string, number> = {
-  'Colombo - Bambalapitiya': 1,
-  'Colombo - Nugegoda': 2,
-  'Kandy - City Center': 3,
-  'Galle - Fort': 4,
 }
 
 export default function UsersPage() {
@@ -81,7 +80,20 @@ export default function UsersPage() {
   // ─── FETCH FROM BACKEND ON LOAD ───
   useEffect(() => {
     fetchUsers()
+    fetchBranches();
   }, [])
+
+  // ─── FETCH BRANCHES FOR DROPDOWN ───
+const fetchBranches = async () => {
+  try {
+    const res = await axiosInstance.get('/branches');
+    setBranches(res.data);
+  } catch (err: any) {
+    console.error('Failed to load branches', err);
+  }
+};
+// Map branch name to branch_id (must match your DB)
+const [branches, setBranches] = useState<BranchOption[]>([]);
 
 const fetchUsers = async () => {
   try {
@@ -151,14 +163,19 @@ const fetchUsers = async () => {
 
   // ─── CREATE / UPDATE ───
   const handleSave = async () => {
-    const payload = {
-      FirstName: form.firstName,
-      LastName: form.lastName,
-      Username: form.username,
-      Password: form.password,
-      RoleId: roleToId[form.role],
-      BranchId: isBranchManager && form.branch ? branchToId[form.branch] : null,
-    }
+
+    const selectedBranch = branches.find(
+        (b) => `${b.branchCode} - ${b.location}` === form.branch
+      );
+
+      const payload = {
+        FirstName: form.firstName,
+        LastName: form.lastName,
+        Username: form.username,
+        Password: form.password,
+        RoleId: roleToId[form.role],
+        BranchId: isBranchManager && selectedBranch ? selectedBranch.branchId : null,
+      };
 
     try {
       setLoading(true)
@@ -194,14 +211,14 @@ const fetchUsers = async () => {
     {
       field: 'fullName',
       headerName: 'Full Name',
-      width: 180,
+      width: 230,
       valueGetter: (_, row) => `${row.firstName} ${row.lastName}`,
     },
     { field: 'username', headerName: 'Username', width: 150 },
     {
       field: 'role',
       headerName: 'Role',
-      width: 180,
+      width: 250,
       renderCell: (params: GridRenderCellParams<UserRow>) => (
         <Chip
           label={params.value}
@@ -216,27 +233,11 @@ const fetchUsers = async () => {
         />
       ),
     },
-    { field: 'branch', headerName: 'Branch', width: 200 },
-    {
-      field: 'isActive',
-      headerName: 'Status',
-      width: 120,
-      renderCell: (params: GridRenderCellParams<UserRow>) => (
-        <Chip
-          label={params.value ? 'Active' : 'Inactive'}
-          size="small"
-          className={
-            params.value
-              ? '!bg-green-50 !text-green-700 !border !border-green-200'
-              : '!bg-gray-100 !text-gray-500 !border !border-gray-200'
-          }
-        />
-      ),
-    },
+    { field: 'branch', headerName: 'Branch', width: 300 },
     {
         field: 'actions',
         headerName: 'Actions',
-        width: 120,
+        width: 150,
         sortable: false,
         filterable: false,
         renderCell: (params: GridRenderCellParams<UserRow>) => (
@@ -286,6 +287,8 @@ const fetchUsers = async () => {
         <DataGrid
           rows={filtered}
           columns={columns}
+          disableColumnFilter
+          disableColumnMenu
           //getRowId={(row) => row.id ?? row.Id ?? 0} 
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           pageSizeOptions={[5, 10, 25]}
@@ -365,6 +368,7 @@ const fetchUsers = async () => {
                 ))}
               </Select>
             </FormControl>
+
             {isBranchManager && (
               <FormControl fullWidth required={isBranchManager}>
                 <InputLabel>Branch</InputLabel>
@@ -373,8 +377,14 @@ const fetchUsers = async () => {
                   label="Branch"
                   onChange={(e) => setForm({ ...form, branch: e.target.value })}
                 >
-                  {branchOptions.map((b) => (
-                    <MenuItem key={b} value={b}>{b}</MenuItem>
+                  <MenuItem value=""><em>Select a branch</em></MenuItem>
+                  {branches.map((b) => (
+                    <MenuItem
+                      key={b.branchId}
+                      value={`${b.branchCode} - ${b.location}`}
+                    >
+                      {b.branchCode} - {b.location}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>

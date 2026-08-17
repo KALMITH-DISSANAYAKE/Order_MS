@@ -14,7 +14,9 @@ export interface OrderRequest {
   totalQuantity: number
   totalPrice: number
   requestedOn: string
-  requestedBy: string  // Change to string (username)
+  firstName: string
+  lastName: string
+  branchCode: number
   items?: OrderRequestItem[]
 }
 
@@ -102,7 +104,7 @@ export const orderRequestApi = {
    * uses a different Item URL.
    */
   async getItems(): Promise<Item[]> {
-    const response = await axiosInstance.get<Item[]>('/Inventory/Items')
+    const response = await axiosInstance.get<Item[]>('/Inventory/items')
 
     return response.data
   },

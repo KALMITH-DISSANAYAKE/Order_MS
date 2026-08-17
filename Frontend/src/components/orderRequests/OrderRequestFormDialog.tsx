@@ -1,8 +1,8 @@
-import { useState } from 'react'
 import axios from 'axios'
 
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -12,13 +12,15 @@ import {
   IconButton,
   TextField,
   Typography,
+  CircularProgress,
 } from '@mui/material'
 
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 
 import { useAuth } from '../../contexts/AuthContext'
-import { orderRequestApi } from '../../api/orderRequestApi'
+import { Item, orderRequestApi } from '../../api/orderRequestApi'
+import { useEffect, useState } from 'react'
 
 interface FormItem {
   itemId: number | ''
@@ -47,6 +49,34 @@ export default function OrderRequestFormDialog({
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [availableItems, setAvailableItems] = useState<Item[]>([])
+  const [itemsLoading, setItemsLoading] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+
+    const loadItems = async () => {
+      try {
+        setItemsLoading(true)
+        setError('')
+
+        const data = await orderRequestApi.getItems()
+        console.log('Available items:', data)
+        setAvailableItems(data)
+      } catch (error: any) {
+        console.error('Failed to load items:', error)
+
+        setError(
+          error.response?.data?.message ||
+          'Unable to load available products.'
+        )
+      } finally {
+        setItemsLoading(false)
+      }
+    }
+
+    loadItems()
+  }, [open])
 
   const updateItem = (
     index: number,
@@ -57,9 +87,9 @@ export default function OrderRequestFormDialog({
       current.map((item, itemIndex) =>
         itemIndex === index
           ? {
-              ...item,
-              [field]: value,
-            }
+            ...item,
+            [field]: value,
+          }
           : item
       )
     )
@@ -240,10 +270,10 @@ export default function OrderRequestFormDialog({
          * Handle 404 specifically
          */
         else if (status === 404) {
-  message =
-    error.response?.data?.message ||
-    'The requested item was not found.'
-}
+          message =
+            error.response?.data?.message ||
+            'The requested item was not found.'
+        }
 
         /*
          * Handle 400
@@ -389,27 +419,79 @@ export default function OrderRequestFormDialog({
 
             {/* Item ID */}
 
-            <TextField
-              label="Item ID"
-              type="number"
-              value={item.itemId}
-              onChange={(event) =>
+            <Autocomplete
+              fullWidth
+              options={availableItems}
+              loading={itemsLoading}
+              value={
+                availableItems.find(
+                  (availableItem) =>
+                    availableItem.itemId === item.itemId
+                ) || null
+              }
+              getOptionLabel={(option) =>
+                `${option.itemName} (ID: ${option.itemId})`
+              }
+              isOptionEqualToValue={(option, value) =>
+                option.itemId === value.itemId
+              }
+              onChange={(_, selectedItem) => {
                 updateItem(
                   index,
                   'itemId',
-                  event.target.value === ''
-                    ? ''
-                    : Number(
-                        event.target.value
-                      )
+                  selectedItem
+                    ? selectedItem.itemId
+                    : ''
                 )
-              }
-              inputProps={{
-                min: 1,
-                step: 1,
               }}
               disabled={submitting}
-              fullWidth
+              filterOptions={(options, state) => {
+                const searchValue =
+                  state.inputValue.toLowerCase().trim()
+
+                return options.filter((option) =>
+                  `${option.itemName} ${option.itemId}`
+                    .toLowerCase()
+                    .includes(searchValue)
+                )
+              }}
+              renderOption={(props, option) => (
+                <li {...props} key={option.itemId}>
+                  <Box>
+                    <Typography fontWeight={600}>
+                      {option.itemName}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                    >
+                      Item ID: {option.itemId}
+                    </Typography>
+                  </Box>
+                </li>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Product"
+                  placeholder="Search product..."
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {itemsLoading && (
+                          <CircularProgress
+                            size={20}
+                          />
+                        )}
+
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
             />
 
             {/* Quantity */}
@@ -425,8 +507,8 @@ export default function OrderRequestFormDialog({
                   event.target.value === ''
                     ? ''
                     : Number(
-                        event.target.value
-                      )
+                      event.target.value
+                    )
                 )
               }
               inputProps={{
@@ -475,8 +557,8 @@ export default function OrderRequestFormDialog({
           color="text.secondary"
           sx={{ mt: 2 }}
         >
-          Enter the Item ID from the inventory
-          table and the required quantity.
+          Select a product from the inventory and enter
+          the required quantity.
         </Typography>
 
       </DialogContent>

@@ -157,3 +157,5 @@ Backend/obj/Debug/net8.0/staticwebassets.build.json.cache
 Backend/obj/Debug/net8.0/swae.build.ex.cache
 Backend/obj/Debug/net8.0/ref/Order_MS.dll
 Backend/obj/Debug/net8.0/refint/Order_MS.dll
+OrderMSDbContext.cs
+appsettings.json

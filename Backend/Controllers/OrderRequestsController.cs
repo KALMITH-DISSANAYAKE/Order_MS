@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Interfaces;
+using System.Security.Claims;
 
 namespace Order_MS.Controllers;
 
@@ -17,6 +18,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPost]
+    // [Authorize(Roles = "BranchManager")]
     //[Authorize(Roles = "BranchManager")]
     public async Task<IActionResult> CreateOrderRequest(
         CreateOrderRequestDTO dto)
@@ -27,6 +29,24 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpGet]
+// [Authorize(Roles = "BranchManager,InventoryManager")]
+public async Task<IActionResult> GetAllOrderRequests()
+{
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+        return Unauthorized();
+    }
+
+    if (!int.TryParse(userIdClaim, out int userId))
+    {
+        return Unauthorized();
+    }
+
+    var result = await _orderRequestService.GetAllOrderRequests(userId);
+    return Ok(result);
+}
     //[Authorize(Roles = "BranchManager,InventoryManager")]
     public async Task<IActionResult> GetAllOrderRequests()
     {
@@ -36,6 +56,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpGet("{id}")]
+   // [Authorize(Roles = "BranchManager,InventoryManager")]
     //[Authorize(Roles = "BranchManager,InventoryManager")]
     public async Task<IActionResult> GetOrderRequestById(int id)
     {
@@ -45,6 +66,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPut("{id}/approve")]
+   // [Authorize(Roles = "InventoryManager")]
     //[Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> ApproveOrderRequest(
         int id,
@@ -57,6 +79,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPut("{id}/reject")]
+    // [Authorize(Roles = "InventoryManager")]
     //[Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> RejectOrderRequest(int id)
     {
@@ -67,6 +90,7 @@ public class OrderRequestController : ControllerBase
     }
 
     [HttpPut("{id}/payment")]
+   // [Authorize(Roles = "InventoryManager")]
     //[Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> MakePayment(int id)
     {

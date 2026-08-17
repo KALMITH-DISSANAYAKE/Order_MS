@@ -51,6 +51,9 @@ public class OrderRequestResponseDTO
     public decimal TotalPrice { get; set; }
 
     public DateTime RequestedOn { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string BranchCode { get; set; } = string.Empty;
 
     public List<OrderRequestLineResponseDTO> Items { get; set; }
 }
@@ -68,6 +71,9 @@ public class OrderRequestListDTO
     public DateTime RequestedOn { get; set; }
 
     public string RequestedBy { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string BranchCode { get; set; } = string.Empty;
 }
 
 public class ApproveOrderRequestDTO

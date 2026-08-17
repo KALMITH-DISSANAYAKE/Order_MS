@@ -19,6 +19,7 @@ import {
   TableRow,
   TextField,
   Typography,
+  TablePagination,
 } from '@mui/material'
 
 import AddIcon from '@mui/icons-material/Add'
@@ -51,6 +52,8 @@ export default function OrderRequestsPage() {
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const [createOpen, setCreateOpen] = useState(false)
 
@@ -102,9 +105,9 @@ export default function OrderRequestsPage() {
 
       setError(
         error.response?.data?.message ||
-          error.response?.data?.title ||
-          error.message ||
-          'Unable to load order requests.'
+        error.response?.data?.title ||
+        error.message ||
+        'Unable to load order requests.'
       )
     } finally {
       setLoading(false)
@@ -115,6 +118,9 @@ export default function OrderRequestsPage() {
     loadRequests()
   }, [])
 
+  useEffect(() => {
+    setPage(0)
+  }, [search, statusFilter])
   // --------------------------------------------------
   // STATUS LIST
   // --------------------------------------------------
@@ -136,23 +142,23 @@ export default function OrderRequestsPage() {
   // --------------------------------------------------
 
   const filteredRequests = useMemo(() => {
-    const searchTerm =
-      search.trim().toLowerCase()
+    const searchTerm = search.trim().toLowerCase()
 
     return requests.filter((request) => {
+      const orderId = String(request.orderReqId)
+      const branchCode = String(
+        request.branchCode ?? ''
+      ).toLowerCase()
+
       const matchesSearch =
         !searchTerm ||
-        String(request.orderReqId).includes(
-          searchTerm
-        ) ||
-        String(request.requestedBy)
-          .toLowerCase()
-          .includes(searchTerm)
+        orderId.includes(searchTerm) ||
+        branchCode.includes(searchTerm)
 
       const matchesStatus =
         statusFilter === 'all' ||
         request.status.toLowerCase() ===
-          statusFilter.toLowerCase()
+        statusFilter.toLowerCase()
 
       return matchesSearch && matchesStatus
     })
@@ -160,6 +166,20 @@ export default function OrderRequestsPage() {
     requests,
     search,
     statusFilter,
+  ])
+
+  const paginatedRequests = useMemo(() => {
+    const startIndex = page * rowsPerPage
+    const endIndex = startIndex + rowsPerPage
+
+    return filteredRequests.slice(
+      startIndex,
+      endIndex
+    )
+  }, [
+    filteredRequests,
+    page,
+    rowsPerPage,
   ])
 
   // --------------------------------------------------
@@ -378,7 +398,7 @@ export default function OrderRequestsPage() {
             >
               <TextField
                 label="Search"
-                placeholder="ID or requester"
+                placeholder="Search Order ID or Branch Code"
                 value={search}
                 onChange={(event) =>
                   setSearch(event.target.value)
@@ -501,7 +521,7 @@ export default function OrderRequestsPage() {
                 sx={{ mt: 1 }}
               >
                 {search ||
-                statusFilter !== 'all'
+                  statusFilter !== 'all'
                   ? 'Try changing your search or filter.'
                   : 'There are no order requests yet.'}
               </Typography>
@@ -527,6 +547,10 @@ export default function OrderRequestsPage() {
                     </TableCell>
 
                     <TableCell>
+                      Branch
+                    </TableCell>
+
+                    <TableCell>
                       Status
                     </TableCell>
 
@@ -549,7 +573,7 @@ export default function OrderRequestsPage() {
                 </TableHead>
 
                 <TableBody>
-                  {filteredRequests.map(
+                  {paginatedRequests.map(
                     (request) => {
 
                       /*
@@ -596,9 +620,12 @@ export default function OrderRequestsPage() {
 
                           {/* REQUESTER */}
                           <TableCell>
-                            {
-                              request.requestedBy
-                            }
+                            {request.firstName} {request.lastName}
+                          </TableCell>
+
+                          {/* BRANCH */}
+                          <TableCell>
+                            {request.branchCode}
                           </TableCell>
 
                           {/* STATUS */}
@@ -737,7 +764,27 @@ export default function OrderRequestsPage() {
                 </TableBody>
               </Table>
             </TableContainer>
+
           )}
+
+          <TablePagination
+            component="div"
+            count={filteredRequests.length}
+            page={page}
+            onPageChange={(_, newPage) => {
+              setPage(newPage)
+            }}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(
+                parseInt(event.target.value, 10)
+              )
+              setPage(0)
+            }}
+            rowsPerPageOptions={[5, 10, 25, 50]}
+          />
+
+
         </CardContent>
       </Card>
 

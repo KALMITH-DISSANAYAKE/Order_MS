@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Interfaces;
@@ -19,7 +19,6 @@ public class OrderRequestController : ControllerBase
 
     [HttpPost]
     // [Authorize(Roles = "BranchManager")]
-    //[Authorize(Roles = "BranchManager")]
     public async Task<IActionResult> CreateOrderRequest(
         CreateOrderRequestDTO dto)
     {
@@ -47,17 +46,10 @@ public async Task<IActionResult> GetAllOrderRequests()
     var result = await _orderRequestService.GetAllOrderRequests(userId);
     return Ok(result);
 }
-    //[Authorize(Roles = "BranchManager,InventoryManager")]
-    public async Task<IActionResult> GetAllOrderRequests()
-    {
-        var result = await _orderRequestService.GetAllOrderRequests();
 
-        return Ok(result);
-    }
 
     [HttpGet("{id}")]
    // [Authorize(Roles = "BranchManager,InventoryManager")]
-    //[Authorize(Roles = "BranchManager,InventoryManager")]
     public async Task<IActionResult> GetOrderRequestById(int id)
     {
         var result = await _orderRequestService.GetOrderRequestById(id);
@@ -67,7 +59,6 @@ public async Task<IActionResult> GetAllOrderRequests()
 
     [HttpPut("{id}/approve")]
    // [Authorize(Roles = "InventoryManager")]
-    //[Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> ApproveOrderRequest(
         int id,
         ApproveOrderRequestDTO dto)
@@ -80,7 +71,6 @@ public async Task<IActionResult> GetAllOrderRequests()
 
     [HttpPut("{id}/reject")]
     // [Authorize(Roles = "InventoryManager")]
-    //[Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> RejectOrderRequest(int id)
     {
         var result = await _orderRequestService
@@ -91,7 +81,6 @@ public async Task<IActionResult> GetAllOrderRequests()
 
     [HttpPut("{id}/payment")]
    // [Authorize(Roles = "InventoryManager")]
-    //[Authorize(Roles = "InventoryManager")]
     public async Task<IActionResult> MakePayment(int id)
     {
         var result = await _orderRequestService

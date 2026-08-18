@@ -335,7 +335,18 @@ public class OrderService : IOrderService
 
             order.OrderRemark = dto.OrderRemark;
             if (!string.IsNullOrEmpty(dto.OrderStatus))
+            {
                 order.OrderStatus = dto.OrderStatus;
+                
+                if (dto.OrderStatus == "Delivered" && order.ConnectionId.HasValue)
+                {
+                    var connection = await _context.DriverVehicleLinks.FindAsync(order.ConnectionId.Value);
+                    if (connection != null)
+                    {
+                        connection.Status = "Available";
+                    }
+                }
+            }
 
             order.ModifiedBy = modifiedBy;
             order.ModifiedOn = DateTime.UtcNow;

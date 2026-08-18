@@ -22,7 +22,7 @@ export default function TransportList() {
   const [links, setLinks] = useState<DriverVehicleLink[]>([])
 
   // Search state
-  const [linkSearch, setLinkSearch] = useState({ driverName: '', vehiclePlate: '' })
+  const [linkSearch, setLinkSearch] = useState({ driverName: '', vehiclePlate: '', availability: '' })
   const [vehicleSearch, setVehicleSearch] = useState({ licensePlate: '', capacity: '', availability: '' })
   const [driverSearch, setDriverSearch] = useState({ name: '', licenseNumber: '', availability: '' })
 
@@ -256,7 +256,8 @@ export default function TransportList() {
 
   const filteredLinks = links.filter(l => 
     l.driverName.toLowerCase().includes(linkSearch.driverName.toLowerCase()) &&
-    l.vehiclePlate.toLowerCase().includes(linkSearch.vehiclePlate.toLowerCase())
+    l.vehiclePlate.toLowerCase().includes(linkSearch.vehiclePlate.toLowerCase()) &&
+    (linkSearch.availability === '' || l.availability === linkSearch.availability)
   )
 
   const filteredVehicles = vehicles.filter(v => 
@@ -295,6 +296,12 @@ export default function TransportList() {
       <Box className="flex gap-4 mb-4">
         <input type="text" placeholder="Driver Name" className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={linkSearch.driverName} onChange={(e) => setLinkSearch({ ...linkSearch, driverName: e.target.value })} />
         <input type="text" placeholder="Vehicle Plate" className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={linkSearch.vehiclePlate} onChange={(e) => setLinkSearch({ ...linkSearch, vehiclePlate: e.target.value })} />
+        <select className="border p-2 rounded text-sm flex-1 min-w-[120px]" value={linkSearch.availability} onChange={(e) => setLinkSearch({ ...linkSearch, availability: e.target.value })}>
+          <option value="">All Statuses</option>
+          <option value="Available">Available</option>
+          <option value="Assigned">Assigned</option>
+          <option value="Unavailable">Unavailable</option>
+        </select>
       </Box>
 
       <Paper className="overflow-hidden mb-8 rounded-xl shadow-sm" style={{ height: 400, width: '100%' }}>

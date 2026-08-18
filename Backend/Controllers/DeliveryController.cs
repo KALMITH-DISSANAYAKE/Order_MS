@@ -62,7 +62,11 @@ namespace Order_MS.Controllers
         {
             try
             {
-                var (success, message) = await _deliveryService.AssignDeliveryAsync(id, dto);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(userIdClaim, out int userId);
+                if (userId == 0) userId = 1;
+
+                var (success, message) = await _deliveryService.AssignDeliveryAsync(id, dto, userId);
                 if (!success)
                     return NotFound(new { message });
 

@@ -6,6 +6,6 @@ namespace Order_MS.Services
     {
         Task<IEnumerable<DeliveryListDto>> GetAllDeliveriesAsync();
         Task<DeliveryDetailDto?> GetDeliveryByIdAsync(int orderReqId);
-        Task<(bool Success, string Message)> AssignDeliveryAsync(int orderReqId, AssignDeliveryDto dto);
+        Task<(bool Success, string Message)> AssignDeliveryAsync(int orderReqId, AssignDeliveryDto dto, int? modifiedBy = null);
     }
 }

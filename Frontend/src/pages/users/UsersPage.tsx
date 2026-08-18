@@ -123,7 +123,7 @@ export default function UsersPage() {
           isActive: true,
         }
       })
-
+      .filter((u: UserRow) => u.role !== 'Admin')
       console.log('MAPPED:', mapped)
       setUsers(mapped)
     } catch (err: any) {

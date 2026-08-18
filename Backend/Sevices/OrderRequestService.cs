@@ -255,6 +255,8 @@ public class OrderRequestService : IOrderRequestService
         request.ReqStatus = "Approved";
         request.ApprovedBy = approvedBy;
         request.ApprovedOn = DateTime.Now;
+        request.ModifiedBy = approvedBy;
+        request.ModifiedOn = DateTime.Now;
 
         var transportAssignment = new TransportAssignment
         {
@@ -308,6 +310,7 @@ public class OrderRequestService : IOrderRequestService
         }
 
         request.ReqStatus = "Rejected";
+        request.ModifiedOn = DateTime.Now;
 
         await _context.SaveChangesAsync();
 
@@ -351,6 +354,7 @@ public class OrderRequestService : IOrderRequestService
         }
 
         request.ReqStatus = "PaymentSuccessful";
+        request.ModifiedOn = DateTime.Now;
 
         await _context.SaveChangesAsync();
 

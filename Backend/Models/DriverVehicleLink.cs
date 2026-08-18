@@ -13,6 +13,8 @@ public partial class DriverVehicleLink
 
     public DateTime? CreatedOn { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual Driver Driver { get; set; } = null!;
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();

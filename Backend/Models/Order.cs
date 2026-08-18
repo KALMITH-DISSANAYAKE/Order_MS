@@ -25,13 +25,21 @@ public partial class Order
 
     public string? OrderRemark { get; set; }
 
+    public int? OrderRequestedBy { get; set; }
+
+    public int? OrderBranch { get; set; }
+
     public virtual DriverVehicleLink? Connection { get; set; }
 
     public virtual User? CreatedByNavigation { get; set; }
 
     public virtual User? ModifiedByNavigation { get; set; }
 
+    public virtual Branch? OrderBranchNavigation { get; set; }
+
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
 
     public virtual OrderRequest? OrderReq { get; set; }
+
+    public virtual User? OrderRequestedByNavigation { get; set; }
 }

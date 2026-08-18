@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Order_MS.Models;
@@ -16,11 +16,11 @@ public partial class OrderMSDbContext : DbContext
     {
     }
 
-    public virtual DbSet<Branch> Branches { get; set; }
+    public virtual DbSet<Branch> Branches { get; set; } = null!;
 
-    public virtual DbSet<Driver> Drivers { get; set; }
+    public virtual DbSet<Driver> Drivers { get; set; } = null!;
 
-    public virtual DbSet<DriverVehicleLink> DriverVehicleLinks { get; set; }
+    public virtual DbSet<DriverVehicleLink> DriverVehicleLinks { get; set; } = null!;
 
     public virtual DbSet<Inventory> Inventories { get; set; }
 
@@ -45,27 +45,18 @@ public partial class OrderMSDbContext : DbContext
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-<<<<<<< Updated upstream
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=.;Database=OrderMS_DB;Trusted_Connection=True;TrustServerCertificate=True");
-=======
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
-        }
-    }
->>>>>>> Stashed changes
+        => optionsBuilder.UseSqlServer("Server=localhost;Database=OrderMS_DB;User Id=sa;Password=StrongPassw0rd!123;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Branch>(entity =>
         {
-            entity.HasKey(e => e.BranchId).HasName("PK__branch__E55E37DECA38162F");
+            entity.HasKey(e => e.BranchId).HasName("PK__branch__E55E37DE9BB62DC5");
 
             entity.ToTable("branch");
 
-            entity.HasIndex(e => e.BranchCode, "UQ__branch__A9F83E3B0D292C36").IsUnique();
+            entity.HasIndex(e => e.BranchCode, "UQ__branch__A9F83E3BE85F3AD0").IsUnique();
 
             entity.Property(e => e.BranchId).HasColumnName("branch_id");
             entity.Property(e => e.BranchCode)
@@ -97,11 +88,11 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Driver>(entity =>
         {
-            entity.HasKey(e => e.DriverId).HasName("PK__driver__A411C5BDBDA1BD2E");
+            entity.HasKey(e => e.DriverId).HasName("PK__driver__A411C5BD4CB8DB44");
 
             entity.ToTable("driver");
 
-            entity.HasIndex(e => e.LicenseNumber, "UQ__driver__D482A003CB83F0C7").IsUnique();
+            entity.HasIndex(e => e.LicenseNumber, "UQ__driver__D482A00353AD99BD").IsUnique();
 
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.Available)
@@ -127,7 +118,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<DriverVehicleLink>(entity =>
         {
-            entity.HasKey(e => e.ConnectionId).HasName("PK__driver_v__E4AA4DD0107D6412");
+            entity.HasKey(e => e.ConnectionId).HasName("PK__driver_v__E4AA4DD095ACF5D9");
 
             entity.ToTable("driver_vehicle_link");
 
@@ -139,6 +130,11 @@ public partial class OrderMSDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("created_on");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasDefaultValue("Available")
+                .HasColumnName("status");
             entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
 
             entity.HasOne(d => d.Driver).WithMany(p => p.DriverVehicleLinks)
@@ -154,7 +150,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Inventory>(entity =>
         {
-            entity.HasKey(e => e.InventoryId).HasName("PK__inventor__B59ACC496F45AEE7");
+            entity.HasKey(e => e.InventoryId).HasName("PK__inventor__B59ACC49AD704748");
 
             entity.ToTable("inventory");
 
@@ -184,7 +180,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Item>(entity =>
         {
-            entity.HasKey(e => e.ItemId).HasName("PK__item__52020FDD84F96F54");
+            entity.HasKey(e => e.ItemId).HasName("PK__item__52020FDD875935DE");
 
             entity.ToTable("item");
 
@@ -194,6 +190,7 @@ public partial class OrderMSDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_on");
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
             entity.Property(e => e.ItemName)
                 .HasMaxLength(100)
                 .IsUnicode(false)
@@ -209,7 +206,7 @@ public partial class OrderMSDbContext : DbContext
             entity.Property(e => e.UnitPrice)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("unit_price");
-            entity.Property(e => e.IsActive).HasColumnName("is_active");
+
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.ItemCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("FK_item_created_by");
@@ -225,7 +222,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__orders__4659622913AFCB02");
+            entity.HasKey(e => e.OrderId).HasName("PK__orders__465962297B397E59");
 
             entity.ToTable("orders");
 
@@ -240,8 +237,10 @@ public partial class OrderMSDbContext : DbContext
             entity.Property(e => e.ModifiedOn)
                 .HasColumnType("datetime")
                 .HasColumnName("modified_on");
+            entity.Property(e => e.OrderBranch).HasColumnName("order_branch");
             entity.Property(e => e.OrderRemark).HasColumnName("order_remark");
             entity.Property(e => e.OrderReqId).HasColumnName("order_req_id");
+            entity.Property(e => e.OrderRequestedBy).HasColumnName("order_requested_by");
             entity.Property(e => e.OrderStatus)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -263,14 +262,22 @@ public partial class OrderMSDbContext : DbContext
                 .HasForeignKey(d => d.ModifiedBy)
                 .HasConstraintName("FK_orders_modified_by");
 
+            entity.HasOne(d => d.OrderBranchNavigation).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.OrderBranch)
+                .HasConstraintName("FK_Order_Branch");
+
             entity.HasOne(d => d.OrderReq).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.OrderReqId)
                 .HasConstraintName("FK_orders_order_request");
+
+            entity.HasOne(d => d.OrderRequestedByNavigation).WithMany(p => p.OrderOrderRequestedByNavigations)
+                .HasForeignKey(d => d.OrderRequestedBy)
+                .HasConstraintName("FK_Order_User");
         });
 
         modelBuilder.Entity<OrderLine>(entity =>
         {
-            entity.HasKey(e => e.OrderlineId).HasName("PK__order_li__053FF2129B401D3F");
+            entity.HasKey(e => e.OrderlineId).HasName("PK__order_li__053FF212709F09A5");
 
             entity.ToTable("order_line");
 
@@ -302,7 +309,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<OrderRequest>(entity =>
         {
-            entity.HasKey(e => e.OrderReqId).HasName("PK__order_re__0CF367CBAE233CB5");
+            entity.HasKey(e => e.OrderReqId).HasName("PK__order_re__0CF367CBA0BF63B6");
 
             entity.ToTable("order_request");
 
@@ -357,7 +364,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<OrderRequestLine>(entity =>
         {
-            entity.HasKey(e => e.OrderReqLineId).HasName("PK__order_re__7C549BF1FBE19B59");
+            entity.HasKey(e => e.OrderReqLineId).HasName("PK__order_re__7C549BF1D7563A98");
 
             entity.ToTable("order_request_line");
 
@@ -381,11 +388,11 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__role__760965CC6CE67922");
+            entity.HasKey(e => e.RoleId).HasName("PK__role__760965CC97EAD1AE");
 
             entity.ToTable("role");
 
-            entity.HasIndex(e => e.RoleName, "UQ__role__783254B14B93E889").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__role__783254B16CE0AC3C").IsUnique();
 
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.CreatedOn)
@@ -407,7 +414,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Supplier>(entity =>
         {
-            entity.HasKey(e => e.SupplierId).HasName("PK__supplier__6EE594E83126DD52");
+            entity.HasKey(e => e.SupplierId).HasName("PK__supplier__6EE594E8290368ED");
 
             entity.ToTable("supplier");
 
@@ -431,7 +438,7 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<TransportAssignment>(entity =>
         {
-            entity.HasKey(e => e.AssignmentId).HasName("PK__Transpor__DA8918143F25ED4B");
+            entity.HasKey(e => e.AssignmentId).HasName("PK__Transpor__DA8918147F3960DE");
 
             entity.ToTable("TransportAssignment");
 
@@ -456,11 +463,11 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__user__3213E83FFA2D3BB7");
+            entity.HasKey(e => e.Id).HasName("PK__user__3213E83F5AA6C93C");
 
             entity.ToTable("user");
 
-            entity.HasIndex(e => e.UserName, "UQ__user__7C9273C45118A8A0").IsUnique();
+            entity.HasIndex(e => e.UserName, "UQ__user__7C9273C49EA7109E").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BranchId).HasColumnName("branch_id");
@@ -511,11 +518,11 @@ public partial class OrderMSDbContext : DbContext
 
         modelBuilder.Entity<Vehicle>(entity =>
         {
-            entity.HasKey(e => e.VehicleId).HasName("PK__vehicle__F2947BC1E194C842");
+            entity.HasKey(e => e.VehicleId).HasName("PK__vehicle__F2947BC10D5E57E9");
 
             entity.ToTable("vehicle");
 
-            entity.HasIndex(e => e.VehicleNumber, "UQ__vehicle__2D703C2A831CCE44").IsUnique();
+            entity.HasIndex(e => e.VehicleNumber, "UQ__vehicle__2D703C2ADEBCD0FB").IsUnique();
 
             entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
             entity.Property(e => e.Available)

@@ -27,5 +27,7 @@ public partial class Branch
 
     public virtual ICollection<OrderRequest> OrderRequests { get; set; } = new List<OrderRequest>();
 
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

@@ -49,6 +49,8 @@ public partial class User
 
     public virtual ICollection<Order> OrderModifiedByNavigations { get; set; } = new List<Order>();
 
+    public virtual ICollection<Order> OrderOrderRequestedByNavigations { get; set; } = new List<Order>();
+
     public virtual ICollection<OrderRequest> OrderRequestApprovedByNavigations { get; set; } = new List<OrderRequest>();
 
     public virtual ICollection<OrderRequest> OrderRequestModifiedByNavigations { get; set; } = new List<OrderRequest>();

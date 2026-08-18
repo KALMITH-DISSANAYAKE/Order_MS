@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Order_MS.Data;
+using Order_MS.Models;
 
 namespace Order_MS.Repositories
 {

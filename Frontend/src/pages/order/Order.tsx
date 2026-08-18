@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react'
 import IconButton from '@mui/material/IconButton'
 import EditIcon from '@mui/icons-material/Edit'
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+import { useAuth } from '../../contexts/AuthContext'
+
 
 import {
   Paper,
@@ -31,6 +33,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TablePagination
 } from '@mui/material'
 
 const orderService = {
@@ -58,22 +61,9 @@ const orderService = {
 
 
 };
-const orderRequestService = {
-
-  getAllOrderRequests: async () => {
-    const response = await axiosInstance.get('/OrderRequest');
-    return response.data;
-  },
-  getOrderRequestById: async (id: number) => {
-    const response = await axiosInstance.get(`/OrderRequest/${id}`);
-    return response.data;
-  },
-};
-
 export default function Order() {
+  const { user } = useAuth()
   const [orders, setOrders] = useState<any[]>([])
-  const [orderRequests, setOrderRequests] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
 
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null)
 
@@ -83,62 +73,126 @@ export default function Order() {
   const [openOrderEditModal, setOpenOrderEditModal] = useState(false)
 
   const [orderSearchTerm, setOrderSearchTerm] = useState('')
-  const [orderRequestSearchTerm, setOrderRequestSearchTerm] = useState('')
+  // const [orderRequestSearchTerm, setOrderRequestSearchTerm] = useState('')
 
   const [orderFilter, setOrderFilter] = useState('All')
-  const [orderRequestFilter, setOrderRequestFilter] = useState('All')
+  // const [orderRequestFilter, setOrderRequestFilter] = useState('All')
 
   const [newOrderStatus, setNewOrderStatus] = useState<string>('')
   const [newOrderRemarks, setNewOrderRemarks] = useState<string>('')
 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const [monthFilter, setMonthFilter] = useState('All');
+  const [yearFilter, setYearFilter] = useState('All');
+  const [dateSort, setDateSort] = useState('desc');
+
+
+
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true)
-        // Fetching specific branch stock until auth is implemented
-        const orderData = await orderService.getAllOrders()
-        const orderRequestsData = await orderRequestService.getAllOrderRequests()
-        setOrders(orderData)
-        setOrderRequests(orderRequestsData)
-      } catch (error) {
-        console.error("Failed to load order data", error)
-      } finally {
-        setLoading(false)
+      const loadData = async () => {
+        try {
+          const orderData = await orderService.getAllOrders()
+          setOrders(orderData)
+        } catch (error) {
+          console.error("Failed to load order data", error)
+        }
       }
-    }
-    loadData()
-  }, [])
+      loadData()
+    }, [])
 
-  const filteredOrders = orders.filter(item => {
-    const matchesSearch = item.orderId?.toString().includes(orderSearchTerm)
-    const matchesFilter = orderFilter === 'All' ? true :
-      orderFilter === 'InTransit' ? item.orderStatus?.includes('InTransit') :
-        item.orderStatus?.includes('Delivered')
-    return matchesSearch && matchesFilter
-  })
-  const filteredOrderRequests = orderRequests.filter(item => {
-    const matchesSearch = item.orderReqId?.toString().includes(orderRequestSearchTerm)
-    const matchesFilter = orderRequestFilter === 'All' ? true :
-      orderRequestFilter === 'PaymentSuccessful' ? item.status?.includes('PaymentSuccessful') :
-        item.status?.includes('Ordered')
-    return matchesSearch && matchesFilter
-  })
+  useEffect(() => {
+    setPage(0);
+  }, [
+    orderSearchTerm,
+    orderFilter,
+    monthFilter,
+    yearFilter,
+    dateSort
+  ]);
 
-  const handleCreateOrder = async (orderReqId: number) => {
-    try {
-      await orderService.createOrder(orderReqId)
-      alert('Order created successfully!')
 
-      // Refresh data
-      const orderData = await orderService.getAllOrders()
-      const orderRequestsData = await orderRequestService.getAllOrderRequests()
-      setOrders(orderData)
-      setOrderRequests(orderRequestsData)
-    } catch (error: any) {
-      console.error('Failed to create order', error)
-      alert('Failed to create order. ' + (error.response?.data?.message || ''))
-    }
-  }
+  const restrictedOrderEditRoles = ['InventoryManager', 'TransportDepartment']
+
+  const filteredOrders = orders.filter((item) => {
+    const matchesSearch =
+      item.orderId
+        ?.toString()
+        .includes(orderSearchTerm);
+    console.log(item.orderBranch);
+
+    const matchesFilter =
+      orderFilter === 'All'
+        ? true
+        : orderFilter === 'InTransit'
+          ? item.orderStatus?.includes('InTransit')
+          : item.orderStatus?.includes('Delivered');
+
+    const orderDate = new Date(item.createdOn);
+
+    const matchesMonth =
+      monthFilter === 'All'
+        ? true
+        : orderDate.getMonth() + 1 === Number(monthFilter);
+
+    const matchesYear =
+      yearFilter === 'All'
+        ? true
+        : orderDate.getFullYear() === Number(yearFilter);
+
+    return (
+      matchesSearch &&
+      matchesFilter &&
+      matchesMonth &&
+      matchesYear
+    );
+  });
+
+  const sortedOrders = [...filteredOrders].sort((a, b) => {
+    const dateA = new Date(a.createdOn).getTime();
+    const dateB = new Date(b.createdOn).getTime();
+
+    return dateSort === 'asc'
+      ? dateA - dateB
+      : dateB - dateA;
+  });
+
+  const paginatedOrder = sortedOrders.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return '-';
+
+    return new Date(dateString).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
+
+  // const handleCreateOrder = async (orderReqId: number) => {
+  //   try {
+  //     await orderService.createOrder(orderReqId)
+  //     alert('Order created successfully!')
+
+  //     // Refresh data
+  //     const orderData = await orderService.getAllOrders()
+  //     const orderRequestsData = await orderRequestService.getAllOrderRequests()
+  //     setOrders(orderData)
+  //     setOrderRequests(orderRequestsData)
+  //   } catch (error: any) {
+  //     console.error('Failed to create order', error)
+  //     alert('Failed to create order. ' + (error.response?.data?.message || ''))
+  //   }
+  // }
 
 
   const handleViewOrder = async (id: number) => {
@@ -172,11 +226,6 @@ export default function Order() {
       const updateData = {
         orderStatus: newOrderStatus || selectedOrder?.orderStatus || '',
         orderRemark: (newOrderRemarks || selectedOrder?.orderRemark || '').trim(),
-      }
-
-      if (!updateData.orderRemark) {
-        console.error('Order remark is required')
-        return
       }
 
       await orderService.updateOrder(Number(orderId), updateData)
@@ -222,6 +271,71 @@ export default function Order() {
                 <MenuItem value="Delivered">Delivered</MenuItem>
               </Select>
             </FormControl>
+            <FormControl
+              size="small"
+              className="w-40 bg-white rounded-md"
+            >
+              <InputLabel>Month</InputLabel>
+
+              <Select
+                value={monthFilter}
+                label="Month"
+                onChange={(e) => setMonthFilter(e.target.value)}
+              >
+                <MenuItem value="All">All Months</MenuItem>
+
+                <MenuItem value="1">January</MenuItem>
+                <MenuItem value="2">February</MenuItem>
+                <MenuItem value="3">March</MenuItem>
+                <MenuItem value="4">April</MenuItem>
+                <MenuItem value="5">May</MenuItem>
+                <MenuItem value="6">June</MenuItem>
+                <MenuItem value="7">July</MenuItem>
+                <MenuItem value="8">August</MenuItem>
+                <MenuItem value="9">September</MenuItem>
+                <MenuItem value="10">October</MenuItem>
+                <MenuItem value="11">November</MenuItem>
+                <MenuItem value="12">December</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl
+              size="small"
+              className="w-32 bg-white rounded-md"
+            >
+              <InputLabel>Year</InputLabel>
+
+              <Select
+                value={yearFilter}
+                label="Year"
+                onChange={(e) => setYearFilter(e.target.value)}
+              >
+                <MenuItem value="All">All Years</MenuItem>
+
+                <MenuItem value="2024">2024</MenuItem>
+                <MenuItem value="2025">2025</MenuItem>
+                <MenuItem value="2026">2026</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl
+              size="small"
+              className="w-44 bg-white rounded-md"
+            >
+              <InputLabel>Sort by Date</InputLabel>
+
+              <Select
+                value={dateSort}
+                label="Sort by Date"
+                onChange={(e) => setDateSort(e.target.value)}
+              >
+                <MenuItem value="desc">
+                  Newest First
+                </MenuItem>
+
+                <MenuItem value="asc">
+                  Oldest First
+                </MenuItem>
+              </Select>
+            </FormControl>
             <TextField
               size="small"
               placeholder="Search by Order ID "
@@ -237,6 +351,9 @@ export default function Order() {
             <TableHead className="bg-gray-50">
               <TableRow>
                 <TableCell align="center" className="!font-bold !text-gray-700">Order ID</TableCell>
+                <TableCell align="center" className="!font-bold !text-gray-700">Order Request ID</TableCell>
+                <TableCell align="center" className="!font-bold !text-gray-700">Requested By</TableCell>
+                <TableCell align="center" className="!font-bold !text-gray-700">Requested Branch</TableCell>
                 <TableCell align="center" className="!font-bold !text-gray-700">Order Date</TableCell>
                 <TableCell align="center" className="!font-bold !text-gray-700">Order Status</TableCell>
                 <TableCell align="center" className="!font-bold !text-gray-700">Action</TableCell>
@@ -244,10 +361,13 @@ export default function Order() {
             </TableHead>
             <TableBody>
               {filteredOrders.length > 0 ? (
-                filteredOrders.map((row) => (
+                paginatedOrder.map((row) => (
                   <TableRow key={row.orderId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} className="hover:bg-gray-50 transition-colors">
                     <TableCell align="center">{row.orderId}</TableCell>
-                    <TableCell align="center">{row.createdOn}</TableCell>
+                    <TableCell align="center">{row.orderReqId}</TableCell>
+                    <TableCell align="center">{row.orderRequestedBy || '-'}</TableCell>
+                    <TableCell align="center">{row.orderBranch || '-'}</TableCell>
+                    <TableCell align="center">{formatDateTime(row.createdOn)}</TableCell>
                     <TableCell align="center">
                       {row.orderStatus === 'InTransit' ? (
                         <Chip label="InTransit" color="warning" size="small" className="!font-medium" />
@@ -257,7 +377,15 @@ export default function Order() {
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" spacing={1} justifyContent="center" divider={<Divider orientation="vertical" flexItem />}>
-                        <IconButton color="primary" aria-label="edit order" onClick={() => handleOrderUpdate(row.orderId)}>
+                        <IconButton
+                          color="primary"
+                          aria-label="edit order"
+                          onClick={() => handleOrderUpdate(row.orderId)}
+                          disabled={
+                            restrictedOrderEditRoles.includes(user?.role ?? '') &&
+                            String(row.orderStatus ?? '').trim() === 'Delivered'
+                          }
+                        >
                           <EditIcon />
                         </IconButton>
 
@@ -277,82 +405,21 @@ export default function Order() {
               )}
             </TableBody>
           </Table>
-        </TableContainer>
-      </Box>
 
-      {/* order request table */}
-      <Box sx={{ mt: 6 }}>
-        <Box className="flex justify-between items-center mb-4">
-          <Typography variant="h6" className="!font-bold !text-gray-800">
-            Order Requests
-          </Typography>
-          <Box className="flex gap-4">
-            <FormControl size="small" className="w-48 bg-white rounded-md">
-              <InputLabel id="branch-filter-label">Filter Status</InputLabel>
-              <Select
-                labelId="branch-filter-label"
-                value={orderRequestFilter}
-                label="Filter Status"
-                onChange={(e) => setOrderRequestFilter(e.target.value)}
-              >
-                <MenuItem value="All">All Statuses</MenuItem>
-                <MenuItem value="TransportAssigned">TransportAssigned</MenuItem>
-                <MenuItem value="PaymentSuccessful">PaymentSuccessful</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              size="small"
-              placeholder="Search by Order Request ID "
-              variant="outlined"
-              value={orderRequestSearchTerm}
-              onChange={(e) => setOrderRequestSearchTerm(e.target.value)}
-              className="w-72 bg-white rounded-md"
-            />
-          </Box>
-        </Box>
-
-        <TableContainer sx={{ mt: 1 }} component={Paper} className="rounded-xl shadow-sm overflow-hidden">
-          <Table sx={{ minWidth: 650 }}>
-            <TableHead className="bg-gray-50">
-              <TableRow>
-                <TableCell align="center" className="!font-bold !text-gray-700">Order Request ID</TableCell>
-                <TableCell align="center" className="!font-bold !text-gray-700">Order Request Date</TableCell>
-                <TableCell align="center" className="!font-bold !text-gray-700">Order Request Status</TableCell>
-                <TableCell align="center" className="!font-bold !text-gray-700">Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredOrderRequests.length > 0 ? (
-                filteredOrderRequests.map((row) => (
-                  <TableRow key={row.orderReqId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} className="hover:bg-gray-50 transition-colors">
-                    <TableCell align="center">{row.orderReqId}</TableCell>
-                    <TableCell align="center">{row.requestedOn}</TableCell>
-                    <TableCell align="center">
-                      {row.status === 'TransportAssigned' ? (
-                        <Chip label="TransportAssigned" color="warning" size="small" className="!font-medium" />
-                      ) : (
-                        <Chip label="PaymentSuccessful" color="success" size="small" className="!font-medium" />
-                      )}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Stack direction="row" spacing={1} justifyContent="center" divider={<Divider orientation="vertical" flexItem />}>
-                        <Button variant='contained' color='primary' onClick={() => handleCreateOrder(row.orderReqId)}>
-                          Place Order
-                        </Button>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} align="center" className="!py-8 !text-gray-500">
-                    No Order Requests available
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <TablePagination
+            component="div"
+            count={filteredOrders.length}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(parseInt(event.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[5, 10, 25]}
+          />
         </TableContainer>
+        
       </Box>
 
       <Dialog open={openOrderViewModal} onClose={() => setOpenOrderViewModal(false)} maxWidth="sm" fullWidth>
@@ -439,7 +506,6 @@ export default function Order() {
         </DialogContent>
         <DialogActions className="p-4">
           <Button onClick={() => { setOpenOrderViewModal(false); setOrderId(''); setSelectedOrder(null); }} color="inherit" className="!normal-case !font-medium">Close</Button>
-          <Button onClick={() => setOpenOrderViewModal(false)} variant="contained" className="!bg-[#E21E26] hover:!bg-[#C61A22] !shadow-none !normal-case !font-medium">Close</Button>
         </DialogActions>
       </Dialog>
 

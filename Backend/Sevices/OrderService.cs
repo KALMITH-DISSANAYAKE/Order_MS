@@ -24,6 +24,7 @@ public class OrderService : IOrderService
     {
         try
         {
+
             var orders = await _repository.GetAllAsync(query =>
                 query
                     .Include(o => o.OrderLines)
@@ -32,12 +33,18 @@ public class OrderService : IOrderService
                         .ThenInclude(cv => cv.Driver)
                     .Include(o => o.Connection)
                         .ThenInclude(cv => cv.Vehicle)
+                    .Include(o => o.OrderRequestedByNavigation)
+                    .Include(o => o.OrderBranchNavigation)
             );
             var orderDtos = orders.Select(order => new OrderResponseDtos
             {
+             
                 OrderId = order.OrderId,
                 OrderReqId = order.OrderReqId,
                 OrderStatus = order.OrderStatus,
+                OrderRequestedBy = order.OrderRequestedByNavigation == null ? null :
+                    (order.OrderRequestedByNavigation.FirstName + " " + order.OrderRequestedByNavigation.LastName).Trim(),
+                OrderBranch = order.OrderBranchNavigation?.BranchCode,
                 CreatedBy = order.CreatedBy,
                 CreatedOn = order.CreatedOn,
                 OrderRemark = order.OrderRemark,
@@ -93,6 +100,10 @@ public class OrderService : IOrderService
                         .ThenInclude(c => c.Driver)
                     .Include(o => o.Connection)
                         .ThenInclude(c => c.Vehicle)
+                    .Include(o => o.OrderReq)
+                        .ThenInclude(or => or.RequestedByNavigation)
+                    .Include(o => o.OrderReq)
+                        .ThenInclude(or => or.Branch)
             );
 
             if (order == null)
@@ -181,6 +192,8 @@ public class OrderService : IOrderService
                 ConnectionId = selectedConnectionId,
                 Price = orderRequest.TotalPrice,
                 OrderStatus = "InTransit",
+                OrderRequestedBy = orderRequest.RequestedBy,
+                OrderBranch = orderRequest.BranchId,
                 CreatedBy = createdBy,
                 CreatedOn = DateTime.UtcNow,
                 ModifiedBy = createdBy,

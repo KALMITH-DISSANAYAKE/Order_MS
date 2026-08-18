@@ -48,7 +48,7 @@ public partial class OrderMSDbContext : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=OrderMS_DB;Trusted_Connection=True;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer("Server=.;Database=OrderMS_DB;Trusted_Connection=True;TrustServerCertificate=True");
         }
     }
 

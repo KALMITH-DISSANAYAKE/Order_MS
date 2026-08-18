@@ -61,6 +61,19 @@ const orderService = {
 
 
 };
+const branchService = {
+  // Master Items
+
+  getBranchById: async (id: number) => {
+    const response = await axiosInstance.get(`/branches/${id}`);
+    return response.data;
+  },
+  updateOrder: async (id: number, updateData: any) => {
+    const response = await axiosInstance.put(`/orders/${id}`, updateData);
+    return response.data;
+  },
+
+};
 export default function Order() {
   const { user } = useAuth()
   const [orders, setOrders] = useState<any[]>([])
@@ -68,6 +81,8 @@ export default function Order() {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null)
 
   const [orderId, setOrderId] = useState('')
+  const [role, setRole] = useState(user?.role ?? '')
+  const [branchCode, setBranchCode] = useState(null);
 
   const [openOrderViewModal, setOpenOrderViewModal] = useState(false)
   const [openOrderEditModal, setOpenOrderEditModal] = useState(false)
@@ -104,6 +119,18 @@ export default function Order() {
     }, [])
 
   useEffect(() => {
+      const loadData = async () => {
+        try {
+          const branchData = await branchService.getBranchById(user?.branchId ?? 0)
+          setBranchCode(branchData.branchCode)
+        } catch (error) {
+          console.error("Failed to load branch data", error)
+        }
+      }
+      loadData()
+  }, [])
+
+  useEffect(() => {
     setPage(0);
   }, [
     orderSearchTerm,
@@ -121,7 +148,6 @@ export default function Order() {
       item.orderId
         ?.toString()
         .includes(orderSearchTerm);
-    console.log(item.orderBranch);
 
     const matchesFilter =
       orderFilter === 'All'
@@ -129,6 +155,11 @@ export default function Order() {
         : orderFilter === 'InTransit'
           ? item.orderStatus?.includes('InTransit')
           : item.orderStatus?.includes('Delivered');
+      
+   const matchesBranch =
+      role === 'BranchManager'
+        ? item.orderBranch === branchCode
+        : true;
 
     const orderDate = new Date(item.createdOn);
 
@@ -146,7 +177,8 @@ export default function Order() {
       matchesSearch &&
       matchesFilter &&
       matchesMonth &&
-      matchesYear
+      matchesYear &&
+      matchesBranch
     );
   });
 
@@ -382,7 +414,7 @@ export default function Order() {
                           aria-label="edit order"
                           onClick={() => handleOrderUpdate(row.orderId)}
                           disabled={
-                            restrictedOrderEditRoles.includes(user?.role ?? '') &&
+                            restrictedOrderEditRoles.includes(user?.role ?? '') ||
                             String(row.orderStatus ?? '').trim() === 'Delivered'
                           }
                         >

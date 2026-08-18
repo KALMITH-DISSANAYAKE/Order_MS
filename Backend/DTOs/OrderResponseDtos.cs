@@ -7,6 +7,7 @@
         public int? ConnectionId { get; set; }
         public string? OrderRequestedBy { get; set; }
         public string? OrderBranch { get; set; }
+        public int? OrderBranchId { get; set; }
         public decimal? Price { get; set; }
         public string? OrderStatus { get; set; }
         public int? CreatedBy { get; set; }

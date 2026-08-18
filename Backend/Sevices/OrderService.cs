@@ -44,6 +44,7 @@ public class OrderService : IOrderService
                 OrderStatus = order.OrderStatus,
                 OrderRequestedBy = order.OrderRequestedByNavigation == null ? null :
                     (order.OrderRequestedByNavigation.FirstName + " " + order.OrderRequestedByNavigation.LastName).Trim(),
+                OrderBranchId = order.OrderBranch,
                 OrderBranch = order.OrderBranchNavigation?.BranchCode,
                 CreatedBy = order.CreatedBy,
                 CreatedOn = order.CreatedOn,

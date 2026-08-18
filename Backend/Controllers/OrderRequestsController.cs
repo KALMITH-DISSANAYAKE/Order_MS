@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Interfaces;
@@ -46,6 +46,7 @@ public async Task<IActionResult> GetAllOrderRequests()
     var result = await _orderRequestService.GetAllOrderRequests(userId);
     return Ok(result);
 }
+
 
     [HttpGet("{id}")]
    // [Authorize(Roles = "BranchManager,InventoryManager")]

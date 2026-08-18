@@ -27,7 +27,6 @@ namespace Order_MS.Services
         {
             return await _context.Items
                 .Include(i => i.Supplier)
-                .Where(i => i.IsActive != false)
                 .Select(i => new ItemDto
                 {
                     ItemId = i.ItemId,
@@ -43,7 +42,6 @@ namespace Order_MS.Services
         {
             var item = await _context.Items
                 .Include(i => i.Supplier)
-                .Where(i => i.IsActive != false)
                 .FirstOrDefaultAsync(i => i.ItemId == id);
 
             if (item == null)
@@ -54,6 +52,7 @@ namespace Order_MS.Services
                 ItemId = item.ItemId,
                 ItemName = item.ItemName,
                 UnitPrice = item.UnitPrice,
+                IsActive = item.IsActive,
                 Supplier = item.Supplier == null ? null! : new SupplierDto
                 {
                     SupplierId = item.Supplier.SupplierId,
@@ -141,6 +140,12 @@ namespace Order_MS.Services
 
             var item = await _itemRepo.GetByIdAsync(inventory.ItemId) as Item;
 
+            if (dto.NewQuantity < 0)
+                throw new BusinessException("Quantity cannot be negative.", 400);
+
+            if (dto.ReorderLevel.HasValue && dto.ReorderLevel.Value < 0)
+                throw new BusinessException("Reorder level cannot be negative.", 400);
+
             int oldQuantity = inventory.Quantity;
             inventory.Quantity = dto.NewQuantity;
             if (dto.ReorderLevel.HasValue)
@@ -179,6 +184,12 @@ namespace Order_MS.Services
 
         public async Task<BranchInventoryDto> AddBranchInventoryAsync(AddBranchInventoryDto dto, int? createdBy)
         {
+            if (dto.Quantity < 0)
+                throw new BusinessException("Quantity cannot be negative.", 400);
+
+            if (dto.ReorderLevel < 0)
+                throw new BusinessException("Reorder level cannot be negative.", 400);
+
             var branchExists = await _context.Branches.AnyAsync(b => b.BranchId == dto.BranchId);
             if (!branchExists)
                 throw new BusinessException($"Branch with ID {dto.BranchId} does not exist.", 400);
@@ -224,6 +235,15 @@ namespace Order_MS.Services
 
         public async Task<ItemDetailDto> CreateItemAsync(CreateItemDto dto, int? createdBy)
         {
+            if (string.IsNullOrWhiteSpace(dto.ItemName))
+                throw new BusinessException("Item name is required.", 400);
+
+            if (dto.UnitPrice <= 0)
+                throw new BusinessException("Unit price must be greater than 0.", 400);
+
+            if (dto.SupplierId <= 0)
+                throw new BusinessException("A valid supplier is required.", 400);
+
             var supplierExists = await _context.Suppliers.AnyAsync(s => s.SupplierId == dto.SupplierId);
             if (!supplierExists)
                 throw new BusinessException($"Supplier with ID {dto.SupplierId} does not exist.", 400);
@@ -260,8 +280,17 @@ namespace Order_MS.Services
         public async Task<ItemDetailDto> UpdateItemAsync(int id, UpdateItemDto dto, int? modifiedBy)
         {
             var item = await _itemRepo.GetByIdAsync(id) as Item;
-            if (item == null || item.IsActive == false)
-                throw new BusinessException($"Item with ID {id} not found or has been deleted.", 404);
+            if (item == null)
+                throw new BusinessException($"Item with ID {id} not found.", 404);
+
+            if (string.IsNullOrWhiteSpace(dto.ItemName))
+                throw new BusinessException("Item name is required.", 400);
+
+            if (dto.UnitPrice <= 0)
+                throw new BusinessException("Unit price must be greater than 0.", 400);
+
+            if (dto.SupplierId <= 0)
+                throw new BusinessException("A valid supplier is required.", 400);
 
             var supplierExists = await _context.Suppliers.AnyAsync(s => s.SupplierId == dto.SupplierId);
             if (!supplierExists)
@@ -270,6 +299,10 @@ namespace Order_MS.Services
             item.ItemName = dto.ItemName;
             item.UnitPrice = dto.UnitPrice;
             item.SupplierId = dto.SupplierId;
+            if (dto.IsActive.HasValue)
+            {
+                item.IsActive = dto.IsActive.Value;
+            }
             item.ModifiedOn = DateTime.Now;
 
             if (modifiedBy.HasValue && modifiedBy.Value > 0)
@@ -303,6 +336,18 @@ namespace Order_MS.Services
 
             _itemRepo.Update(item);
             await _itemRepo.SaveAsync();
+        }
+
+        public async Task<IEnumerable<SupplierDto>> GetAllSuppliersAsync()
+        {
+            return await _context.Suppliers
+                .Select(s => new SupplierDto
+                {
+                    SupplierId = s.SupplierId,
+                    SupplierName = s.SupplierName,
+                    Availability = s.Availability ?? "Unknown"
+                })
+                .ToListAsync();
         }
     }
 }

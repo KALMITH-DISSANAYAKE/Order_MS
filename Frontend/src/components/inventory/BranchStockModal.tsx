@@ -5,7 +5,11 @@ import {
   DialogActions,
   Grid,
   TextField,
-  Button
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 
 interface BranchStockModalProps {
@@ -15,6 +19,8 @@ interface BranchStockModalProps {
   editingId: number | null;
   itemId: number | string;
   setItemId: (val: string) => void;
+  itemName?: string;
+  masterItems?: any[];
   quantity: number | string;
   setQuantity: (val: string) => void;
   reorderLevel: number | string;
@@ -28,6 +34,8 @@ export default function BranchStockModal({
   editingId,
   itemId,
   setItemId,
+  itemName = '',
+  masterItems = [],
   quantity,
   setQuantity,
   reorderLevel,
@@ -41,16 +49,41 @@ export default function BranchStockModal({
       <DialogContent dividers>
         <Grid container spacing={3} className="pt-2">
           <Grid item xs={12}>
-            <TextField
-              label="Item ID"
-              type="number"
-              variant="outlined"
-              fullWidth
-              size="small"
-              disabled={!!editingId}
-              value={itemId}
-              onChange={(e) => setItemId(e.target.value)}
-            />
+            {editingId ? (
+              <TextField
+                label="Item Name"
+                variant="outlined"
+                fullWidth
+                size="small"
+                disabled
+                value={itemName || (itemId ? `Item #${itemId}` : '')}
+              />
+            ) : (
+              <FormControl fullWidth size="small">
+                <InputLabel id="select-item-label">Select Master Item</InputLabel>
+                <Select
+                  labelId="select-item-label"
+                  value={itemId ? String(itemId) : ''}
+                  label="Select Master Item"
+                  onChange={(e) => setItemId(e.target.value)}
+                >
+                  <MenuItem value="" disabled>
+                    <em>Select an item</em>
+                  </MenuItem>
+                  {masterItems && masterItems.length > 0 ? (
+                    masterItems.map((item) => (
+                      <MenuItem key={item.itemId} value={String(item.itemId)}>
+                        {item.itemName} (ID: {item.itemId})
+                      </MenuItem>
+                    ))
+                  ) : (
+                    <MenuItem value="" disabled>
+                      No items available
+                    </MenuItem>
+                  )}
+                </Select>
+              </FormControl>
+            )}
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField

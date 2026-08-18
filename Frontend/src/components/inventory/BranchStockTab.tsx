@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -15,7 +15,8 @@ import {
   TableCell,
   TableBody,
   Chip,
-  IconButton
+  IconButton,
+  TablePagination
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -29,6 +30,8 @@ interface BranchStockTabProps {
 export default function BranchStockTab({ inventory, onOpenEdit, onDelete }: BranchStockTabProps) {
   const [branchFilter, setBranchFilter] = useState('All');
   const [branchSearchTerm, setBranchSearchTerm] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const filteredBranchStock = inventory.filter(item => {
     const matchesSearch = item.itemName?.toLowerCase().includes(branchSearchTerm.toLowerCase()) ||
@@ -39,6 +42,15 @@ export default function BranchStockTab({ inventory, onOpenEdit, onDelete }: Bran
         !item.isBelowReorderLevel;
     return matchesSearch && matchesFilter;
   });
+
+  useEffect(() => {
+    setPage(0);
+  }, [branchFilter, branchSearchTerm]);
+
+  const paginatedBranchStock = filteredBranchStock.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Box>
@@ -83,31 +95,51 @@ export default function BranchStockTab({ inventory, onOpenEdit, onDelete }: Bran
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredBranchStock.map((row) => (
-              <TableRow key={row.inventoryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} className="hover:bg-gray-50 transition-colors">
-                <TableCell>{row.itemId}</TableCell>
-                <TableCell>{row.itemName}</TableCell>
-                <TableCell align="right">{row.quantity}</TableCell>
-                <TableCell align="right">{row.reorderLevel}</TableCell>
-                <TableCell align="center">
-                  {row.isBelowReorderLevel ? (
-                    <Chip label="Low Stock" color="error" size="small" className="!font-medium" />
-                  ) : (
-                    <Chip label="In Stock" color="success" size="small" className="!font-medium" />
-                  )}
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton size="small" color="primary" onClick={() => onOpenEdit(row)}>
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton size="small" color="error" onClick={() => onDelete(row.inventoryId)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+            {filteredBranchStock.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" className="py-6 text-gray-500 italic">
+                  No branch stock items found.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              paginatedBranchStock.map((row) => (
+                <TableRow key={row.inventoryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} className="hover:bg-gray-50 transition-colors">
+                  <TableCell>{row.itemId}</TableCell>
+                  <TableCell>{row.itemName}</TableCell>
+                  <TableCell align="right">{row.quantity}</TableCell>
+                  <TableCell align="right">{row.reorderLevel}</TableCell>
+                  <TableCell align="center">
+                    {row.isBelowReorderLevel ? (
+                      <Chip label="Low Stock" color="error" size="small" className="!font-medium" />
+                    ) : (
+                      <Chip label="In Stock" color="success" size="small" className="!font-medium" />
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    <IconButton size="small" color="primary" onClick={() => onOpenEdit(row)}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" color="error" onClick={() => onDelete(row.inventoryId)}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          component="div"
+          count={filteredBranchStock.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+        />
       </TableContainer>
     </Box>
   );

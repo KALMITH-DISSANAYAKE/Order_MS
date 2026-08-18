@@ -14,6 +14,7 @@ namespace Order_MS.Services
         Task<BranchInventoryDto> AddBranchInventoryAsync(AddBranchInventoryDto dto, int? createdBy);
         Task<ItemDetailDto> CreateItemAsync(CreateItemDto dto, int? createdBy);
         Task<ItemDetailDto> UpdateItemAsync(int id, UpdateItemDto dto, int? modifiedBy);   
-        Task DeleteItemAsync(int id);                                                     
+        Task DeleteItemAsync(int id);
+        Task<IEnumerable<SupplierDto>> GetAllSuppliersAsync();
     }
 }

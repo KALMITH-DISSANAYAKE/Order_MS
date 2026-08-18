@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -15,7 +15,8 @@ import {
   TableCell,
   TableBody,
   Chip,
-  IconButton
+  IconButton,
+  TablePagination
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -27,9 +28,89 @@ interface MasterItemsTabProps {
   onDelete: (id: number) => void;
 }
 
+interface BranchStockTableProps {
+  branchName: string;
+  items: any[];
+}
+
+function BranchStockTable({ branchName, items }: BranchStockTableProps) {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  useEffect(() => {
+    setPage(0);
+  }, [items]);
+
+  const paginatedItems = items.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  return (
+    <Box className="mb-6">
+      <Typography variant="subtitle1" className="!font-bold !text-gray-700 mb-3 bg-gray-100 p-2 rounded-t-lg border border-b-0 border-gray-200">
+        {branchName}
+      </Typography>
+      <TableContainer component={Paper} className="shadow-sm overflow-hidden border border-gray-200 rounded-b-lg rounded-t-none">
+        <Table sx={{ minWidth: 650 }}>
+          <TableHead className="bg-gray-50">
+            <TableRow>
+              <TableCell className="!font-bold !text-gray-700">Item ID</TableCell>
+              <TableCell className="!font-bold !text-gray-700">Item Name</TableCell>
+              <TableCell align="right" className="!font-bold !text-gray-700">Quantity</TableCell>
+              <TableCell align="right" className="!font-bold !text-gray-700">Reorder Level</TableCell>
+              <TableCell align="center" className="!font-bold !text-gray-700">Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center" className="py-6 text-gray-500 italic">
+                  No stock items for this branch.
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedItems.map((row: any) => (
+                <TableRow key={row.inventoryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} className="hover:bg-gray-50 transition-colors">
+                  <TableCell>{row.itemId}</TableCell>
+                  <TableCell>{row.itemName}</TableCell>
+                  <TableCell align="right">{row.quantity}</TableCell>
+                  <TableCell align="right">{row.reorderLevel}</TableCell>
+                  <TableCell align="center">
+                    {row.isBelowReorderLevel ? (
+                      <Chip label="Low Stock" color="error" size="small" className="!font-medium" />
+                    ) : (
+                      <Chip label="In Stock" color="success" size="small" className="!font-medium" />
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={items.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+        />
+      </TableContainer>
+    </Box>
+  );
+}
+
 export default function MasterItemsTab({ masterItems, allBranchStock, onOpenEdit, onDelete }: MasterItemsTabProps) {
   const [masterFilter, setMasterFilter] = useState('All');
   const [masterSearchTerm, setMasterSearchTerm] = useState('');
+  const [masterPage, setMasterPage] = useState(0);
+  const [masterRowsPerPage, setMasterRowsPerPage] = useState(10);
+
   const [allBranchFilter, setAllBranchFilter] = useState('All');
   const [allBranchSearchTerm, setAllBranchSearchTerm] = useState('');
 
@@ -42,6 +123,15 @@ export default function MasterItemsTab({ masterItems, allBranchStock, onOpenEdit
         !item.isActive;
     return matchesSearch && matchesFilter;
   });
+
+  useEffect(() => {
+    setMasterPage(0);
+  }, [masterFilter, masterSearchTerm]);
+
+  const paginatedMasterItems = filteredMasterItems.slice(
+    masterPage * masterRowsPerPage,
+    masterPage * masterRowsPerPage + masterRowsPerPage
+  );
 
   const filteredAllBranchStock = allBranchStock.filter(item => {
     const matchesSearch = item.itemName?.toLowerCase().includes(allBranchSearchTerm.toLowerCase()) ||
@@ -103,31 +193,51 @@ export default function MasterItemsTab({ masterItems, allBranchStock, onOpenEdit
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredMasterItems.map((row) => (
-              <TableRow key={row.itemId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} className="hover:bg-gray-50 transition-colors">
-                <TableCell>{row.itemId}</TableCell>
-                <TableCell className="!font-medium">{row.itemName}</TableCell>
-                <TableCell>{row.supplierName}</TableCell>
-                <TableCell align="right">{row.unitPrice.toFixed(2)}</TableCell>
-                <TableCell align="center">
-                  {row.isActive ? (
-                    <Chip label="Active" color="success" size="small" className="!font-medium" />
-                  ) : (
-                    <Chip label="Inactive" color="default" size="small" className="!font-medium" />
-                  )}
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton size="small" color="primary" onClick={() => onOpenEdit(row)}>
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton size="small" color="error" onClick={() => onDelete(row.itemId)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+            {filteredMasterItems.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" className="py-6 text-gray-500 italic">
+                  No master items found.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              paginatedMasterItems.map((row) => (
+                <TableRow key={row.itemId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} className="hover:bg-gray-50 transition-colors">
+                  <TableCell>{row.itemId}</TableCell>
+                  <TableCell className="!font-medium">{row.itemName}</TableCell>
+                  <TableCell>{row.supplierName}</TableCell>
+                  <TableCell align="right">{row.unitPrice.toFixed(2)}</TableCell>
+                  <TableCell align="center">
+                    {row.isActive ? (
+                      <Chip label="Active" color="success" size="small" className="!font-medium" />
+                    ) : (
+                      <Chip label="Inactive" color="default" size="small" className="!font-medium" />
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    <IconButton size="small" color="primary" onClick={() => onOpenEdit(row)}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" color="error" onClick={() => onDelete(row.itemId)}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          component="div"
+          count={filteredMasterItems.length}
+          rowsPerPage={masterRowsPerPage}
+          page={masterPage}
+          onPageChange={(_, newPage) => setMasterPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setMasterRowsPerPage(parseInt(e.target.value, 10));
+            setMasterPage(0);
+          }}
+        />
       </TableContainer>
 
       <Box className="mt-10">
@@ -165,41 +275,7 @@ export default function MasterItemsTab({ masterItems, allBranchStock, onOpenEdit
           </Typography>
         ) : (
           Object.entries(groupedBranchStock).map(([branchName, items]) => (
-            <Box key={branchName} className="mb-6">
-              <Typography variant="subtitle1" className="!font-bold !text-gray-700 mb-3 bg-gray-100 p-2 rounded-t-lg border border-b-0 border-gray-200">
-                {branchName}
-              </Typography>
-              <TableContainer component={Paper} className="shadow-sm overflow-hidden border border-gray-200 rounded-b-lg rounded-t-none">
-                <Table sx={{ minWidth: 650 }}>
-                  <TableHead className="bg-gray-50">
-                    <TableRow>
-                      <TableCell className="!font-bold !text-gray-700">Item ID</TableCell>
-                      <TableCell className="!font-bold !text-gray-700">Item Name</TableCell>
-                      <TableCell align="right" className="!font-bold !text-gray-700">Quantity</TableCell>
-                      <TableCell align="right" className="!font-bold !text-gray-700">Reorder Level</TableCell>
-                      <TableCell align="center" className="!font-bold !text-gray-700">Status</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {(items as any[]).map((row: any) => (
-                      <TableRow key={row.inventoryId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} className="hover:bg-gray-50 transition-colors">
-                        <TableCell>{row.itemId}</TableCell>
-                        <TableCell>{row.itemName}</TableCell>
-                        <TableCell align="right">{row.quantity}</TableCell>
-                        <TableCell align="right">{row.reorderLevel}</TableCell>
-                        <TableCell align="center">
-                          {row.isBelowReorderLevel ? (
-                            <Chip label="Low Stock" color="error" size="small" className="!font-medium" />
-                          ) : (
-                            <Chip label="In Stock" color="success" size="small" className="!font-medium" />
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
+            <BranchStockTable key={branchName} branchName={branchName} items={items as any} />
           ))
         )}
       </Box>

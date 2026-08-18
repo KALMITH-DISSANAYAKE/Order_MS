@@ -7,7 +7,7 @@ namespace Order_MS.Repositories
 
         Task<IEnumerable<OrderRequest>> GetApprovedOrderRequestsAsync();
         Task<OrderRequest?> GetOrderRequestWithDetailsAsync(int orderReqId);
-        Task<bool> UpdateOrderRequestStatusAsync(int orderReqId, string newStatus);
+        Task<bool> UpdateOrderRequestStatusAsync(int orderReqId, string newStatus, int? modifiedBy = null);
 
         Task<IEnumerable<DriverVehicleLink>> GetAvailableDriverVehicleLinksAsync();
         Task<IEnumerable<DriverVehicleLink>> GetAllDriverVehicleLinksAsync();

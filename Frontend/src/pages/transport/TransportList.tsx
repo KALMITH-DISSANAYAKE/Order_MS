@@ -89,7 +89,7 @@ export default function TransportList() {
         driverName: l.driverName,
         vehicleId: l.vehicleId.toString(),
         vehiclePlate: l.vehicleNumber,
-        availability: 'Available'
+        availability: l.status || 'Available'
       }))
       setLinks(mappedLinks)
     } catch (err) {
@@ -120,8 +120,17 @@ export default function TransportList() {
     }
   }
 
-  const handleDeleteVehicle = (id: string) => {
-    if (window.confirm('Delete this vehicle?')) setVehicles(vehicles.filter((v) => v.id !== id))
+  const handleDeleteVehicle = async (id: string) => {
+    if (window.confirm('Delete this vehicle?')) {
+      try {
+        await axiosInstance.delete(`/Transport/vehicles/${id}`)
+        setSnackbar({ open: true, message: 'Vehicle deleted successfully!', severity: 'success' })
+        fetchVehicles()
+      } catch (err: any) {
+        console.error('Error deleting vehicle', err)
+        setSnackbar({ open: true, message: err.response?.data?.message || 'Failed to delete vehicle', severity: 'error' })
+      }
+    }
   }
 
   const handleSaveDriver = async (driver: Driver) => {
@@ -146,8 +155,17 @@ export default function TransportList() {
     }
   }
 
-  const handleDeleteDriver = (id: string) => {
-    if (window.confirm('Delete this driver?')) setDrivers(drivers.filter((d) => d.id !== id))
+  const handleDeleteDriver = async (id: string) => {
+    if (window.confirm('Delete this driver?')) {
+      try {
+        await axiosInstance.delete(`/Transport/drivers/${id}`)
+        setSnackbar({ open: true, message: 'Driver deleted successfully!', severity: 'success' })
+        fetchDrivers()
+      } catch (err: any) {
+        console.error('Error deleting driver', err)
+        setSnackbar({ open: true, message: err.response?.data?.message || 'Failed to delete driver', severity: 'error' })
+      }
+    }
   }
 
   const handleCreateLink = async () => {
@@ -227,6 +245,7 @@ export default function TransportList() {
   const linkColumns: GridColDef[] = [
     { field: 'driverName', headerName: 'Driver Name', flex: 1 },
     { field: 'vehiclePlate', headerName: 'Vehicle Plate', flex: 1 },
+    { field: 'availability', headerName: 'Status', width: 130, renderCell: renderAvailability },
     {
       field: 'actions', headerName: 'Actions', width: 70, sortable: false,
       renderCell: (params) => (

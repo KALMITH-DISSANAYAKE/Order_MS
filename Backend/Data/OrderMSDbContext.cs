@@ -45,8 +45,12 @@ public partial class OrderMSDbContext : DbContext
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=.;Database=OrderMS_DB;Trusted_Connection=True;TrustServerCertificate=True");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=OrderMS_DB;Trusted_Connection=True;TrustServerCertificate=True");
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -129,6 +133,11 @@ public partial class OrderMSDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_on");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasDefaultValue("Available")
+                .HasColumnName("status");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
 

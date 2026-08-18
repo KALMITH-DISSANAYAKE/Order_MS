@@ -10,6 +10,7 @@ namespace Order_MS.DTOs
         public int VehicleId { get; set; }
         public string VehicleNumber { get; set; } = string.Empty;
         public int? Capacity { get; set; }
+        public string Status { get; set; } = string.Empty;
     }
 
     public class CreateDriverVehicleLinkDto

@@ -110,6 +110,8 @@ namespace Order_MS.Services
                 Quantity = or.TotalQuantity ?? 0
             };
 
+            link.Status = "Assigned"; // Update the link's status to Assigned so it doesn't show in new assignments
+
             await _context.TransportAssignments.AddAsync(assignment);
             or.ReqStatus = "TransportAssigned";
             or.ModifiedOn = DateTime.UtcNow;

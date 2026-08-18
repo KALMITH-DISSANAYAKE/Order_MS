@@ -138,6 +138,7 @@ CREATE TABLE driver_vehicle_link (
     connection_id INT PRIMARY KEY IDENTITY(1,1),
     driver_id INT NOT NULL,
     vehicle_id INT NOT NULL,
+    [status] VARCHAR(20) DEFAULT 'Available',
     created_on DATETIME DEFAULT GETDATE(),
     
     CONSTRAINT FK_dvl_driver FOREIGN KEY (driver_id) REFERENCES driver(driver_id),

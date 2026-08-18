@@ -35,13 +35,17 @@ namespace Order_MS.Repositories
                 .FirstOrDefaultAsync(or => or.OrderReqId == orderReqId);
         }
 
-        public async Task<bool> UpdateOrderRequestStatusAsync(int orderReqId, string newStatus)
+        public async Task<bool> UpdateOrderRequestStatusAsync(int orderReqId, string newStatus, int? modifiedBy = null)
         {
             var orderRequest = await _context.OrderRequests.FindAsync(orderReqId);
             if (orderRequest is null) return false;
 
             orderRequest.ReqStatus = newStatus;
             orderRequest.ModifiedOn = DateTime.UtcNow;
+            if (modifiedBy.HasValue)
+            {
+                orderRequest.ModifiedBy = modifiedBy.Value;
+            }
             return true;
         }
 
@@ -52,9 +56,7 @@ namespace Order_MS.Repositories
             return await _context.DriverVehicleLinks
                 .Include(dvl => dvl.Driver)
                 .Include(dvl => dvl.Vehicle)
-                .Where(dvl =>
-                    dvl.Driver.Available == "Available" &&
-                    dvl.Vehicle.Available == "Available")
+                .Where(dvl => dvl.Status == "Available")
                 .ToListAsync();
         }
 
@@ -132,10 +134,18 @@ namespace Order_MS.Repositories
 
         public async Task<bool> UpdateAssignmentStatusAsync(int assignmentId, string newStatus)
         {
-            var assignment = await _context.TransportAssignments.FindAsync(assignmentId);
+            var assignment = await _context.TransportAssignments
+                .Include(t => t.Connection)
+                .FirstOrDefaultAsync(t => t.AssignmentId == assignmentId);
             if (assignment is null) return false;
 
             assignment.Status = newStatus;
+            
+            if ((newStatus == "Completed" || newStatus == "Cancelled" || newStatus == "Released") && assignment.Connection != null)
+            {
+                assignment.Connection.Status = "Available";
+            }
+            
             return true;
         }
 
@@ -169,6 +179,32 @@ namespace Order_MS.Repositories
         public async Task AddDriverAsync(Driver driver)
         {
             await _context.Drivers.AddAsync(driver);
+        }
+
+        public async Task<bool> DeleteVehicleAsync(int vehicleId)
+        {
+            var vehicle = await _context.Vehicles.FindAsync(vehicleId);
+            if (vehicle is null) return false;
+            _context.Vehicles.Remove(vehicle);
+            return true;
+        }
+
+        public async Task<bool> HasLinksForVehicleAsync(int vehicleId)
+        {
+            return await _context.DriverVehicleLinks.AnyAsync(dvl => dvl.VehicleId == vehicleId);
+        }
+
+        public async Task<bool> DeleteDriverAsync(int driverId)
+        {
+            var driver = await _context.Drivers.FindAsync(driverId);
+            if (driver is null) return false;
+            _context.Drivers.Remove(driver);
+            return true;
+        }
+
+        public async Task<bool> HasLinksForDriverAsync(int driverId)
+        {
+            return await _context.DriverVehicleLinks.AnyAsync(dvl => dvl.DriverId == driverId);
         }
 
         public async Task SaveAsync()

@@ -54,12 +54,13 @@ export default function Dashboard() {
 
     try {
       // Fetch all existing endpoints in parallel
-      const [usersRes, branchesRes, ordersRes, requestsRes, inventoryRes] = await Promise.all([
+      const [usersRes, branchesRes, ordersRes, requestsRes, inventoryRes, assignmentsRes] = await Promise.all([
         axiosInstance.get('/users').catch(() => ({ data: [] })),
         axiosInstance.get('/branches').catch(() => ({ data: [] })),
         axiosInstance.get('/orders').catch(() => ({ data: [] })),
-        axiosInstance.get('/orderrequests').catch(() => ({ data: [] })),
+        axiosInstance.get('/OrderRequest').catch(() => ({ data: [] })),
         axiosInstance.get('/inventory').catch(() => ({ data: [] })),
+        axiosInstance.get('/Transport/assignments').catch(() => ({ data: [] })),
       ])
 
       const users = usersRes.data
@@ -67,6 +68,7 @@ export default function Dashboard() {
       const orders = ordersRes.data
       const requests = requestsRes.data
       const inventory = inventoryRes.data
+      const assignments = assignmentsRes.data
 
       const role = user.role
       const cards: StatCard[] = []
@@ -238,9 +240,8 @@ export default function Dashboard() {
 
       // ─── TRANSPORT DEPARTMENT ───
       else if (role === 'TransportDepartment') {
-        const assigned = countByStatus(orders, 'Assigned')
-        const delivered = countByStatus(orders, 'Delivered')
-        const pendingDel = countByStatus(orders, 'Pending Delivery')
+        const assigned = countByStatus(requests, 'TransportAssigned')
+        const pendingDel = countByStatus(requests, 'Approved')
 
         cards.push(
           {
@@ -260,14 +261,6 @@ export default function Dashboard() {
             subtitle: 'In progress',
           },
           {
-            label: 'Delivered',
-            value: delivered,
-            icon: <CheckCircle fontSize="small" />,
-            color: '#2E7D32',
-            bg: '#E8F5E9',
-            subtitle: 'Completed orders',
-          },
-          {
             label: 'Total Branches',
             value: branches.length,
             icon: <AccountTree fontSize="small" />,
@@ -278,10 +271,9 @@ export default function Dashboard() {
         )
 
         breakdowns.push(
-          { label: 'Pending', count: pendingDel, color: '#ED6C02' },
+          { label: 'Pending Delivery', count: pendingDel, color: '#ED6C02' },
           { label: 'Assigned', count: assigned, color: '#1565C0' },
-          { label: 'Delivered', count: delivered, color: '#2E7D32' },
-          { label: 'Total', count: orders.length, color: '#666666' },
+          { label: 'Total', count: assigned + pendingDel, color: '#666666' },
         )
       }
 

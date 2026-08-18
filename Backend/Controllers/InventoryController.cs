@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Order_MS.DTOs;
 using Order_MS.Services;
@@ -60,6 +60,13 @@ namespace Order_MS.Controllers
         {
             await _inventoryService.DeleteItemAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("suppliers")]
+        public async Task<IActionResult> GetAllSuppliers()
+        {
+            var suppliers = await _inventoryService.GetAllSuppliersAsync();
+            return Ok(suppliers);
         }
 
        [HttpGet("branch")]

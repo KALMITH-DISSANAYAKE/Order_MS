@@ -91,7 +91,11 @@ namespace Order_MS.Controllers
             {
                 var (success, message) = await _transportService.DeleteDriverVehicleLinkAsync(id);
                 if (!success)
+                {
+                    if (message.Contains("assigned to an order"))
+                        return BadRequest(new { message });
                     return NotFound(new { message });
+                }
 
                 return Ok(new { message });
             }
@@ -136,7 +140,11 @@ namespace Order_MS.Controllers
         {
             try
             {
-                var (success, message, data) = await _transportService.AssignTransportAsync(dto);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(userIdClaim, out int userId);
+                if (userId == 0) userId = 1; // Default to 1 if not authenticated for now
+
+                var (success, message, data) = await _transportService.AssignTransportAsync(dto, userId);
                 if (!success)
                     return BadRequest(new { message });
 
@@ -227,6 +235,28 @@ namespace Order_MS.Controllers
             }
         }
 
+        [HttpDelete("vehicles/{id:int}")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> DeleteVehicle(int id)
+        {
+            try
+            {
+                var (success, message) = await _transportService.DeleteVehicleAsync(id);
+                if (!success)
+                {
+                    if (message.Contains("assigned") || message.Contains("link"))
+                        return BadRequest(new { message });
+                    return NotFound(new { message });
+                }
+
+                return Ok(new { message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while deleting vehicle", details = ex.InnerException?.Message ?? ex.Message });
+            }
+        }
+
         // --- Drivers ---
 
         [HttpGet("drivers")]
@@ -276,6 +306,28 @@ namespace Order_MS.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while updating driver", details = ex.InnerException?.Message ?? ex.Message });
+            }
+        }
+
+        [HttpDelete("drivers/{id:int}")]
+        //[Authorize(Roles = "TransportDepartment")]
+        public async Task<IActionResult> DeleteDriver(int id)
+        {
+            try
+            {
+                var (success, message) = await _transportService.DeleteDriverAsync(id);
+                if (!success)
+                {
+                    if (message.Contains("assigned") || message.Contains("link"))
+                        return BadRequest(new { message });
+                    return NotFound(new { message });
+                }
+
+                return Ok(new { message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while deleting driver", details = ex.InnerException?.Message ?? ex.Message });
             }
         }
     }

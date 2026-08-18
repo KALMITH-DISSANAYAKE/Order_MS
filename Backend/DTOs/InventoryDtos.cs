@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Order_MS.DTOs
 {
     public class BranchInventoryDto
@@ -27,8 +29,13 @@ namespace Order_MS.DTOs
 
     public class UpdateStockDto
     {
+        [Range(1, int.MaxValue, ErrorMessage = "Valid Inventory ID is required.")]
         public int InventoryId { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "Quantity cannot be negative.")]
         public int NewQuantity { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "Reorder level cannot be negative.")]
         public int? ReorderLevel { get; set; }
     }
 
@@ -44,9 +51,16 @@ namespace Order_MS.DTOs
 
     public class AddBranchInventoryDto
     {
+        [Range(1, int.MaxValue, ErrorMessage = "Valid Branch ID is required.")]
         public int BranchId { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Valid Item ID is required.")]
         public int ItemId { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "Quantity cannot be negative.")]
         public int Quantity { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "Reorder level cannot be negative.")]
         public int ReorderLevel { get; set; }
     }
 }

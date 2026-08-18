@@ -15,6 +15,10 @@ const inventoryService = {
     const response = await axiosInstance.get('/inventory/items');
     return response.data;
   },
+  getSuppliers: async () => {
+    const response = await axiosInstance.get('/inventory/suppliers');
+    return response.data;
+  },
   createMasterItem: async (itemData: any) => {
     const response = await axiosInstance.post('/inventory/items', itemData);
     return response.data;
@@ -57,14 +61,18 @@ const inventoryService = {
 
 export default function Inventory() {
   const { user } = useAuth();
+  const isBranchManager = user?.role === 'BranchManager';
   const currentBranchId = user?.branchId || 1;
 
   const [inventory, setInventory] = useState<any[]>([])
   const [masterItems, setMasterItems] = useState<any[]>([])
   const [allBranchStock, setAllBranchStock] = useState<any[]>([])
+  const [suppliers, setSuppliers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  const [tabIndex, setTabIndex] = useState(0)
+  const [activeTab, setActiveTab] = useState<'branch-stock' | 'items'>(
+    isBranchManager ? 'branch-stock' : 'items'
+  );
   
   // Modals state
   const [openBranchModal, setOpenBranchModal] = useState(false)
@@ -74,24 +82,41 @@ export default function Inventory() {
   const [newItemName, setNewItemName] = useState('')
   const [newUnitPrice, setNewUnitPrice] = useState<number | string>('')
   const [newSupplierId, setNewSupplierId] = useState<number | string>('')
+  const [newItemIsActive, setNewItemIsActive] = useState<boolean>(true)
   const [editingItemId, setEditingItemId] = useState<number | null>(null)
 
   // Branch Stock Edit State
   const [editingBranchStockId, setEditingBranchStockId] = useState<number | null>(null)
   const [newBranchStockItemId, setNewBranchStockItemId] = useState<number | string>('')
+  const [newBranchStockItemName, setNewBranchStockItemName] = useState<string>('')
   const [newBranchStockQuantity, setNewBranchStockQuantity] = useState<number | string>('')
   const [newBranchStockReorderLevel, setNewBranchStockReorderLevel] = useState<number | string>('')
+
+  useEffect(() => {
+    setActiveTab(isBranchManager ? 'branch-stock' : 'items');
+  }, [isBranchManager]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true)
-        const branchData = await inventoryService.getBranchStock(currentBranchId)
-        const masterData = await inventoryService.getMasterItems()
-        const allBranchData = await inventoryService.getAllBranchStock()
-        setInventory(branchData)
-        setMasterItems(masterData)
-        setAllBranchStock(allBranchData)
+        if (isBranchManager) {
+          const [branchData, masterData] = await Promise.all([
+            inventoryService.getBranchStock(currentBranchId),
+            inventoryService.getMasterItems()
+          ]);
+          setInventory(branchData || []);
+          setMasterItems(masterData || []);
+        } else {
+          const [masterData, allBranchData, suppliersData] = await Promise.all([
+            inventoryService.getMasterItems(),
+            inventoryService.getAllBranchStock(),
+            inventoryService.getSuppliers()
+          ]);
+          setMasterItems(masterData || []);
+          setAllBranchStock(allBranchData || []);
+          setSuppliers(suppliersData || []);
+        }
       } catch (error) {
         console.error("Failed to load inventory data", error)
       } finally {
@@ -99,15 +124,19 @@ export default function Inventory() {
       }
     }
     loadData()
-  }, [currentBranchId])
+  }, [currentBranchId, isBranchManager])
 
-  const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
-    setTabIndex(newValue)
+  const handleTabChange = (_event: SyntheticEvent, newValue: 'branch-stock' | 'items') => {
+    setActiveTab(newValue)
   }
 
   const handleSaveBranchStock = async () => {
     if (newBranchStockItemId === '' || newBranchStockQuantity === '' || newBranchStockReorderLevel === '') {
       alert("Please fill all fields")
+      return
+    }
+    if (Number(newBranchStockQuantity) < 0 || Number(newBranchStockReorderLevel) < 0) {
+      alert("Quantity and reorder level cannot be negative.")
       return
     }
     try {
@@ -131,11 +160,10 @@ export default function Inventory() {
       setEditingBranchStockId(null)
       
       const branchData = await inventoryService.getBranchStock(currentBranchId)
-      const allBranchData = await inventoryService.getAllBranchStock()
       setInventory(branchData)
-      setAllBranchStock(allBranchData)
 
       setNewBranchStockItemId('')
+      setNewBranchStockItemName('')
       setNewBranchStockQuantity('')
       setNewBranchStockReorderLevel('')
     } catch (error: any) {
@@ -147,6 +175,7 @@ export default function Inventory() {
   const handleOpenBranchEdit = (row: any) => {
     setEditingBranchStockId(row.inventoryId);
     setNewBranchStockItemId(row.itemId);
+    setNewBranchStockItemName(row.itemName || '');
     setNewBranchStockQuantity(row.quantity);
     setNewBranchStockReorderLevel(row.reorderLevel);
     setOpenBranchModal(true);
@@ -157,9 +186,7 @@ export default function Inventory() {
       try {
         await inventoryService.deleteBranchStock(id);
         const branchData = await inventoryService.getBranchStock(currentBranchId);
-        const allBranchData = await inventoryService.getAllBranchStock();
         setInventory(branchData);
-        setAllBranchStock(allBranchData);
       } catch (error) {
         console.error("Failed to delete branch stock", error);
         alert("Failed to delete branch stock.");
@@ -174,6 +201,7 @@ export default function Inventory() {
       setNewItemName(fullItem.itemName);
       setNewUnitPrice(fullItem.unitPrice);
       setNewSupplierId(fullItem.supplier?.supplierId || '');
+      setNewItemIsActive(fullItem.isActive ?? item.isActive ?? true);
       setOpenMasterModal(true);
     } catch (e) {
       console.error(e);
@@ -195,18 +223,23 @@ export default function Inventory() {
   }
 
   const handleSaveMasterItem = async () => {
-    if (!newItemName || newUnitPrice === '' || newSupplierId === '') {
+    if (!newItemName.trim() || newUnitPrice === '' || newSupplierId === '') {
       alert("Please fill all fields")
       return
     }
+    if (Number(newUnitPrice) <= 0 || isNaN(Number(newUnitPrice))) {
+      alert("Unit price must be greater than 0.")
+      return
+    }
     try {
-      const payload = {
+      const payload: any = {
         itemName: newItemName,
         unitPrice: Number(newUnitPrice),
         supplierId: Number(newSupplierId),
       }
       
       if (editingItemId) {
+        payload.isActive = newItemIsActive;
         await inventoryService.updateMasterItem(editingItemId, payload)
       } else {
         await inventoryService.createMasterItem(payload)
@@ -221,6 +254,7 @@ export default function Inventory() {
       setNewItemName('')
       setNewUnitPrice('')
       setNewSupplierId('')
+      setNewItemIsActive(true)
     } catch (error: any) {
       console.error("Failed to save item", error)
       alert("Failed to save item. " + (error.response?.data?.message || "Make sure Supplier ID is valid."))
@@ -239,14 +273,15 @@ export default function Inventory() {
     <div>
       <PageHeader
         title="Inventory Management"
-        subtitle="Manage master items and monitor branch stock levels"
+        subtitle={isBranchManager ? "Monitor and manage your branch stock levels" : "Manage master items and monitor branch stock levels"}
         action={
-          tabIndex === 0 ? (
+          isBranchManager ? (
             <Button
               variant="contained"
               onClick={() => {
                 setEditingBranchStockId(null)
                 setNewBranchStockItemId('')
+                setNewBranchStockItemName('')
                 setNewBranchStockQuantity('')
                 setNewBranchStockReorderLevel('')
                 setOpenBranchModal(true)
@@ -263,6 +298,7 @@ export default function Inventory() {
                 setNewItemName('');
                 setNewUnitPrice('');
                 setNewSupplierId('');
+                setNewItemIsActive(true);
                 setOpenMasterModal(true);
               }}
               className="!bg-[#E21E26] hover:!bg-[#C61A22] !shadow-none !normal-case !font-medium !rounded-lg"
@@ -274,13 +310,30 @@ export default function Inventory() {
       />
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }} className="mb-6">
-        <Tabs value={tabIndex} onChange={handleTabChange} aria-label="inventory tabs" TabIndicatorProps={{ className: '!bg-[#E21E26]' }}>
-          <Tab label="Branch Stock" className={tabIndex === 0 ? '!text-[#E21E26] !font-bold' : '!font-medium'} />
-          <Tab label="Items" className={tabIndex === 1 ? '!text-[#E21E26] !font-bold' : '!font-medium'} />
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label="inventory tabs"
+          TabIndicatorProps={{ className: '!bg-[#E21E26]' }}
+        >
+          {isBranchManager && (
+            <Tab
+              value="branch-stock"
+              label="Branch Stock"
+              className={activeTab === 'branch-stock' ? '!text-[#E21E26] !font-bold' : '!font-medium'}
+            />
+          )}
+          {!isBranchManager && (
+            <Tab
+              value="items"
+              label="Items"
+              className={activeTab === 'items' ? '!text-[#E21E26] !font-bold' : '!font-medium'}
+            />
+          )}
         </Tabs>
       </Box>
 
-      {tabIndex === 0 && (
+      {isBranchManager && activeTab === 'branch-stock' && (
         <BranchStockTab 
           inventory={inventory} 
           onOpenEdit={handleOpenBranchEdit} 
@@ -288,7 +341,7 @@ export default function Inventory() {
         />
       )}
 
-      {tabIndex === 1 && (
+      {!isBranchManager && activeTab === 'items' && (
         <MasterItemsTab 
           masterItems={masterItems} 
           allBranchStock={allBranchStock} 
@@ -304,6 +357,8 @@ export default function Inventory() {
         editingId={editingBranchStockId}
         itemId={newBranchStockItemId}
         setItemId={setNewBranchStockItemId}
+        itemName={newBranchStockItemName}
+        masterItems={masterItems}
         quantity={newBranchStockQuantity}
         setQuantity={setNewBranchStockQuantity}
         reorderLevel={newBranchStockReorderLevel}
@@ -321,6 +376,9 @@ export default function Inventory() {
         setUnitPrice={setNewUnitPrice}
         supplierId={newSupplierId}
         setSupplierId={setNewSupplierId}
+        suppliers={suppliers}
+        isActive={newItemIsActive}
+        setIsActive={setNewItemIsActive}
       />
     </div>
   )

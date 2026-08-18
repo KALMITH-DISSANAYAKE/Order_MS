@@ -40,10 +40,17 @@ namespace Order_MS.Services
             {
                 DriverId = dto.DriverId,
                 VehicleId = dto.VehicleId,
-                CreatedOn = DateTime.UtcNow
+                CreatedOn = DateTime.UtcNow,
+                Status = "Available"
             };
 
             await _repo.AddDriverVehicleLinkAsync(link);
+
+            var driver = await _repo.GetDriverByIdAsync(dto.DriverId);
+            if (driver != null) driver.Available = "Assigned";
+
+            var vehicle = await _repo.GetVehicleByIdAsync(dto.VehicleId);
+            if (vehicle != null) vehicle.Available = "Assigned";
             
             try
             {
@@ -63,6 +70,24 @@ namespace Order_MS.Services
 
         public async Task<(bool Success, string Message)> DeleteDriverVehicleLinkAsync(int connectionId)
         {
+            var isAssigned = await _repo.HasAssignmentsForLinkAsync(connectionId);
+            if (isAssigned)
+            {
+                return (false, "Cannot delete because this link is assigned to an order request.");
+            }
+
+            var allLinks = await _repo.GetAllDriverVehicleLinksAsync();
+            var link = allLinks.FirstOrDefault(l => l.ConnectionId == connectionId);
+
+            if (link != null)
+            {
+                var driver = await _repo.GetDriverByIdAsync(link.DriverId);
+                if (driver != null) driver.Available = "Available";
+
+                var vehicle = await _repo.GetVehicleByIdAsync(link.VehicleId);
+                if (vehicle != null) vehicle.Available = "Available";
+            }
+
             var deleted = await _repo.DeleteDriverVehicleLinkAsync(connectionId);
             if (!deleted)
                 return (false, $"Driver-vehicle link #{connectionId} not found.");
@@ -95,7 +120,7 @@ namespace Order_MS.Services
        
 
         public async Task<(bool Success, string Message, IEnumerable<TransportAssignmentResponseDto>? Data)>
-            AssignTransportAsync(AssignTransportDto dto)
+            AssignTransportAsync(AssignTransportDto dto, int? userId = null)
         {
             
             var orderRequest = await _repo.GetOrderRequestWithDetailsAsync(dto.OrderReqId);
@@ -131,6 +156,11 @@ namespace Order_MS.Services
      
             foreach (var item in dto.Assignments)
             {
+                if (availableLinks.TryGetValue(item.ConnectionId, out var link))
+                {
+                    link.Status = "Assigned";
+                }
+                
                 await _repo.AddAssignmentAsync(new TransportAssignment
                 {
                     OrderReqId = dto.OrderReqId,
@@ -141,7 +171,7 @@ namespace Order_MS.Services
                 });
             }
 
-            await _repo.UpdateOrderRequestStatusAsync(dto.OrderReqId, "TransportAssigned");
+            await _repo.UpdateOrderRequestStatusAsync(dto.OrderReqId, "TransportAssigned", userId);
 
             try
             {
@@ -241,6 +271,41 @@ namespace Order_MS.Services
             return (true, "Vehicle updated successfully.", result);
         }
 
+        public async Task<(bool Success, string Message)> DeleteVehicleAsync(int vehicleId)
+        {
+            var vehicle = await _repo.GetVehicleByIdAsync(vehicleId);
+            if (vehicle is null)
+            {
+                return (false, "Vehicle not found.");
+            }
+
+            if (vehicle.Available == "Assigned")
+            {
+                return (false, "Cannot delete vehicle because it is currently assigned.");
+            }
+
+            var hasLinks = await _repo.HasLinksForVehicleAsync(vehicleId);
+            if (hasLinks)
+            {
+                return (false, "Cannot delete vehicle because it is part of a driver-vehicle link.");
+            }
+
+            var deleted = await _repo.DeleteVehicleAsync(vehicleId);
+            if (!deleted)
+                return (false, $"Vehicle #{vehicleId} could not be deleted.");
+
+            try
+            {
+                await _repo.SaveAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return (false, $"Database error: {ex.InnerException?.Message ?? ex.Message}");
+            }
+
+            return (true, $"Vehicle #{vehicleId} deleted successfully.");
+        }
+
         // Drivers
 
         public async Task<IEnumerable<DriverDto>> GetAllDriversAsync()
@@ -257,6 +322,12 @@ namespace Order_MS.Services
 
         public async Task<(bool Success, string Message, DriverDto? Data)> CreateDriverAsync(CreateDriverDto dto)
         {
+            var existingDrivers = await _repo.GetDriversAsync();
+            if (existingDrivers.Any(d => d.LicenseNumber == dto.LicenseNumber))
+            {
+                return (false, $"Driver with License Number {dto.LicenseNumber} already exists.", null);
+            }
+
             var driver = new Driver
             {
                 DriversName = dto.DriversName,
@@ -303,6 +374,41 @@ namespace Order_MS.Services
             return (true, "Driver updated successfully.", result);
         }
 
+        public async Task<(bool Success, string Message)> DeleteDriverAsync(int driverId)
+        {
+            var driver = await _repo.GetDriverByIdAsync(driverId);
+            if (driver is null)
+            {
+                return (false, "Driver not found.");
+            }
+
+            if (driver.Available == "Assigned")
+            {
+                return (false, "Cannot delete driver because they are currently assigned.");
+            }
+
+            var hasLinks = await _repo.HasLinksForDriverAsync(driverId);
+            if (hasLinks)
+            {
+                return (false, "Cannot delete driver because they are part of a driver-vehicle link.");
+            }
+
+            var deleted = await _repo.DeleteDriverAsync(driverId);
+            if (!deleted)
+                return (false, $"Driver #{driverId} could not be deleted.");
+
+            try
+            {
+                await _repo.SaveAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return (false, $"Database error: {ex.InnerException?.Message ?? ex.Message}");
+            }
+
+            return (true, $"Driver #{driverId} deleted successfully.");
+        }
+
         private static OrderRequestForTransportDto ToOrderRequestDto(OrderRequest or) => new()
         {
             OrderReqId = or.OrderReqId,
@@ -329,8 +435,11 @@ namespace Order_MS.Services
             LicenseNumber = dvl.Driver?.LicenseNumber ?? string.Empty,
             VehicleId = dvl.VehicleId,
             VehicleNumber = dvl.Vehicle?.VehicleNumber ?? string.Empty,
-            Capacity = dvl.Vehicle?.Capacity
+            Capacity = dvl.Vehicle?.Capacity,
+            Status = dvl.Status ?? "Available"
         };
+
+
 
         private static TransportAssignmentResponseDto ToAssignmentDto(TransportAssignment ta) => new()
         {

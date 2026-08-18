@@ -91,7 +91,7 @@ namespace Order_MS.Services
 
 
 
-        public async Task<(bool Success, string Message)> AssignDeliveryAsync(int orderReqId, AssignDeliveryDto dto)
+        public async Task<(bool Success, string Message)> AssignDeliveryAsync(int orderReqId, AssignDeliveryDto dto, int? modifiedBy = null)
         {
             var or = await _context.OrderRequests.FindAsync(orderReqId);
             if (or is null)
@@ -110,9 +110,15 @@ namespace Order_MS.Services
                 Quantity = or.TotalQuantity ?? 0
             };
 
+            link.Status = "Assigned"; // Update the link's status to Assigned so it doesn't show in new assignments
+
             await _context.TransportAssignments.AddAsync(assignment);
             or.ReqStatus = "TransportAssigned";
             or.ModifiedOn = DateTime.UtcNow;
+            if (modifiedBy.HasValue)
+            {
+                or.ModifiedBy = modifiedBy.Value;
+            }
 
             try
             {

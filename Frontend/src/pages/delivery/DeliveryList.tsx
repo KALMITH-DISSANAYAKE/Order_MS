@@ -23,6 +23,9 @@ interface Delivery {
 
 export default function DeliveryList() {
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
+  
+  // Filter state
+  const [filter, setFilter] = useState({ id: '', driver: '', vehicle: '', status: '', destination: '' })
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -149,13 +152,64 @@ export default function DeliveryList() {
     },
   ]
 
+  const filteredDeliveries = deliveries.filter(d => 
+    d.id.toLowerCase().includes(filter.id.toLowerCase()) &&
+    d.driver.toLowerCase().includes(filter.driver.toLowerCase()) &&
+    d.vehicle.toLowerCase().includes(filter.vehicle.toLowerCase()) &&
+    d.destination.toLowerCase().includes(filter.destination.toLowerCase()) &&
+    (filter.status === '' || d.status === filter.status)
+  )
+
   return (
     <Box>
       <PageHeader title="Delivery Tracking" subtitle="Monitor and assign deliveries for your branches" />
 
+      <Paper className="p-4 mt-4 mb-4 rounded-xl shadow-sm">
+        <Typography variant="subtitle2" className="!font-bold mb-3">Filters</Typography>
+        <Box className="flex gap-4 flex-wrap">
+          <input 
+            type="text" 
+            placeholder="Delivery ID" 
+            className="border p-2 rounded text-sm flex-1 min-w-[120px]" 
+            value={filter.id} 
+            onChange={(e) => setFilter({ ...filter, id: e.target.value })} 
+          />
+          <input 
+            type="text" 
+            placeholder="Destination" 
+            className="border p-2 rounded text-sm flex-1 min-w-[120px]" 
+            value={filter.destination} 
+            onChange={(e) => setFilter({ ...filter, destination: e.target.value })} 
+          />
+          <input 
+            type="text" 
+            placeholder="Driver" 
+            className="border p-2 rounded text-sm flex-1 min-w-[120px]" 
+            value={filter.driver} 
+            onChange={(e) => setFilter({ ...filter, driver: e.target.value })} 
+          />
+          <input 
+            type="text" 
+            placeholder="Vehicle" 
+            className="border p-2 rounded text-sm flex-1 min-w-[120px]" 
+            value={filter.vehicle} 
+            onChange={(e) => setFilter({ ...filter, vehicle: e.target.value })} 
+          />
+          <select 
+            className="border p-2 rounded text-sm flex-1 min-w-[120px]" 
+            value={filter.status} 
+            onChange={(e) => setFilter({ ...filter, status: e.target.value })}
+          >
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Assigned">Assigned</option>
+          </select>
+        </Box>
+      </Paper>
+
       <Paper className="overflow-hidden mt-4 rounded-xl shadow-sm" style={{ height: 500, width: '100%' }}>
         <DataGrid
-          rows={deliveries}
+          rows={filteredDeliveries}
           columns={columns}
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },

@@ -43,9 +43,9 @@ interface UserRow {
 }
 
 interface BranchOption {
-  branchId: number;    
-  branchCode: string;    
-  location: string;      
+  branchId: number;
+  branchCode: string;
+  location: string;
 }
 
 const roleOptions = ['BranchManager', 'InventoryManager', 'TransportDepartment']
@@ -84,54 +84,54 @@ export default function UsersPage() {
   }, [])
 
   // ─── FETCH BRANCHES FOR DROPDOWN ───
-const fetchBranches = async () => {
-  try {
-    const res = await axiosInstance.get('/branches');
-    setBranches(res.data);
-  } catch (err: any) {
-    console.error('Failed to load branches', err);
+  const fetchBranches = async () => {
+    try {
+      const res = await axiosInstance.get('/branches');
+      setBranches(res.data);
+    } catch (err: any) {
+      console.error('Failed to load branches', err);
+    }
+  };
+  // Map branch name to branch_id (must match your DB)
+  const [branches, setBranches] = useState<BranchOption[]>([]);
+
+  const fetchUsers = async () => {
+    try {
+      setTableLoading(true)
+      const res = await axiosInstance.get('/users')
+
+      console.log('RAW:', res.data)
+
+      const mapped = res.data.map((u: any, index: number) => {
+        // Helper: get property regardless of casing
+        const get = (key: string) => {
+          const lower = key.toLowerCase()
+          const keys = Object.keys(u)
+          const match = keys.find(k => k.toLowerCase() === lower)
+          return match ? u[match] : undefined
+        }
+
+        const id = get('id') ?? get('userid') ?? get('user_id') ?? index + 1
+
+        return {
+          id: Number(id),  // Force to number
+          firstName: get('firstname') ?? get('first_name') ?? '',
+          lastName: get('lastname') ?? get('last_name') ?? '',
+          username: get('username') ?? get('user_name') ?? get('userName') ?? '',
+          role: get('role') ?? get('rolename') ?? get('role_name') ?? '',
+          branch: get('branchname') ?? get('branch_name') ?? get('branch') ?? '-',
+          isActive: true,
+        }
+      })
+      .filter((u: UserRow) => u.role !== 'Admin')
+      console.log('MAPPED:', mapped)
+      setUsers(mapped)
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to load users')
+    } finally {
+      setTableLoading(false)
+    }
   }
-};
-// Map branch name to branch_id (must match your DB)
-const [branches, setBranches] = useState<BranchOption[]>([]);
-
-const fetchUsers = async () => {
-  try {
-    setTableLoading(true)
-    const res = await axiosInstance.get('/users')
-    
-    console.log('RAW:', res.data)
-
-    const mapped = res.data.map((u: any, index: number) => {
-      // Helper: get property regardless of casing
-      const get = (key: string) => {
-        const lower = key.toLowerCase()
-        const keys = Object.keys(u)
-        const match = keys.find(k => k.toLowerCase() === lower)
-        return match ? u[match] : undefined
-      }
-
-      const id = get('id') ?? get('userid') ?? get('user_id') ?? index + 1
-      
-      return {
-        id: Number(id),  // Force to number
-        firstName: get('firstname') ?? get('first_name') ?? '',
-        lastName: get('lastname') ?? get('last_name') ?? '',
-        username: get('username') ?? get('user_name') ?? get('userName') ?? '',
-        role: get('role') ?? get('rolename') ?? get('role_name') ?? '',
-        branch: get('branchname') ?? get('branch_name') ?? get('branch') ?? '-',
-        isActive: true,
-      }
-    })
-
-    console.log('MAPPED:', mapped)
-    setUsers(mapped)
-  } catch (err: any) {
-    alert(err.response?.data?.message || 'Failed to load users')
-  } finally {
-    setTableLoading(false)
-  }
-}
 
   const filtered = users.filter((u) =>
     `${u.firstName} ${u.lastName} ${u.username} ${u.role}`.toLowerCase().includes(search.toLowerCase())
@@ -165,17 +165,17 @@ const fetchUsers = async () => {
   const handleSave = async () => {
 
     const selectedBranch = branches.find(
-        (b) => `${b.branchCode} - ${b.location}` === form.branch
-      );
+      (b) => `${b.branchCode} - ${b.location}` === form.branch
+    );
 
-      const payload = {
-        FirstName: form.firstName,
-        LastName: form.lastName,
-        Username: form.username,
-        Password: form.password,
-        RoleId: roleToId[form.role],
-        BranchId: isBranchManager && selectedBranch ? selectedBranch.branchId : null,
-      };
+    const payload = {
+      FirstName: form.firstName,
+      LastName: form.lastName,
+      Username: form.username,
+      Password: form.password,
+      RoleId: roleToId[form.role],
+      BranchId: isBranchManager && selectedBranch ? selectedBranch.branchId : null,
+    };
 
     try {
       setLoading(true)
@@ -227,37 +227,37 @@ const fetchUsers = async () => {
             params.value === 'BranchManager'
               ? '!bg-blue-50 !text-blue-700 !border !border-blue-200'
               : params.value === 'InventoryManager'
-              ? '!bg-purple-50 !text-purple-700 !border !border-purple-200'
-              : '!bg-orange-50 !text-orange-700 !border !border-orange-200'
+                ? '!bg-purple-50 !text-purple-700 !border !border-purple-200'
+                : '!bg-orange-50 !text-orange-700 !border !border-orange-200'
           }
         />
       ),
     },
     { field: 'branch', headerName: 'Branch', width: 300 },
     {
-        field: 'actions',
-        headerName: 'Actions',
-        width: 150,
-        sortable: false,
-        filterable: false,
-        renderCell: (params: GridRenderCellParams<UserRow>) => (
-          <Box className="flex gap-1">
-            <IconButton size="small" onClick={() => handleOpen(params.row)} className="!text-blue-600">
-              <Edit fontSize="small" />
-            </IconButton>
-            <IconButton size="small" onClick={() => handleDelete(params.id)} className="!text-red-600">
-              <Delete fontSize="small" />
-            </IconButton>
-          </Box>
-        ),
-      },
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: GridRenderCellParams<UserRow>) => (
+        <Box className="flex gap-1">
+          <IconButton size="small" onClick={() => handleOpen(params.row)} className="!text-blue-600">
+            <Edit fontSize="small" />
+          </IconButton>
+          <IconButton size="small" onClick={() => handleDelete(params.id)} className="!text-red-600">
+            <Delete fontSize="small" />
+          </IconButton>
+        </Box>
+      ),
+    },
   ]
 
   return (
     <div>
       <PageHeader title="User Management" subtitle="Manage staff accounts, roles, and branch assignments" />
 
-      <Box className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <Box className="flex flex-col gap-4 justify-between items-start mb-6 sm:flex-row sm:items-center">
         <TextField
           placeholder="Search users..."
           size="small"
@@ -283,7 +283,7 @@ const fetchUsers = async () => {
         </Button>
       </Box>
 
-      <Box className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <Box className="overflow-hidden bg-white rounded-xl border border-gray-200 shadow-sm">
         <DataGrid
           rows={filtered}
           columns={columns}

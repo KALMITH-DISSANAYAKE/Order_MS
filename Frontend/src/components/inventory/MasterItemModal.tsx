@@ -5,7 +5,11 @@ import {
   DialogActions,
   Grid,
   TextField,
-  Button
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 
 interface MasterItemModalProps {
@@ -19,6 +23,9 @@ interface MasterItemModalProps {
   setUnitPrice: (val: string) => void;
   supplierId: number | string;
   setSupplierId: (val: string) => void;
+  suppliers?: any[];
+  isActive: boolean;
+  setIsActive: (val: boolean) => void;
 }
 
 export default function MasterItemModal({
@@ -31,7 +38,10 @@ export default function MasterItemModal({
   unitPrice,
   setUnitPrice,
   supplierId,
-  setSupplierId
+  setSupplierId,
+  suppliers = [],
+  isActive,
+  setIsActive
 }: MasterItemModalProps) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -62,16 +72,47 @@ export default function MasterItemModal({
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField 
-              label="Supplier ID" 
-              type="number" 
-              variant="outlined" 
-              fullWidth 
-              size="small" 
-              value={supplierId}
-              onChange={(e) => setSupplierId(e.target.value)}
-            />
+            <FormControl fullWidth size="small">
+              <InputLabel id="select-supplier-label">Supplier</InputLabel>
+              <Select
+                labelId="select-supplier-label"
+                value={supplierId ? String(supplierId) : ''}
+                label="Supplier"
+                onChange={(e) => setSupplierId(e.target.value)}
+              >
+                <MenuItem value="" disabled>
+                  <em>Select a supplier</em>
+                </MenuItem>
+                {suppliers && suppliers.length > 0 ? (
+                  suppliers.map((s) => (
+                    <MenuItem key={s.supplierId} value={String(s.supplierId)}>
+                      {s.supplierName} (ID: {s.supplierId})
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem value="" disabled>
+                    No suppliers available
+                  </MenuItem>
+                )}
+              </Select>
+            </FormControl>
           </Grid>
+          {editingId && (
+            <Grid item xs={12}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="item-status-label">Status</InputLabel>
+                <Select
+                  labelId="item-status-label"
+                  value={isActive ? "Active" : "Inactive"}
+                  label="Status"
+                  onChange={(e) => setIsActive(e.target.value === "Active")}
+                >
+                  <MenuItem value="Active">Active</MenuItem>
+                  <MenuItem value="Inactive">Inactive</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          )}
         </Grid>
       </DialogContent>
       <DialogActions className="p-4">

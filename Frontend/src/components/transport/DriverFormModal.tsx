@@ -48,7 +48,11 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
   const validate = () => {
     const newErrors: Record<string, string> = {}
     if (!formData.name?.trim()) newErrors.name = 'Name is required'
-    if (!formData.licenseNumber?.trim()) newErrors.licenseNumber = 'License Number is required'
+    if (!formData.licenseNumber?.trim()) {
+      newErrors.licenseNumber = 'License Number is required'
+    } else if (!/^L-\d{9}$/.test(formData.licenseNumber)) {
+      newErrors.licenseNumber = 'Invalid format (e.g., L-123456789)'
+    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -76,7 +80,7 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
           {initialData ? 'Update driver details.' : 'Enter details for the new driver.'}
         </Typography>
         <Grid container spacing={3}>
-          <Grid xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label="Name"
@@ -87,7 +91,7 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
               placeholder="Driver Name"
             />
           </Grid>
-          <Grid xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label="License Number"
@@ -98,7 +102,7 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
               placeholder="e.g. L-123456789"
             />
           </Grid>
-          <Grid xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               select
@@ -106,7 +110,7 @@ export default function DriverFormModal({ open, onClose, onSave, initialData }: 
               value={formData.availability || ''}
               onChange={handleChange('availability')}
             >
-              {AVAILABILITIES.map((availability) => (
+              {AVAILABILITIES.filter(a => initialData || a !== 'Assigned').map((availability) => (
                 <MenuItem key={availability} value={availability}>
                   {availability}
                 </MenuItem>

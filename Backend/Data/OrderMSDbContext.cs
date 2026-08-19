@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Order_MS.Models;
@@ -48,7 +48,7 @@ public partial class OrderMSDbContext : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseSqlServer("Server=.;Database=OrderMS_DB;Trusted_Connection=True;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer("Server=localhost;Database=OrderMS_DB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");
         }
     }
 

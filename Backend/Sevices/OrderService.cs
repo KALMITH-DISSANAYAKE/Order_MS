@@ -35,6 +35,10 @@ public class OrderService : IOrderService
                         .ThenInclude(cv => cv.Vehicle)
                     .Include(o => o.OrderRequestedByNavigation)
                     .Include(o => o.OrderBranchNavigation)
+                    .Include(o => o.OrderReq)
+                        .ThenInclude(or => or.RequestedByNavigation)
+                    .Include(o => o.OrderReq)
+                        .ThenInclude(or => or.Branch)
             );
             var orderDtos = orders.Select(order => new OrderResponseDtos
             {
@@ -42,10 +46,13 @@ public class OrderService : IOrderService
                 OrderId = order.OrderId,
                 OrderReqId = order.OrderReqId,
                 OrderStatus = order.OrderStatus,
-                OrderRequestedBy = order.OrderRequestedByNavigation == null ? null :
-                    (order.OrderRequestedByNavigation.FirstName + " " + order.OrderRequestedByNavigation.LastName).Trim(),
-                OrderBranchId = order.OrderBranch,
-                OrderBranch = order.OrderBranchNavigation?.BranchCode,
+                OrderRequestedBy = order.OrderRequestedByNavigation != null
+                    ? $"{order.OrderRequestedByNavigation.FirstName} {order.OrderRequestedByNavigation.LastName}".Trim()
+                    : (order.OrderReq?.RequestedByNavigation != null
+                        ? $"{order.OrderReq.RequestedByNavigation.FirstName} {order.OrderReq.RequestedByNavigation.LastName}".Trim()
+                        : null),
+                OrderBranchId = order.OrderBranch ?? order.OrderReq?.BranchId,
+                OrderBranch = order.OrderBranchNavigation?.BranchCode ?? order.OrderReq?.Branch?.BranchCode,
                 CreatedBy = order.CreatedBy,
                 CreatedOn = order.CreatedOn,
                 OrderRemark = order.OrderRemark,
@@ -115,6 +122,13 @@ public class OrderService : IOrderService
                 OrderId = order.OrderId,
                 OrderReqId = order.OrderReqId,
                 OrderStatus = order.OrderStatus,
+                OrderRequestedBy = order.OrderRequestedByNavigation != null
+                    ? $"{order.OrderRequestedByNavigation.FirstName} {order.OrderRequestedByNavigation.LastName}".Trim()
+                    : (order.OrderReq?.RequestedByNavigation != null
+                        ? $"{order.OrderReq.RequestedByNavigation.FirstName} {order.OrderReq.RequestedByNavigation.LastName}".Trim()
+                        : null),
+                OrderBranchId = order.OrderBranch ?? order.OrderReq?.BranchId,
+                OrderBranch = order.OrderBranchNavigation?.BranchCode ?? order.OrderReq?.Branch?.BranchCode,
                 CreatedBy = order.CreatedBy,
                 CreatedOn = order.CreatedOn,
                 OrderRemark = order.OrderRemark,
@@ -186,7 +200,7 @@ public class OrderService : IOrderService
                 .Where(ta => ta.OrderReqId == orderReqId && ta.ConnectionId.HasValue)
                 .Select(ta => ta.ConnectionId)
                 .FirstOrDefaultAsync();
-
+        
             var order = new Order
             {
                 OrderReqId = orderRequest.OrderReqId,
@@ -342,22 +356,101 @@ public class OrderService : IOrderService
 
         try
         {
-            var order = await _repository.GetAsync(o => o.OrderId == id);
+            var order = await _repository.GetAsync(
+                o => o.OrderId == id,
+                query => query
+                    .Include(o => o.OrderLines)
+                    .Include(o => o.OrderReq)
+            );
 
             if (order == null)
                 throw new BusinessException($"Order with ID {id} was not found.", 404);
 
             order.OrderRemark = dto.OrderRemark;
+
             if (!string.IsNullOrEmpty(dto.OrderStatus))
             {
-                order.OrderStatus = dto.OrderStatus;
-                
-                if (dto.OrderStatus == "Delivered" && order.ConnectionId.HasValue)
+                order.OrderStatus = dto.OrderStatus.Trim();
+
+                // When order status is Delivered
+                if (string.Equals(order.OrderStatus, "Delivered", StringComparison.OrdinalIgnoreCase))
                 {
-                    var connection = await _context.DriverVehicleLinks.FindAsync(order.ConnectionId.Value);
-                    if (connection != null)
+                    int? branchId = order.OrderBranch;
+
+                    if (!branchId.HasValue && order.OrderReqId.HasValue)
                     {
-                        connection.Status = "Available";
+                        var req = await _context.OrderRequests.FindAsync(order.OrderReqId.Value);
+                        branchId = req?.BranchId;
+                    }
+
+                    if (branchId.HasValue)
+                    {
+                        // Load lines directly to ensure we get all items
+                        var lines = await _context.OrderLines
+                            .Where(ol => ol.OrderId == order.OrderId)
+                            .ToListAsync();
+
+                        // If OrderLines table has no lines for this order, get from OrderRequestLines
+                        if (!lines.Any() && order.OrderReqId.HasValue)
+                        {
+                            var reqLines = await _context.OrderRequestLines
+                                .Where(rl => rl.OrderReqId == order.OrderReqId.Value)
+                                .ToListAsync();
+
+                            foreach (var rl in reqLines)
+                            {
+                                lines.Add(new OrderLine
+                                {
+                                    OrderId = order.OrderId,
+                                    ItemId = rl.ItemId,
+                                    Quantity = rl.Quantity,
+                                    UnitPrice = rl.Price ?? 0,
+                                    TotalPrice = (rl.Price ?? 0) * rl.Quantity
+                                });
+                            }
+                        }
+
+                        foreach (var line in lines)
+                        {
+                            var branchInventory = await _context.Inventories
+                                .FirstOrDefaultAsync(i => i.BranchId == branchId.Value && i.ItemId == line.ItemId);
+
+                            if (branchInventory != null)
+                            {
+                                branchInventory.Quantity += line.Quantity;
+                                branchInventory.ModifiedOn = DateTime.Now;
+                                _context.Inventories.Update(branchInventory);
+                            }
+                            else
+                            {
+                                var newInventory = new Inventory
+                                {
+                                    BranchId = branchId.Value,
+                                    ItemId = line.ItemId,
+                                    Quantity = line.Quantity,
+                                    ReorderLevel = 0,
+                                    ModifiedOn = DateTime.Now
+                                };
+                                await _context.Inventories.AddAsync(newInventory);
+                            }
+                        }
+                    }
+
+                    // Release assigned Driver & Vehicle
+                    if (order.ConnectionId.HasValue)
+                    {
+                        var connection = await _context.DriverVehicleLinks
+                            .Include(c => c.Driver)
+                            .Include(c => c.Vehicle)
+                            .FirstOrDefaultAsync(c => c.ConnectionId == order.ConnectionId.Value);
+
+                        if (connection != null)
+                        {
+                            if (connection.Driver != null)
+                                connection.Driver.Available = "Available";
+                            if (connection.Vehicle != null)
+                                connection.Vehicle.Available = "Available";
+                        }
                     }
                 }
             }
@@ -366,7 +459,7 @@ public class OrderService : IOrderService
             order.ModifiedOn = DateTime.UtcNow;
 
             _repository.Update(order);
-            await _repository.SaveAsync();
+            await _context.SaveChangesAsync();
         }
         catch (BusinessException)
         {
